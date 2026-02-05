@@ -1,45 +1,61 @@
 import streamlit as st
 
-st.set_page_config(page_title="Generatore Descrizioni", layout="centered")
+st.set_page_config(page_title="Generatore Descrizioni v2", layout="wide")
 
-st.title("✍️ Generatore di Descrizioni Universali")
-st.subheader("Configura le caratteristiche del prodotto")
+st.title("✍️ Generatore di Descrizioni Prodotto")
+st.markdown("Strumento per la creazione di testi universali standardizzati.")
 
-# --- INPUT COLLABORATORE ---
-col1, col2 = st.columns(2)
-
-with col1:
-    prodotto = st.text_input("Nome Prodotto", placeholder="es. Tavolo Wood")
-    materiale = st.selectbox("Materiale", ["Legno Massiccio", "Acciaio Inox", "Plastica Riciclata", "Vetro Temprato"])
-    stile = st.radio("Stile", ["Moderno", "Classico", "Minimalista", "Industriale"])
-
-with col2:
-    target = st.select_slider("Tono di voce", options=["Tecnico", "Formale", "Emozionale"])
-    uso = st.multiselect("Destinazione d'uso", ["Interno", "Esterno", "Ufficio", "Residenziale"])
-
-# --- LOGICA DI GENERAZIONE ---
-def genera_descrizione(nome, mat, stl, tg, us):
-    # Esempio di blocchi di testo dinamici
-    intro = f"Il nostro {nome} rappresenta l'eccellenza del design {stl.lower()}."
-    corpo = f"Realizzato interamente in {mat}, è progettato per durare nel tempo."
+# --- INPUT DATI ---
+with st.container():
+    nome_prodotto = st.text_input("📦 NOME PRODOTTO", placeholder="Inserisci il nome commerciale...")
     
-    if tg == "Emozionale":
-        conclusione = f"Perfetto per chi cerca un tocco unico nei propri ambienti di tipo {', '.join(us).lower()}."
-    elif tg == "Tecnico":
-        conclusione = f"Specifiche ottimizzate per installazioni in ambito {', '.join(us).lower()}."
-    else:
-        conclusione = f"Una soluzione versatile per contesti {', '.join(us).lower()}."
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.subheader("Contesto e Dettagli")
+        macro = st.text_area("1. MACRO (Funzione principale)", help="Cosa fa il prodotto in generale?")
+        particolare = st.text_area("2. PARTICOLARE (Specifiche uniche)", help="Dettagli tecnici, materiali o finiture.")
+    
+    with col2:
+        st.subheader("Logistica e Fitting")
+        dimensioni = st.text_input("3. DIMENSIONI", placeholder="es. 100x50x20 cm / 5kg")
+        extra = st.text_area("4. EXTRA", placeholder="Garanzie, certificazioni, accessori inclusi...")
+        compatibilita = st.text_area("5. COMPATIBILITÀ", placeholder="Modelli supportati, sistemi operativi o attacchi.")
 
-    return f"{intro} {corpo} {conclusione}"
-
-# --- OUTPUT ---
 st.divider()
 
-if st.button("Genera Descrizione Universale"):
-    if prodotto:
-        risultato = genera_descrizione(prodotto, materiale, stile, target, uso)
-        st.success("Descrizione Generata!")
-        st.text_area("Copia il testo:", risultato, height=150)
-        st.button("📋 Copia negli appunti (simulato)")
+# --- LOGICA DI GENERAZIONE ---
+if st.button("🚀 GENERA DESCRIZIONE UNIVERSALE"):
+    if not nome_prodotto:
+        st.error("Inserisci il nome del prodotto per continuare.")
     else:
-        st.error("Per favore, inserisci almeno il nome del prodotto.")
+        # Costruzione del testo finale
+        testo_formattato = f"""**SCHEDA PRODOTTO: {nome_prodotto.upper()}**
+
+---
+**1. MACRO**
+{macro if macro else "Dato non inserito."}
+
+**2. PARTICOLARE**
+{particolare if particolare else "Dato non inserito."}
+
+**3. DIMENSIONI**
+• {dimensioni if dimensioni else "Vedi scheda tecnica."}
+
+**4. EXTRA**
+{extra if extra else "Nessuna nota aggiuntiva."}
+
+**5. COMPATIBILITÀ**
+• {compatibilita if compatibilita else "Universale o da verificare."}
+"""
+
+        # Visualizzazione Output
+        st.subheader("✅ Risultato Generato")
+        st.text_area("Copia il testo da qui:", value=testo_formattato, height=450)
+        
+        # Anteprima estetica
+        with st.expander("👁️ Anteprima Formattata"):
+            st.markdown(testo_formattato)
+
+# --- PIÈ DI PAGINA ---
+st.sidebar.info("Modifica i campi e clicca su Genera. Il testo è ottimizzato per essere incollato su cataloghi, siti web o preventivi.")
