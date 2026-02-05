@@ -7,7 +7,7 @@ database = {
     "1. Sheet Metal": {
         "macro_en": "SHEET METAL",
         "Particolari": {
-            "Taglio Laser": "LASER CUT",
+            "Ripiano": "SHELF",
             "Piegatura CNC": "CNC BENDING",
             "Saldatura TIG": "TIG WELDING",
             "Punzonatura": "PUNCHING"
