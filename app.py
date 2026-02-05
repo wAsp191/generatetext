@@ -88,8 +88,8 @@ database = {
             "Rondella piana": "FLAT WASHER"
         }
     },
-    "7. Accessori": {
-        "macro_en": "ACCESSORIES",
+    "7. Other": {
+        "macro_en": "OTHER",
         "Particolari": {
             "Materiale misto": "MIXED MATERIAL",
             "Specifica custom": "CUSTOM SPECIFICATION",
@@ -103,40 +103,62 @@ database = {
     }
 }
 
-st.title("⚙️ Generatore Stringa Tecnica")
-st.write("Scegli le opzioni in italiano, la stringa finale sarà in inglese.")
+# --- INTERFACCIA ---
+st.title("⚙️ Universal Technical Description Generator")
+st.markdown("Compila i campi in italiano per ottenere la stringa tecnica in inglese.")
 
 col1, col2 = st.columns(2)
 
 with col1:
-    st.subheader("Configurazione")
-    # Menu Macro con i nomi richiesti
+    st.subheader("🛠️ Configurazione Selezionabile")
+    # Selezione Macro
     macro_it = st.selectbox("Seleziona Macro Categoria:", list(database.keys()))
     macro_en = database[macro_it]["macro_en"]
     
-    # Sotto-menu dinamici
-    part_it = st.selectbox("Seleziona Particolare:", list(database[macro_it]["Particolari"].keys()))
+    # Selezione Particolare dinamica
+    opzioni_part = list(database[macro_it]["Particolari"].keys())
+    part_it = st.selectbox("Seleziona Particolare (2):", opzioni_part)
     part_en = database[macro_it]["Particolari"][part_it]
     
-    comp_it = st.selectbox("Seleziona Compatibilità:", list(database[macro_it]["Compatibilità"].keys()))
+    # Selezione Compatibilità dinamica
+    opzioni_comp = list(database[macro_it]["Compatibilità"].keys())
+    comp_it = st.selectbox("Seleziona Compatibilità (5):", opzioni_comp)
     comp_en = database[macro_it]["Compatibilità"][comp_it]
 
 with col2:
-    st.subheader("Campi Manuali")
-    dim = st.text_input("3. DIMENSIONI (Stampatello)", placeholder="es. 500X200X2 MM").upper()
-    extra = st.text_input("4. EXTRA (Stampatello)", placeholder="es. COLORE NERO").upper()
+    st.subheader("✍️ Input Manuale")
+    # Campi manuali con conversione automatica in maiuscolo e rimozione spazi inutili
+    dim_input = st.text_input("3. DIMENSIONI (es. 500X200 MM):").strip().upper()
+    extra_input = st.text_input("4. EXTRA (es. COLOR RAL 9005):").strip().upper()
 
 st.divider()
 
-if st.button("🚀 GENERA DESCRIZIONE INGLESE", use_container_width=True):
-    # Gestione valori vuoti
-    dim_val = dim if dim else "N/A"
-    extra_val = extra if extra else "NONE"
+# --- GENERAZIONE STRINGA ---
+if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
+    # Logica per gestire i campi vuoti
+    dim_final = dim_input if dim_input else "N/A"
+    extra_final = extra_input if extra_input else "NONE"
     
-    # Composizione stringa finale: MACRO - PARTICOLARE - DIMENSIONI - EXTRA - COMPATIBILITA
-    risultato = f"{macro_en} - {part_en} - {dim_val} - {extra_val} - {comp_en}"
-    risultato = risultato.upper()
+    # Assemblaggio finale
+    # Formato: MACRO - PARTICOLARE - DIMENSIONI - EXTRA - COMPATIBILITÀ
+    final_string = f"{macro_en} - {part_en} - {dim_final} - {extra_final} - {comp_en}"
+    final_string = final_string.upper()
 
-    st.success("Testo generato con successo!")
-    st.code(risultato, language=None)
-    st.text_area("Copia da qui:", value=risultato, height=70)
+    # Visualizzazione Risultati
+    st.success("Stringa tecnica generata con successo!")
+    
+    st.markdown("### 📋 Risultato da copiare:")
+    st.code(final_string, language=None)
+    
+    # Area di testo per copia rapida da mobile/desktop
+    st.text_area("Seleziona e copia:", value=final_string, height=70)
+
+# --- FOOTER ---
+st.sidebar.markdown("---")
+st.sidebar.info("""
+**Istruzioni:**
+1. Scegli la categoria.
+2. Seleziona i dettagli dai menu.
+3. Inserisci misure e note extra.
+4. Copia la stringa inglese pronta.
+""")
