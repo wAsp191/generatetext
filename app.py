@@ -1,83 +1,85 @@
 import streamlit as st
 
-st.set_page_config(page_title="Generatore Descrizioni Professionali", layout="wide")
+st.set_page_config(page_title="Configuratore Prodotti Aziendale", layout="wide")
 
-st.title("✍️ Configurazione Descrizione Universale")
-
-# --- DATABASE DEI SOTTOASSIEMI (Modifica qui per aggiornare i testi) ---
-# Puoi aggiungere o cambiare queste voci facilmente
-dati_prodotti = {
-    "Elettronica": {
-        "Particolari": ["Chipset ad alta velocità", "Display LED antiriflesso", "Batteria a lunga durata"],
-        "Compatibilità": ["Standard USB-C", "Windows/Mac/Linux", "Protocollo Zigbee"]
+# --- DATABASE SOTTOASSIEMI ---
+# Qui puoi aggiungere o modificare le opzioni per ogni categoria
+database = {
+    "Plastic Component": {
+        "Particolari": ["Stampaggio a iniezione", "Termoformato", "Resistente UV", "Tecnopolimero rinforzato"],
+        "Compatibilità": ["Aggancio a scatto", "Saldatura a ultrasuoni", "Sede per vite autofilettante"]
     },
-    "Meccanica": {
-        "Particolari": ["Acciaio inossidabile 316L", "Ingranaggi a taglio laser", "Guarnizioni in Viton"],
-        "Compatibilità": ["Flangia ISO 5211", "Attacco rapido 1/4", "Standard DIN 2576"]
+    "Glass Component": {
+        "Particolari": ["Vetro Temprato", "Vetro Stratificato", "Finitura Acidata", "Bordo filo lucido"],
+        "Compatibilità": ["Supporti a pinza", "Incollaggio UV", "Guarnizioni in silicone"]
     },
-    "Arredamento": {
-        "Particolari": ["Finitura a cera naturale", "Cerniere ammortizzate", "Tessuto idrorepellente"],
-        "Compatibilità": ["Montaggio a parete", "Sistemi modulari serie X", "Standard ambientali Classe A"]
+    "Wood Component": {
+        "Particolari": ["Essenza Rovere", "Multistrato pioppo", "Finitura naturale", "Trattamento ignifugo"],
+        "Compatibilità": ["Incastro a coda di rondine", "Ferramenta standard", "Fissaggio a scomparsa"]
+    },
+    "Electric Component": {
+        "Particolari": ["Cablaggio UL/CSA", "Grado IP65", "Protezione termica", "Contatti dorati"],
+        "Compatibilità": ["Tensione 220V", "Attacco DIN", "Segnale 4-20mA"]
+    },
+    "Fastner": {
+        "Particolari": ["Acciaio Zincato", "Classe 8.8", "Testa esagonale", "Filettatura parziale"],
+        "Compatibilità": ["Foro pre-filettato", "Chiave fissa/bussola", "Rosetta piana"]
+    },
+    "Fitting": {
+        "Particolari": ["Ottone nichelato", "Innesto rapido", "Tenuta o-ring", "Filetto gas"],
+        "Compatibilità": ["Tubi flessibili Rilsan", "Pressione max 10 bar", "Fluidi oleodinamici"]
     }
 }
 
-# --- INTERFACCIA ---
-col1, col2 = st.columns(2)
+# --- INTERFACCIA APP ---
+st.title("🛠️ Generatore Descrizioni Universali")
+st.info("Seleziona la Macro categoria per visualizzare le opzioni specifiche.")
+
+col1, col2 = st.columns([1, 1], gap="large")
 
 with col1:
-    st.subheader("Selezione Guidata")
-    # 1. MACRO (A tendina)
-    macro_scelta = st.selectbox("1. MACRO (Categoria)", list(dati_prodotti.keys()))
+    st.subheader("📌 Configurazione")
     
-    # 2. PARTICOLARE (A tendina basata sulla Macro)
-    opzioni_particolare = dati_prodotti[macro_scelta]["Particolari"]
-    particolare_scelto = st.selectbox("2. PARTICOLARE (Dettaglio)", opzioni_particolare)
+    # 1. MACRO
+    macro = st.selectbox("Seleziona Macro Categoria:", list(database.keys()))
     
-    # 5. COMPATIBILITÀ (A tendina basata sulla Macro)
-    opzioni_comp = dati_prodotti[macro_scelta]["Compatibilità"]
-    compatibilita_scelta = st.selectbox("5. COMPATIBILITÀ", opzioni_comp)
+    # 2. PARTICOLARE (Dinamico)
+    particolare = st.selectbox("Seleziona Particolare:", database[macro]["Particolari"])
+    
+    # 5. COMPATIBILITÀ (Dinamico)
+    compatibilita = st.selectbox("Seleziona Compatibilità:", database[macro]["Compatibilità"])
 
 with col2:
-    st.subheader("Dati Variabili")
-    # 3. DIMENSIONI (Compilabile)
-    dimensioni = st.text_input("3. DIMENSIONI", placeholder="es. 120x60x10 cm")
+    st.subheader("📏 Dati Variabili")
     
-    # 4. EXTRA (Compilabile)
-    extra = st.text_area("4. EXTRA", placeholder="es. Certificazione CE, Garanzia estesa...")
+    # 3. DIMENSIONI (Libero)
+    dimensioni = st.text_input("Inserisci Dimensioni:", placeholder="es. Ø 20mm, L: 500mm")
+    
+    # 4. EXTRA (Libero)
+    extra = st.text_area("Inserisci Note Extra:", placeholder="es. Lotto minimo 100pz, Certificato ISO...")
 
-# --- GENERAZIONE TESTO ---
+# --- GENERAZIONE RISULTATO ---
 st.divider()
 
-if st.button("🚀 GENERA DESCRIZIONE"):
-    testo_finale = f"""**SCHEDA TECNICA UNIVERSALE**
+if st.button("✨ GENERA DESCRIZIONE FINALE", use_container_width=True):
+    descrizione_finale = f"""**IDENTIFICATIVO PRODOTTO: {macro.upper()}**
 
 **1. MACRO**
-Ambito: {macro_scelta}
+Categoria di riferimento: {macro}
 
 **2. PARTICOLARE**
-Dettaglio tecnico: {particolare_scelto}
+Caratteristica costruttiva: {particolare}
 
 **3. DIMENSIONI**
-Ingombro: {dimensioni if dimensioni else "Vedere allegato tecnico"}
+Dati dimensionali: {dimensioni if dimensioni else "Vedi disegno tecnico allegato"}
 
 **4. EXTRA**
-Note aggiuntive: {extra if extra else "Nessun extra specificato"}
+Note e Certificazioni: {extra if extra else "Nessuna nota aggiuntiva"}
 
 **5. COMPATIBILITÀ**
-Requisiti: {compatibilita_scelta}
+Interfacce e accoppiamenti: {compatibilita}
 """
 
-    st.subheader("Testo Pronto:")
-    st.text_area("Copia da qui:", value=testo_finale, height=350)
-    
-    with st.expander("Anteprima visiva"):
-        st.markdown(testo_finale)
-
-# Istruzioni per il collaboratore
-st.sidebar.markdown("""
-### Come usare l'app:
-1. Seleziona la **Macro** categoria.
-2. I campi **Particolare** e **Compatibilità** si aggiorneranno da soli.
-3. Inserisci manualmente le **Dimensioni** e gli **Extra**.
-4. Clicca su **Genera** e copia il risultato.
-""")
+    st.subheader("📋 Copia la descrizione:")
+    st.text_area("Testo pronto per il catalogo:", value=descrizione_finale, height=350)
+    st.success("Testo generato correttamente!")
