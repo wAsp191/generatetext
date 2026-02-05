@@ -4,7 +4,7 @@ st.set_page_config(page_title="Generatore Tecnico Universale", layout="wide")
 
 # --- DATABASE SOTTOASSIEMI (Etichetta Italiana: Valore Inglese) ---
 database = {
-    "Componente Plastico": {
+    "Plastic Component": {
         "macro_en": "PLASTIC COMPONENT",
         "Particolari": {
             "Stampato a iniezione": "INJECTION MOLDED",
