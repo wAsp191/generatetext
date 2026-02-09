@@ -2,10 +2,10 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # Configurazione Pagina
-st.set_page_config(page_title="Technical Description Generator v3.0", layout="wide")
+st.set_page_config(page_title="Technical Description Generator v3.1", layout="wide")
 
 # =========================================================
-# DATABASE AGGIORNATO DAL FILE EXCEL
+# DATABASE INTEGRALE DAL FILE EXCEL (CORRETTO)
 # =========================================================
 DATABASE = {
     "1. Sheet Metal": {
@@ -15,6 +15,7 @@ DATABASE = {
             "Cesto in filo": ["WIRE BASKET", {}, "BASKET"],
             "Chiusura": ["TOP COVER", {"Con scasso": "WITH RECESS"}, "COVER"],
             "Cielino": ["CANOPY", {}, "CANOPY"],
+            "Coprifessura": ["JOINT COVER", {"Standard": "STANDARD", "A scatto": "SNAP-ON"}, "ACCESSORY"],
             "Copripiede": ["FOOT COVER", {"H90": "WITH H90 FOOT", "H100": "WITH H100 FOOT", "H150": "WITH H150 FOOT"}, "COVER"],
             "Corrente": ["BEAM", {"Rinforzato": "REINFORCED", "Senza ganci": "WITHOUT HOOKS"}, "BEAM"],
             "Diagonale": ["DIAGONAL", {}, "BRACING"],
@@ -22,10 +23,13 @@ DATABASE = {
             "Divisori": ["DIVIDER", {}, "DIVIDER"],
             "Fiancata laterale": ["SIDE PANEL", {"Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", "H90": "H90", "H100": "H100"}, "PANEL"],
             "Ganci": ["HOOK", {}, "ACCESSORY"],
-            "Mensola": ["BRACKET", {}, "BRACKET"],
+            "Mensola": ["BRACKET", {
+                "Sinistra": "LEFT", "Destra": "RIGHT", "Rinforzata": "REINFORCED"
+            }, "BRACKET"],
             "Montante": ["UPRIGHT", {
                 "70x30": "70X30", "90x30": "90X30", "Monoasolato": "WITH SLOTS ON ONE SIDE",
-                "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", "Estensione": "EXTENSION", "Minirack": "MINIRACK"
+                "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", 
+                "Estensione": "EXTENSION", "Minirack": "MINIRACK"
             }, "UPRIGHT"],
             "Pannello rivestimento": ["BACK PANEL", {
                 "Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Forato a rombo": "RUMBLE PERFORATED",
@@ -72,7 +76,7 @@ DATABASE = {
 }
 
 OPZIONI_COMPATIBILITA = ["F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
-EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED"}
+EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT"}
 
 # =========================================================
 # FUNZIONI
@@ -101,7 +105,6 @@ with col_macro:
     macro_en = DATABASE[macro_it]["macro_en"]
 
 with col_workarea:
-    # 2. PARTICOLARE
     st.subheader("🔍 2. Particolare")
     part_dict = DATABASE[macro_it]["Particolari"]
     nomi_it_ordinati = sorted(list(part_dict.keys()))
@@ -113,7 +116,7 @@ with col_workarea:
 
     st.markdown("---")
     
-    # 4. EXTRA (SPOSTATO PRIMA DELLE DIMENSIONI)
+    # 3. EXTRA (PUNTO 3)
     st.subheader(f"✨ 3. Extra per {scelta_part_it}")
     col_ex1, col_ex2 = st.columns([2, 1])
     with col_ex1:
@@ -122,11 +125,11 @@ with col_workarea:
     with col_ex2:
         extra_libero = st.text_input("Note libere (Traduzione IT->EN):", key="extra_text").strip()
 
-    # 3. DIMENSIONI
+    # 4. DIMENSIONI (PUNTO 4)
     st.subheader("📏 4. Dimensioni")
     dim_input = st.text_input("Misure (es. 1000X500):", key="dim_val").strip().upper()
 
-    # 5. COMPATIBILITÀ
+    # 5. COMPATIBILITÀ (PUNTO 5)
     st.subheader("🔗 5. Compatibilità")
     comp_selezionate = st.multiselect("Modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
 
@@ -136,7 +139,6 @@ with col_workarea:
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # Traduzione extra
     extra_final_list = [opzioni_extra_visibili[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
@@ -149,9 +151,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     comp_str = ", ".join(comp_selezionate) if comp_selezionate else "UNIVERSAL"
     dim_final = dim_input if dim_input else "N/A"
     
-    # COSTRUZIONE STRINGA CON VIRGOLA (SOSTITUITO IL TRATTINO)
-    # Formato: MACRO, PARTICOLARE, DIMENSIONI, EXTRA, COMPATIBILITÀ
-    res = f"{macro_en} - {part_en}, {extra_str}, {dim_final}, , {comp_str}".upper()
+    # STRINGA CON SEPARATORE VIRGOLA
+    res = f"{macro_en}, {part_en}, {dim_final}, {extra_str}, {comp_str}".upper()
 
     st.success("Stringa tecnica generata correttamente!")
     st.code(res, language=None)
