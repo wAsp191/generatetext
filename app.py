@@ -101,7 +101,6 @@ DATABASE = {
     }
 }
 
-EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT"}
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 OPZIONI_SPESSORE = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
 OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
@@ -147,8 +146,8 @@ with col_workarea:
     st.subheader(f"✨ 3. Extra per {scelta_part_it}")
     col_ex1, col_ex2 = st.columns([2, 1])
     with col_ex1:
-        opzioni_extra_visibili = {**EXTRA_COMUNI, **extra_dedicati_dict}
-        extra_selezionati = st.multiselect("Opzioni:", options=list(opzioni_extra_visibili.keys()), key="extra_tags")
+        # Ora mostra SOLO gli extra specifici del database
+        extra_selezionati = st.multiselect("Opzioni:", options=list(extra_dedicati_dict.keys()), key="extra_tags")
     with col_ex2:
         extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
@@ -171,7 +170,7 @@ with col_workarea:
     comp_selezionate = st.multiselect("Modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
 
 # =========================================================
-# GENERAZIONE STRINGA FINALE (CON PREFISSI L, P, H, D)
+# GENERAZIONE STRINGA FINALE
 # =========================================================
 st.divider()
 
@@ -184,7 +183,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         l_val = dim_l.strip().upper()
         
         if d_val:
-            # Se è una vite e non ha già la M, la aggiungiamo, altrimenti usiamo D
             prefix_d = "" if d_val.startswith('M') else "D"
             dim_final_parts.append(f"{prefix_d}{d_val}")
         if l_val:
@@ -193,15 +191,13 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         dim_final = "X".join(dim_final_parts)
         if normativa: dim_final += f" {normativa}"
     else:
-        # Costruiamo L, P, H solo se compilati
         if dim_l.strip(): dim_final_parts.append(f"L{dim_l.strip().upper()}")
         if dim_p.strip(): dim_final_parts.append(f"P{dim_p.strip().upper()}")
         if dim_h.strip(): dim_final_parts.append(f"H{dim_h.strip().upper()}")
         
         lph_str = "X".join(dim_final_parts)
-        
-        # Spessore (S) separato da spazio come richiesto precedentemente
         s_val = dim_s.strip()
+        
         if lph_str and s_val:
             dim_final = f"{lph_str} S{s_val}"
         elif lph_str:
@@ -211,8 +207,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         else:
             dim_final = ""
 
-    # Extra
-    extra_final_list = [opzioni_extra_visibili[ex] for ex in extra_selezionati]
+    # Elaborazione Extra (Solo specifici + liberi)
+    extra_final_list = [extra_dedicati_dict[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
             extra_tradotto = GoogleTranslator(source='it', target='en').translate(extra_libero).upper()
