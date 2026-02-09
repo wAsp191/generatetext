@@ -11,63 +11,58 @@ DATABASE = {
     "1. Sheet Metal": {
         "macro_en": "SHEET METAL",
         "Particolari": {
+            "Ante scorrevoli": "SLIDING DOOR",
+            "Cesto in filo": "WIRE BASKET",
+            "Chiusura": "TOP COVER",
+            "Cielino": "CANOPY",
+            "Corrente": "BEAM",
+            "Diagonale": "DIAGONAL",
+            "Distanziali": "SPACER",
+            "Divisori": "DIVIDER",
+            "Ganci": "HOOK",
+            "Mensola": "BRACKET",
+            "Montante": "UPRIGHT",
             "Pannello di rivestimento": "BACK PANEL",
             "Pannello di rivestimento centrale": "CENTRAL PANEL",
-            "Corrente": "BEAM",
-            "Montante": "UPRIGHT",
-            "Ripiano": "SHELF",
-            "Cesto in filo": "WIRE BASKET",
-            "Mensola": "BRACKET",
-            "Cielino": "CANOPY",
-            "Chiusura": "TOP COVER",
-            "Diagonale": "DIAGONAL",
-            "Divisori": "DIVIDER",
-            "Ante scorrevoli": "SLIDING DOOR",
             "Piede di base": "BASE FOOT",
-            "Ganci": "HOOK",
-            "Staffa": "PLATE",
-            "Zoccolatura": "PLINTH",
             "Profilo": "PROFILE",
-            "Distanziali": "SPACER",
-            "Rinforzo": "STIFFENER"
+            "Rinforzo": "STIFFENER",
+            "Ripiano": "SHELF",
+            "Staffa": "PLATE",
+            "Zoccolatura": "PLINTH"
         }
     },
     "2. Plastic Comp": {
         "macro_en": "PLASTIC COMPONENT",
-        "Particolari": {
-            "Esempio Plastica": "PLASTIC EXAMPLE"
-        }
+        "Particolari": { "Esempio Plastica": "PLASTIC EXAMPLE" }
     },
     "3. Glass Comp": {
         "macro_en": "GLASS COMPONENT",
-        "Particolari": {
-            "Esempio Vetro": "GLASS EXAMPLE"
-        }
+        "Particolari": { "Esempio Vetro": "GLASS EXAMPLE" }
     },
     "4. Wood Comp": {
         "macro_en": "WOOD COMPONENT",
-        "Particolari": {
-            "Esempio Legno": "WOOD EXAMPLE"
-        }
+        "Particolari": { "Esempio Legno": "WOOD EXAMPLE" }
     },
     "5. Electric Comp": {
         "macro_en": "ELECTRIC COMPONENT",
-        "Particolari": {
-            "Esempio Elettrico": "ELECTRIC EXAMPLE"
-        }
+        "Particolari": { "Esempio Elettrico": "ELECTRIC EXAMPLE" }
     },
     "6. Fastener": {
         "macro_en": "FASTENER",
-        "Particolari": {
-            "Viti": "SCREWS",
-            "Bulloni": "BOLTS"
-        }
+        "Particolari": { "Viti": "SCREWS", "Bulloni": "BOLTS" }
     },
-    "7. Other": {
+    "7. Assembly": {
+        "macro_en": "ASSEMBLY",
+        "Particolari": { "Assieme generale": "GENERAL ASSEMBLY" }
+    },
+    "8. Weldcomp": {
+        "macro_en": "WELDCOMP",
+        "Particolari": { "Componente saldato": "WELDED COMPONENT" }
+    },
+    "9. Other": {
         "macro_en": "OTHER",
-        "Particolari": {
-            "Accessorio": "ACCESSORY"
-        }
+        "Particolari": { "Accessorio": "ACCESSORY" }
     }
 }
 
@@ -105,7 +100,7 @@ with col_macro:
     macro_en = DATABASE[macro_it]["macro_en"]
 
 with col_workarea:
-    # 2. PARTICOLARE (Esploso orizzontale e alfabetico)
+    # 2. PARTICOLARE
     st.subheader("🔍 2. Particolare")
     part_dict = DATABASE[macro_it]["Particolari"]
     nomi_it_ordinati = sorted(list(part_dict.keys()))
@@ -122,13 +117,13 @@ with col_workarea:
     st.subheader("✨ 4. Extra")
     col_ex1, col_ex2 = st.columns([2, 1])
     with col_ex1:
-        extra_selezionati = st.multiselect("Seleziona opzioni extra predefinite:", options=list(EXTRA_FISSI.keys()), key="extra_tags")
+        extra_selezionati = st.multiselect("Opzioni predefinite:", options=list(EXTRA_FISSI.keys()), key="extra_tags")
     with col_ex2:
-        extra_libero = st.text_input("Note aggiuntive (Traduzione Automatica):", key="extra_text").strip()
+        extra_libero = st.text_input("Note aggiuntive (Traduzione IT->EN):", key="extra_text").strip()
 
     # 5. COMPATIBILITÀ
     st.subheader("🔗 5. Compatibilità")
-    comp_selezionate = st.multiselect("Seleziona modelli (Scelta multipla):", options=OPZIONI_COMPATIBILITA, key="comp_tags")
+    comp_selezionate = st.multiselect("Seleziona modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
 
 # =========================================================
 # GENERAZIONE RISULTATO
@@ -140,22 +135,18 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     extra_final_list = [EXTRA_FISSI[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
-            # Traduzione IT -> EN
             extra_tradotto = GoogleTranslator(source='it', target='en').translate(extra_libero).upper()
             extra_final_list.append(extra_tradotto)
         except:
-            # Se la traduzione fallisce (es. no internet), usa il testo originale in maiuscolo
             extra_final_list.append(extra_libero.upper())
     
     extra_str = ", ".join(extra_final_list) if extra_final_list else "NONE"
     
     # Unione Compatibilità
     comp_str = ", ".join(comp_selezionate) if comp_selezionate else "UNIVERSAL"
-    
-    # Gestione Dimensioni vuote
     dim_final = dim_input if dim_input else "N/A"
     
-    # COSTRUZIONE FINALE: MACRO - PARTICOLARE - DIMENSIONI - EXTRA - COMPATIBILITÀ
+    # COSTRUZIONE FINALE
     res = f"{macro_en} - {part_en} - {dim_final} - {extra_str} - {comp_str}"
     res = res.upper()
 
@@ -163,7 +154,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     st.code(res, language=None)
     st.text_area("Copia rapida:", value=res, height=70)
 
-# CSS per layout orizzontale e responsive
 st.markdown("""
 <style>
     .stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }
