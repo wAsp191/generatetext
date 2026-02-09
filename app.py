@@ -40,21 +40,20 @@ DATABASE = {
         "Particolari": {
             "Montante": ["UPRIGHT", {"70x30": "70X30", "90x30": "90X30", "Monoasolato": "WITH SLOTS ON ONE SIDE", "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", "Estensione": "EXTENSION", "Minirack": "MINIRACK"}, "UPRIGHT"],
             "Piede di base": ["BASE FOOT", {"H90": "H90", "H100": "H100", "H150": "H150", "Con piedino regolabile": "WITH ADJUSTABLE FOOT", "Estensione": "EXTENSION"}, "FOOT"],
-            "Zoccolatura": ["PLINTH", {"H90": "H90", "H100": "H100", "H150": "H150", "Liscia": "PLAIN", "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED"}, "PLINTH"],
+            "Zoccolatura": ["PLINTH", {"H90": "FOR H90 BASE FOOT", "H100": "FOR BASE FOOT H100", "H150": "FOR BASE FOOT H150", "Liscia": "PLAIN", "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED"}, "PLINTH"],
             "Pannello rivestimento": ["BACK PANEL", {"Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Forato a rombo": "RUMBLE PERFORATED", "Forato asolato": "SLOTTED PERFORATED", "Multilame": "MULTISTRIP", "Multibarra": "MULTIBAR", "Con foro passacavi": "WITH CABLE-COVER HOLE", "Con 1 foro WLD": "WITH 1 WLD'S HOLE", "Con 2 fori WLD": "WITH 2 WLD'S HOLES"}, "PANEL"],
-            "Copripiede": ["FOOT COVER", {"H90": "WITH H90 FOOT", "H100": "WITH H100 FOOT", "H150": "WITH H150 FOOT"}, "COVER"],
+            "Copripiede": ["FOOT COVER", {"H90": "FOR H90 FOOT", "H100": "FOR H100 FOOT", "H150": "FOR H150 FOOT"}, "COVER"],
             "Chiusura": ["TOP COVER", {"Con scasso": "WITH RECESS"}, "COVER"],
-            "Fiancata laterale": ["SIDE PANEL", {"Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", "H90": "H90", "H100": "H100"}, "PANEL"],
-            "Mensola": ["BRACKET", {"H30": "H30", "H20": "H20", "Slim": "SLIM VERSION", "Sinistra": "LEFT", "Destra": "RIGHT", "Rinforzata": "REINFORCED"}, "BRACKET"],
-            "Coprifessura": ["JOINT COVER", {"Standard": "STANDARD", "A scatto": "SNAP-ON"}, "ACCESSORY"],
-            "Ripiano": ["SHELF", {"H30": "H30", "H20": "H20", "Liscio": "PLAIN", "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT"}, "SHELF"],
+            "Fiancata laterale": ["SIDE PANEL", {"Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", "H90": "FOR BASE FOOT H90", "H100": "FOR BASE FOOT H100", "H150": "FOR BASE FOOT H150"}, "SIDE-PANEL"],
+            "Mensola": ["BRACKET", {"SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "1 Posizione": "1 POSITION", "2 Posizioni": "2 POSITIONS", "Attacco montante": "HOOKS ONTO UPRIGHT", "Attacco multibarra": "FOR MULTIBAR", "Attacco multilame": "FOR MUTISTRIP"}, "BRACKET"],
+            "Ripiano": ["SHELF", {"Liscio": "PLAIN", "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT", "Con boccole": "WITH RIVET"}, "SHELF"],
             "Cesto in filo": ["WIRE BASKET", {}, "BASKET"],
             "Cielino": ["CANOPY", {}, "CANOPY"],
             "Corrente": ["BEAM", {"Rinforzato": "REINFORCED", "Senza ganci": "WITHOUT HOOKS"}, "BEAM"],
-            "Diagonale": ["DIAGONAL", {}, "BRACING"],
-            "Distanziali": ["SPACER", {}, "ACCESSORY"],
+            "Diagonale": ["DIAGONAL", {"Forata": "PERFORETED"}, "DIAGONAL"],
+            "Distanziali": ["SPACER", {}, "SPACER"],
             "Divisori": ["DIVIDER", {}, "DIVIDER"],
-            "Ganci": ["HOOK", {}, "ACCESSORY"],
+            "Ganci": ["HOOK", {}, "HOOK"],
             "Pannello di rivestimento centrale": ["CENTRAL PANEL", {}, "PANEL"],
             "Profilo": ["PROFILE", {}, "PROFILE"],
             "Rinforzo": ["STIFFENER", {}, "STIFFENER"],
@@ -67,26 +66,31 @@ DATABASE = {
         "Particolari": {
             "Ripiano Legno": ["WOODEN SHELF", {}, "SHELF"],
             "Schienale Legno": ["WOODEN BACK", {}, "PANEL"]
+            "Cielino": "CANOPY"
         }
     },
     "PLASTIC COMP": {
         "macro_en": "PLASTIC COMPONENT",
         "Particolari": {
-            "Tappo": ["PLASTIC CAP", {}, "ACCESSORY"],
+            "Tappo": ["PLASTIC CAP", {}, "CAP"],
             "Guarnizione": ["GASKET", {}, "ACCESSORY"]
         }
     },
     "GLASS COMP": {
         "macro_en": "GLASS COMPONENT",
         "Particolari": {
-            "Vetro": ["GLASS PANEL", {}, "GLASS"]
+            "Ripiano": ["GLASS SHELF", {}, "SHELF"]
         }
     },
     "FASTENER": {
         "macro_en": "FASTENER",
         "Particolari": {
-            "Vite": ["SCREW", {}, "FASTENER"],
+            "Vite": ["SCREW", {}, "FASTENER", "SCREW"],
             "Bullone": ["BOLT", {}, "FASTENER"]
+            "Rondella": ["WASHER", {}, "FASTENER", "WASHER"]
+            "Dado": ["NUT", {}, "FASTENER", "NUT"]
+            "Inserti filettati": ["RIVET", {}, "FASTENER", "RIVET"]
+            "Tasselli": ["ANCHOR", {}, "FASTENER", "ANCHOR"]
         }
     },
     "ASSEMBLY": {
