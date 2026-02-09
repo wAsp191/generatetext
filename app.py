@@ -2,7 +2,7 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # Configurazione Pagina
-st.set_page_config(page_title="Technical Generator v7.0", layout="wide")
+st.set_page_config(page_title="Technical Generator v7.1", layout="wide")
 
 # =========================================================
 # 1. CONFIGURAZIONE MATERIALI PER OGNI NUOVA MACRO
@@ -27,14 +27,13 @@ MATERIALI_CONFIG = {
     "GLASS COMP": {
         "VETRO TEMPRATO": "TEMPERED GLASS"
     },
-    "FASTENER": {}, # Nessun materiale specifico richiesto al momento
+    "FASTENER": {}, 
     "ASSEMBLY": {}
 }
 
 # =========================================================
 # 2. DATABASE INTEGRALE (Tutte le voci del tuo file Excel)
 # =========================================================
-# Nota: Ho associato i vecchi dati alle nuove categorie Macro
 DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
@@ -130,10 +129,8 @@ col_macro, col_workarea = st.columns([1, 3], gap="large")
 with col_macro:
     st.subheader("📂 1. Macro Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
-    macro_en = DATABASE[macro_it]["macro_en"]
 
 with col_workarea:
-    # SEZIONE MATERIALE DINAMICA (Modifica richiesta)
     st.subheader("🛠️ 2. Materiale e Particolare")
     materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
     
@@ -142,9 +139,8 @@ with col_workarea:
         mat_it = st.radio(f"Seleziona Materiale per {macro_it}:", options=list(materiali_disponibili.keys()), horizontal=True)
         mat_en = materiali_disponibili[mat_it]
     
-    st.write("") # Spaziatore
+    st.write("") 
     
-    # SEZIONE PARTICOLARE
     part_dict = DATABASE[macro_it]["Particolari"]
     nomi_it_ordinati = sorted(list(part_dict.keys()))
     scelta_part_it = st.radio("Seleziona dettaglio:", options=nomi_it_ordinati, horizontal=True)
@@ -155,7 +151,6 @@ with col_workarea:
 
     st.markdown("---")
     
-    # EXTRA
     st.subheader(f"✨ 3. Extra per {scelta_part_it}")
     col_ex1, col_ex2 = st.columns([2, 1])
     with col_ex1:
@@ -164,7 +159,6 @@ with col_workarea:
     with col_ex2:
         extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
-    # DIMENSIONI
     st.subheader("📏 4. Dimensioni (mm)")
     c1, c2, c3, c4 = st.columns(4)
     with c1: dim_l = st.text_input("Lunghezza", key="dim_l")
@@ -172,7 +166,6 @@ with col_workarea:
     with c3: dim_h = st.text_input("Altezza", key="dim_h")
     with c4: dim_s = st.selectbox("Spessore", options=OPZIONI_SPESSORE, key="dim_s")
 
-    # COMPATIBILITÀ
     st.subheader("🔗 5. Compatibilità")
     comp_selezionate = st.multiselect("Modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
 
@@ -182,10 +175,18 @@ with col_workarea:
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # Gestione Dimensioni
-    dims_list = [d.strip().upper() for d in [dim_l, dim_p, dim_h, dim_s] if d.strip()]
-    dim_final = "X".join(dims_list) if dims_list else ""
+    # Logica Dimensioni modificata: L, P, H con X | Spessore con Spazio
+    lph_list = [d.strip().upper() for d in [dim_l, dim_p, dim_h] if d.strip()]
+    lph_str = "X".join(lph_list)
     
+    s_val = dim_s.strip()
+    
+    # Costruzione stringa dimensioni finale
+    if lph_str and s_val:
+        dim_final = f"{lph_str} {s_val}"
+    else:
+        dim_final = lph_str if lph_str else s_val
+
     # Elaborazione Extra
     extra_final_list = [opzioni_extra_visibili[ex] for ex in extra_selezionati]
     if extra_libero:
@@ -198,15 +199,12 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     extra_str = ", ".join(extra_final_list) if extra_final_list else "NONE"
     comp_str = ", ".join(comp_selezionate) if comp_selezionate else "UNIVERSAL"
     
-    # COSTRUZIONE: MATERIALE PARTICOLARE DIMENSIONI, EXTRA - COMPATIBILITÀ
-    # Il replace gestisce i casi dove mat_en è vuoto evitando doppi spazi
     descrizione_centrale = f"{mat_en} {part_en} {dim_final}".strip().replace("  ", " ")
     res = f"{macro_it} - {descrizione_centrale}, {extra_str} - {comp_str}".upper()
 
     st.success("Stringa tecnica generata!")
     st.code(res, language=None)
 
-    # Suggerimenti Tag
     st.markdown("### 💡 Suggerimenti per la classificazione")
     all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_selezionate]
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
