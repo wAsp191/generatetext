@@ -15,7 +15,21 @@ DATABASE = {
             "Pannello di rivestimento centrale": "CENTRAL PANEL",
             "Corrente": "BEAM",
             "Montante": "UPRIGHT",
-            "Ripiano": "SHELF"
+            "Ripiano": "SHELF",
+            "Cesto in filo": "WIRE BASKET",
+            "Mensola": "BRACKET",
+            "Cielino": "CANOPY",
+            "Chiusura": "TOP COVER",
+            "Diagonale": "DIAGONAL",
+            "Divisori": "DIVIDER",
+            "Ante scorrevoli": "SLIDING DOOR",
+            "Piede di base": "BASE FOOT",
+            "Ganci": "HOOK",
+            "Staffa": "PLATE",
+            "Zoccolatura": "PLINTH",
+            "Profilo": "PROFILE",
+            "Distanziali": "SPACER",
+            "Rinforzo": "STIFFENER"
         }
     },
     "2. Plastic Comp": {
@@ -45,7 +59,8 @@ DATABASE = {
     "6. Fastener": {
         "macro_en": "FASTENER",
         "Particolari": {
-            "Esempio Vite": "SCREW EXAMPLE"
+            "Viti": "SCREWS",
+            "Bulloni": "BOLTS"
         }
     },
     "7. Other": {
@@ -107,13 +122,13 @@ with col_workarea:
     st.subheader("✨ 4. Extra")
     col_ex1, col_ex2 = st.columns([2, 1])
     with col_ex1:
-        extra_selezionati = st.multiselect("Seleziona opzioni extra:", options=list(EXTRA_FISSI.keys()), key="extra_tags")
+        extra_selezionati = st.multiselect("Seleziona opzioni extra predefinite:", options=list(EXTRA_FISSI.keys()), key="extra_tags")
     with col_ex2:
-        extra_libero = st.text_input("Note aggiuntive (IT):", key="extra_text").strip()
+        extra_libero = st.text_input("Note aggiuntive (Traduzione Automatica):", key="extra_text").strip()
 
     # 5. COMPATIBILITÀ
     st.subheader("🔗 5. Compatibilità")
-    comp_selezionate = st.multiselect("Seleziona modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
+    comp_selezionate = st.multiselect("Seleziona modelli (Scelta multipla):", options=OPZIONI_COMPATIBILITA, key="comp_tags")
 
 # =========================================================
 # GENERAZIONE RISULTATO
@@ -125,18 +140,22 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     extra_final_list = [EXTRA_FISSI[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
+            # Traduzione IT -> EN
             extra_tradotto = GoogleTranslator(source='it', target='en').translate(extra_libero).upper()
             extra_final_list.append(extra_tradotto)
         except:
+            # Se la traduzione fallisce (es. no internet), usa il testo originale in maiuscolo
             extra_final_list.append(extra_libero.upper())
     
     extra_str = ", ".join(extra_final_list) if extra_final_list else "NONE"
     
     # Unione Compatibilità
     comp_str = ", ".join(comp_selezionate) if comp_selezionate else "UNIVERSAL"
+    
+    # Gestione Dimensioni vuote
     dim_final = dim_input if dim_input else "N/A"
     
-    # COSTRUZIONE: MACRO - PARTICOLARE - DIMENSIONI - EXTRA - COMPATIBILITÀ
+    # COSTRUZIONE FINALE: MACRO - PARTICOLARE - DIMENSIONI - EXTRA - COMPATIBILITÀ
     res = f"{macro_en} - {part_en} - {dim_final} - {extra_str} - {comp_str}"
     res = res.upper()
 
@@ -144,6 +163,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     st.code(res, language=None)
     st.text_area("Copia rapida:", value=res, height=70)
 
+# CSS per layout orizzontale e responsive
 st.markdown("""
 <style>
     .stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }
