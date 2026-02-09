@@ -65,7 +65,7 @@ DATABASE = {
         "macro_en": "WOOD COMPONENT",
         "Particolari": {
             "Ripiano Legno": ["WOODEN SHELF", {}, "SHELF"],
-            "Schienale Legno": ["WOODEN BACK", {}, "PANEL"]
+            "Schienale Legno": ["WOODEN BACK", {}, "PANEL"],
             "Cielino": "CANOPY"
         }
     },
@@ -86,11 +86,11 @@ DATABASE = {
         "macro_en": "FASTENER",
         "Particolari": {
             "Vite": ["SCREW", {}, "FASTENER", "SCREW"],
-            "Bullone": ["BOLT", {}, "FASTENER"]
-            "Rondella": ["WASHER", {}, "FASTENER", "WASHER"]
-            "Dado": ["NUT", {}, "FASTENER", "NUT"]
-            "Inserti filettati": ["RIVET", {}, "FASTENER", "RIVET"]
-            "Tasselli": ["ANCHOR", {}, "FASTENER", "ANCHOR"]
+            "Bullone": ["BOLT", {}, "FASTENER"],
+            "Rondella": ["WASHER", {}, "FASTENER", "WASHER"],
+            "Dado": ["NUT", {}, "FASTENER", "NUT"],
+            "Inserti filettati": ["RIVET", {}, "FASTENER", "RIVET"],
+            "Tasselli": ["ANCHOR", {}, "FASTENER", "ANCHOR"],
         }
     },
     "ASSEMBLY": {
