@@ -1,6 +1,7 @@
 import streamlit as st
+from deep_translator import GoogleTranslator
 
-st.set_page_config(page_title="Technical Description Generator", layout="wide")
+st.set_page_config(page_title="Technical Description Generator v1.0", layout="wide")
 
 # --- LISTA COMPATIBILITÀ FISSA ---
 opzioni_compatibilita = [
@@ -12,7 +13,7 @@ opzioni_compatibilita = [
     "FORTISSIMO"
 ]
 
-# --- DATABASE SOTTOASSIEMI (Etichetta IT -> Valore EN) ---
+# --- DATABASE SOTTOASSIEMI ---
 database = {
     "1. Sheet Metal": {
         "macro_en": "SHEET METAL",
@@ -78,54 +79,62 @@ database = {
     }
 }
 
-# --- INTERFACCIA APP ---
 st.title("⚙️ Universal Technical Description Generator")
-st.markdown("Generazione stringhe tecniche in lingua inglese - Formato Stampatello")
+st.markdown("---")
 
-col1, col2 = st.columns(2)
+# --- LAYOUT PRINCIPALE ---
+col_macro, col_dettagli = st.columns([1, 2], gap="large")
 
-with col1:
-    st.subheader("🛠️ Selezione")
-    
-    # 1. Selezione Macro
-    macro_it = st.selectbox("Seleziona Macro Categoria:", list(database.keys()))
+with col_macro:
+    st.subheader("📂 1. Macro Categoria")
+    # Selezione singola con titoli per esteso (Radio button)
+    macro_it = st.radio(
+        "Scegli una categoria (la selezione esclude le altre):",
+        options=list(database.keys()),
+        index=0
+    )
     macro_en = database[macro_it]["macro_en"]
+
+with col_dettagli:
+    st.subheader("🔍 2. Dettagli e Input")
     
-    # 2. Selezione Particolare dinamica
+    # Sotto-menu che "esplodono" in base alla scelta sopra
     opzioni_part = list(database[macro_it]["Particolari"].keys())
-    part_it = st.selectbox("Seleziona Particolare (2):", opzioni_part)
+    part_it = st.selectbox(f"Seleziona Particolare per {macro_it}:", opzioni_part)
     part_en = database[macro_it]["Particolari"][part_it]
     
-    # 5. Selezione Compatibilità (FISSA come richiesto)
-    comp_scelta = st.selectbox("Seleziona Compatibilità (5):", opzioni_compatibilita)
-
-with col2:
-    st.subheader("✍️ Input Manuale")
-    # Campi manuali
+    # Campi fissi e manuali
+    comp_scelta = st.selectbox("5. Seleziona Compatibilità:", opzioni_compatibilita)
+    
     dim_input = st.text_input("3. DIMENSIONI (es. 500X200 MM):").strip().upper()
-    extra_input = st.text_input("4. EXTRA (es. COLOR RAL 9005):").strip().upper()
+    extra_it = st.text_input("4. EXTRA (Traduzione Automatica):", placeholder="Scrivi in italiano...").strip()
 
 st.divider()
 
-# --- GENERAZIONE STRINGA ---
-if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # Gestione valori vuoti
+# --- LOGICA DI GENERAZIONE ---
+if st.button("🚀 GENERA E TRADUCI STRINGA FINALE", use_container_width=True):
+    # Traduzione automatica campo Extra
+    if extra_it:
+        try:
+            extra_en = GoogleTranslator(source='it', target='en').translate(extra_it)
+            extra_final = extra_en.upper()
+        except:
+            extra_final = extra_it.upper()
+    else:
+        extra_final = "NONE"
+
     dim_final = dim_input if dim_input else "N/A"
-    extra_final = extra_input if extra_input else "NONE"
     
-    # Assemblaggio finale: MACRO - PARTICOLARE - DIMENSIONI - EXTRA - COMPATIBILITÀ
-    # Nota: comp_scelta è già in inglese/stampatello nel menu
+    # Assemblaggio finale
     final_string = f"{macro_en} - {part_en} - {dim_final} - {extra_final} - {comp_scelta}"
     final_string = final_string.upper()
 
-    # Visualizzazione
     st.success("Stringa tecnica generata correttamente!")
-    
-    st.markdown("### 📋 Risultato da copiare:")
+    st.markdown("### 📋 Risultato (English - Uppercase):")
     st.code(final_string, language=None)
-    
     st.text_area("Copia rapida:", value=final_string, height=70)
 
-# --- FOOTER ---
+# Sidebar informativa
+st.sidebar.markdown(f"**Categoria Attiva:**\n{macro_it}")
 st.sidebar.markdown("---")
-st.sidebar.info("L'output è configurato per essere sempre in lingua inglese e in stampatello.")
+st.sidebar.write("L'interfaccia a sinistra ti permette di cambiare categoria velocemente senza dover aprire menu a tendina.")
