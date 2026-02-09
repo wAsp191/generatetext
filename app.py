@@ -32,7 +32,7 @@ MATERIALI_CONFIG = {
 }
 
 # =========================================================
-# 2. DATABASE INTEGRALE (Tutte le voci del tuo file Excel)
+# 2. DATABASE INTEGRALE (Corretto per evitare TypeError)
 # =========================================================
 DATABASE = {
     "METAL COMP": {
@@ -66,7 +66,7 @@ DATABASE = {
         "Particolari": {
             "Ripiano Legno": ["WOODEN SHELF", {}, "SHELF"],
             "Schienale Legno": ["WOODEN BACK", {}, "PANEL"],
-            "Cielino": "CANOPY"
+            "Cielino": ["CANOPY", {}, "CANOPY"] # CORRETTO: Aggiunta lista e dizionario vuoto
         }
     },
     "PLASTIC COMP": {
@@ -85,12 +85,12 @@ DATABASE = {
     "FASTENER": {
         "macro_en": "FASTENER",
         "Particolari": {
-            "Vite": ["SCREW", {}, "FASTENER", "SCREW"],
+            "Vite": ["SCREW", {}, "SCREW"], # CORRETTO: Rimossi elementi extra
             "Bullone": ["BOLT", {}, "FASTENER"],
-            "Rondella": ["WASHER", {}, "FASTENER", "WASHER"],
-            "Dado": ["NUT", {}, "FASTENER", "NUT"],
-            "Inserti filettati": ["RIVET", {}, "FASTENER", "RIVET"],
-            "Tasselli": ["ANCHOR", {}, "FASTENER", "ANCHOR"],
+            "Rondella": ["WASHER", {}, "WASHER"],
+            "Dado": ["NUT", {}, "NUT"],
+            "Inserti filettati": ["RIVET", {}, "RIVET"],
+            "Tasselli": ["ANCHOR", {}, "ANCHOR"]
         }
     },
     "ASSEMBLY": {
@@ -149,15 +149,18 @@ with col_workarea:
     nomi_it_ordinati = sorted(list(part_dict.keys()))
     scelta_part_it = st.radio("Seleziona dettaglio:", options=nomi_it_ordinati, horizontal=True)
     
-    part_en = part_dict[scelta_part_it][0]
-    extra_dedicati_dict = part_dict[scelta_part_it][1]
-    tag_suggerimento = part_dict[scelta_part_it][2]
+    # Estrazione sicura dei dati del particolare
+    dati_part = part_dict[scelta_part_it]
+    part_en = dati_part[0]
+    extra_dedicati_dict = dati_part[1]
+    tag_suggerimento = dati_part[2]
 
     st.markdown("---")
     
     st.subheader(f"✨ 3. Extra per {scelta_part_it}")
     col_ex1, col_ex2 = st.columns([2, 1])
     with col_ex1:
+        # Qui avveniva l'errore: ora extra_dedicati_dict è garantito essere un dizionario
         opzioni_extra_visibili = {**EXTRA_COMUNI, **extra_dedicati_dict}
         extra_selezionati = st.multiselect("Opzioni:", options=list(opzioni_extra_visibili.keys()), key="extra_tags")
     with col_ex2:
@@ -179,19 +182,15 @@ with col_workarea:
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # Logica Dimensioni modificata: L, P, H con X | Spessore con Spazio
     lph_list = [d.strip().upper() for d in [dim_l, dim_p, dim_h] if d.strip()]
     lph_str = "X".join(lph_list)
-    
     s_val = dim_s.strip()
     
-    # Costruzione stringa dimensioni finale
     if lph_str and s_val:
         dim_final = f"{lph_str} {s_val}"
     else:
         dim_final = lph_str if lph_str else s_val
 
-    # Elaborazione Extra
     extra_final_list = [opzioni_extra_visibili[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
