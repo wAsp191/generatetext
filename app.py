@@ -2,10 +2,10 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # Configurazione Pagina
-st.set_page_config(page_title="Technical Generator v7.1", layout="wide")
+st.set_page_config(page_title="Technical Generator v7.2", layout="wide")
 
 # =========================================================
-# 1. CONFIGURAZIONE MATERIALI PER OGNI NUOVA MACRO
+# 1. CONFIGURAZIONE MATERIALI PER OGNI MACRO
 # =========================================================
 MATERIALI_CONFIG = {
     "METAL COMP": {
@@ -32,7 +32,7 @@ MATERIALI_CONFIG = {
 }
 
 # =========================================================
-# 2. DATABASE INTEGRALE (Corretto per evitare TypeError)
+# 2. DATABASE INTEGRALE (Corretto e Aggiornato)
 # =========================================================
 DATABASE = {
     "METAL COMP": {
@@ -66,7 +66,7 @@ DATABASE = {
         "Particolari": {
             "Ripiano Legno": ["WOODEN SHELF", {}, "SHELF"],
             "Schienale Legno": ["WOODEN BACK", {}, "PANEL"],
-            "Cielino": ["CANOPY", {}, "CANOPY"] # CORRETTO: Aggiunta lista e dizionario vuoto
+            "Cielino": ["CANOPY", {}, "CANOPY"]
         }
     },
     "PLASTIC COMP": {
@@ -85,12 +85,12 @@ DATABASE = {
     "FASTENER": {
         "macro_en": "FASTENER",
         "Particolari": {
-            "Vite": ["SCREW", {}, "SCREW"], # CORRETTO: Rimossi elementi extra
+            "Vite": ["SCREW", {}, "FASTENER"],
             "Bullone": ["BOLT", {}, "FASTENER"],
-            "Rondella": ["WASHER", {}, "WASHER"],
-            "Dado": ["NUT", {}, "NUT"],
-            "Inserti filettati": ["RIVET", {}, "RIVET"],
-            "Tasselli": ["ANCHOR", {}, "ANCHOR"]
+            "Rondella": ["WASHER", {}, "FASTENER"],
+            "Dado": ["NUT", {}, "FASTENER"],
+            "Inserti filettati": ["RIVET", {}, "FASTENER"],
+            "Tasselli": ["ANCHOR", {}, "FASTENER"]
         }
     },
     "ASSEMBLY": {
@@ -105,18 +105,14 @@ DATABASE = {
 OPZIONI_COMPATIBILITA = ["F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT"}
 OPZIONI_SPESSORE = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
+OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
 
 # =========================================================
 # FUNZIONI
 # =========================================================
 def reset_all():
-    st.session_state["dim_l"] = ""
-    st.session_state["dim_p"] = ""
-    st.session_state["dim_h"] = ""
-    st.session_state["dim_s"] = ""
-    st.session_state["extra_text"] = ""
-    st.session_state["extra_tags"] = []
-    st.session_state["comp_tags"] = []
+    for k in ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags"]:
+        if k in st.session_state: st.session_state[k] = "" if "tags" not in k else []
 
 # =========================================================
 # INTERFACCIA
@@ -137,41 +133,42 @@ with col_macro:
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Particolare")
     materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
-    
     mat_en = ""
     if materiali_disponibili:
-        mat_it = st.radio(f"Seleziona Materiale per {macro_it}:", options=list(materiali_disponibili.keys()), horizontal=True)
+        mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
         mat_en = materiali_disponibili[mat_it]
     
-    st.write("") 
-    
     part_dict = DATABASE[macro_it]["Particolari"]
-    nomi_it_ordinati = sorted(list(part_dict.keys()))
-    scelta_part_it = st.radio("Seleziona dettaglio:", options=nomi_it_ordinati, horizontal=True)
+    scelta_part_it = st.radio("Seleziona dettaglio:", options=sorted(list(part_dict.keys())), horizontal=True)
     
-    # Estrazione sicura dei dati del particolare
     dati_part = part_dict[scelta_part_it]
-    part_en = dati_part[0]
-    extra_dedicati_dict = dati_part[1]
-    tag_suggerimento = dati_part[2]
+    part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
 
     st.markdown("---")
-    
     st.subheader(f"✨ 3. Extra per {scelta_part_it}")
     col_ex1, col_ex2 = st.columns([2, 1])
     with col_ex1:
-        # Qui avveniva l'errore: ora extra_dedicati_dict è garantito essere un dizionario
         opzioni_extra_visibili = {**EXTRA_COMUNI, **extra_dedicati_dict}
         extra_selezionati = st.multiselect("Opzioni:", options=list(opzioni_extra_visibili.keys()), key="extra_tags")
     with col_ex2:
         extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
-    st.subheader("📏 4. Dimensioni (mm)")
-    c1, c2, c3, c4 = st.columns(4)
-    with c1: dim_l = st.text_input("Lunghezza", key="dim_l")
-    with c2: dim_p = st.text_input("Profondità", key="dim_p")
-    with c3: dim_h = st.text_input("Altezza", key="dim_h")
-    with c4: dim_s = st.selectbox("Spessore", options=OPZIONI_SPESSORE, key="dim_s")
+    # --- SEZIONE DIMENSIONI DINAMICA ---
+    st.subheader("📏 4. Dimensioni e Normative")
+    if macro_it == "FASTENER":
+        c1, c2, c3 = st.columns(3)
+        with c1: dim_l = st.text_input("Lunghezza (mm)", key="dim_l")
+        with c2: dim_dia = st.text_input("Diametro (Ø)", key="dim_dia")
+        with c3: normativa = st.selectbox("Normativa", options=OPZIONI_NORMATIVA)
+        # Reset campi non usati per evitare errori logici
+        dim_p, dim_h, dim_s = "", "", "" 
+    else:
+        c1, c2, c3, c4 = st.columns(4)
+        with c1: dim_l = st.text_input("Lunghezza", key="dim_l")
+        with c2: dim_p = st.text_input("Profondità", key="dim_p")
+        with c3: dim_h = st.text_input("Altezza", key="dim_h")
+        with c4: dim_s = st.selectbox("Spessore", options=OPZIONI_SPESSORE, key="dim_s")
+        dim_dia, normativa = "", ""
 
     st.subheader("🔗 5. Compatibilità")
     comp_selezionate = st.multiselect("Modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
@@ -182,15 +179,17 @@ with col_workarea:
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    lph_list = [d.strip().upper() for d in [dim_l, dim_p, dim_h] if d.strip()]
-    lph_str = "X".join(lph_list)
-    s_val = dim_s.strip()
-    
-    if lph_str and s_val:
-        dim_final = f"{lph_str} {s_val}"
+    # Logica Dimensioni Differenziata
+    if macro_it == "FASTENER":
+        dims_part = [d.strip().upper() for d in [dim_dia, dim_l] if d.strip()]
+        dim_final = "X".join(dims_part)
+        if normativa: dim_final += f" {normativa}"
     else:
-        dim_final = lph_str if lph_str else s_val
+        lph_list = [d.strip().upper() for d in [dim_l, dim_p, dim_h] if d.strip()]
+        lph_str = "X".join(lph_list)
+        dim_final = f"{lph_str} {dim_s}".strip() if lph_str and dim_s else (lph_str or dim_s)
 
+    # Extra
     extra_final_list = [opzioni_extra_visibili[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
