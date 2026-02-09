@@ -28,33 +28,29 @@ DATABASE = {
             "Pannello rivestimento": ["BACK PANEL", {
                 "Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Forato a rombo": "RUMBLE PERFORATED",
                 "Forato asolato": "SLOTTED PERFORATED", "Multilame": "MULTISTRIP", "Multibarra": "MULTIBAR",
-                "Con foro passacavi": "WITH CABLE-COVER HOLE", "Con 1 foro WLD": "WITH 1 WLD'S HOLE", "Con 2 fori WLD": "WITH 2 WLD'S HOLES"
+                "Con foro passacavi": "WITH CABLE-COVER HOLE", "Con 1 foro WLD": "WITH 1 WLD'S HOLE", "Con 2 fori WLD": "WITH 2 WLD'S HOLES", "Pannello centrale": "CENTRAL PANEL"
             }, "PANEL"],
             "Copripiede": ["FOOT COVER", {
-                "H90": "WITH H90 FOOT", "H100": "WITH H100 FOOT", "H150": "WITH H150 FOOT"
+                "H90": "FOR H90 FOOT", "H100": "FOR H100 FOOT", "H150": "FOR H150 FOOT"
             }, "COVER"],
             "Chiusura": ["TOP COVER", {"Con scasso": "WITH RECESS"}, "COVER"],
             "Fiancata laterale": ["SIDE PANEL", {
                 "Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", 
-                "H90": "H90", "H100": "H100"
-            }, "PANEL"],
+                "H90": "FOR H90 BASE FOOT", "H100": "FOR H100 BASE FOOT", "Stondata": "ROUNDED", "Trapezoidale": "SLOPING", "Curva": "CURVED"
+            }, "SIDE PANEL"],
             "Mensola": ["BRACKET", {
-                "H30": "H30", "H20": "H20", "Slim": "SLIM VERSION", 
-                "Sinistra": "LEFT", "Destra": "RIGHT", "Rinforzata": "REINFORCED"
+                "Sinistra": "LEFT", "Destra": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "Alti carichi": "HEAVY-DUTY", "2 Posizioni": "2 POSITION", "Attacco montante": "HOOKS ONTO UPRIGHT", "Attacco barra": "FIXING BAR", "Attacco multilame": FOR MULTISTRIP
             }, "BRACKET"],
-            "Coprifessura": ["JOINT COVER", {"Standard": "STANDARD", "A scatto": "SNAP-ON"}, "ACCESSORY"],
             "Ripiano": ["SHELF", {
-                "H30": "H30", "H20": "H20", "Liscio": "PLAIN",
-                "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT"
+                "Liscio": "PLAIN",  "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT", "Senza rinforzo": "WITHOUT REINFORCEMENT"
             }, "SHELF"],
             "Cesto in filo": ["WIRE BASKET", {}, "BASKET"],
             "Cielino": ["CANOPY", {}, "CANOPY"],
             "Corrente": ["BEAM", {"Rinforzato": "REINFORCED", "Senza ganci": "WITHOUT HOOKS"}, "BEAM"],
             "Diagonale": ["DIAGONAL", {}, "BRACING"],
-            "Distanziali": ["SPACER", {}, "ACCESSORY"],
+            "Distanziali": ["SPACER", {}, "SPACER"],
             "Divisori": ["DIVIDER", {}, "DIVIDER"],
-            "Ganci": ["HOOK", {}, "ACCESSORY"],
-            "Pannello di rivestimento centrale": ["CENTRAL PANEL", {}, "PANEL"],
+            "Ganci": ["HOOK", {}, "HOOK"],
             "Profilo": ["PROFILE", {}, "PROFILE"],
             "Rinforzo": ["STIFFENER", {}, "STIFFENER"],
             "Staffa": ["PLATE", {}, "PLATE"],
