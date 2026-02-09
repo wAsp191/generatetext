@@ -151,7 +151,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     
     # COSTRUZIONE STRINGA CON VIRGOLA (SOSTITUITO IL TRATTINO)
     # Formato: MACRO, PARTICOLARE, DIMENSIONI, EXTRA, COMPATIBILITÀ
-    res = f"{macro_en}, {part_en}, {dim_final}, {extra_str}, {comp_str}".upper()
+    res = f"{macro_en} - {part_en}, {extra_str}, {dim_final}, , {comp_str}".upper()
 
     st.success("Stringa tecnica generata correttamente!")
     st.code(res, language=None)
