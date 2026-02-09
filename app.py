@@ -5,73 +5,60 @@ from deep_translator import GoogleTranslator
 st.set_page_config(page_title="Technical Description Generator", layout="wide")
 
 # =========================================================
-# DATABASE COMPLETO (RIPRISTINATO)
-# Struttura: "Nome IT": ["Traduzione EN", {Dizionario Extra Dedicati}]
+# DATABASE GENERATO DAL TUO EXCEL
+# Struttura: "IT": ["EN", {Extra IT: Extra EN}, "Suggerimento"]
 # =========================================================
 DATABASE = {
     "1. Sheet Metal": {
         "macro_en": "SHEET METAL",
         "Particolari": {
-            "Ante scorrevoli": ["SLIDING DOOR", {}],
-            "Cesto in filo": ["WIRE BASKET", {}],
-            "Chiusura": ["TOP COVER", {}],
-            "Cielino": ["CANOPY", {}],
-            "Corrente": ["BEAM", {"Rinforzato": "REINFORCED", "Senza ganci": "WITHOUT HOOKS"}],
-            "Diagonale": ["DIAGONAL", {}],
-            "Distanziali": ["SPACER", {}],
-            "Divisori": ["DIVIDER", {}],
-            "Ganci": ["HOOK", {}],
-            "Mensola": ["BRACKET", {}],
-            "Montante": ["UPRIGHT", {"Passo 25mm": "PITCH 25MM", "Passo 50mm": "PITCH 50MM"}],
-            "Pannello di rivestimento": ["BACK PANEL", {"Forato": "PERFORATED", "Liscio": "SMOOTH"}],
-            "Pannello di rivestimento centrale": ["CENTRAL PANEL", {}],
-            "Piede di base": ["BASE FOOT", {}],
-            "Profilo": ["PROFILE", {}],
-            "Rinforzo": ["STIFFENER", {}],
-            "Ripiano": ["SHELF", {"Carico pesante": "HEAVY LOAD", "Slim": "SLIM VERSION"}],
-            "Staffa": ["PLATE", {}],
-            "Zoccolatura": ["PLINTH", {}]
+            "Montante": ["UPRIGHT", {
+                "70x30": "70X30", "90x30": "90X30", "Monoasolato": "WITH SLOTS ON ONE SIDE",
+                "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", "Estensione": "EXTENSION"
+            }, "UPRIGHT"],
+            "Piede di base": ["BASE FOOT", {
+                "H90": "H90", "H100": "H100", "H150": "H150", 
+                "Con piedino regolabile": "WITH ADJUSTABLE FOOT", "Estensione": "EXTENSION"
+            }, "FOOT"],
+            "Zoccolatura": ["PLINTH", {
+                "H90": "H90", "H100": "H100", "H150": "H150", "Liscia": "PLAIN", 
+                "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", 
+                "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED"
+            }, "PLINTH"],
+            "Pannello rivestimento": ["BACK PANEL", {
+                "Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Forato a rombo": "RUMBLE PERFORATED",
+                "Forato asolato": "SLOTTED PERFORATED", "Multilame": "MULTISTRIP", "Multibarra": "MULTIBAR",
+                "Con foro passacavi": "WITH CABLE-COVER HOLE", "Con 1 foro WLD": "WITH 1 WLD'S HOLE", "Con 2 fori WLD": "WITH 2 WLD'S HOLES"
+            }, "PANEL"],
+            "Coprifessura": ["JOINT COVER", {
+                "Standard": "STANDARD", "A scatto": "SNAP-ON"
+            }, "ACCESSORY"],
+            "Ripiano": ["SHELF", {
+                "H30": "H30", "H20": "H20", "Slim": "SLIM VERSION", "Liscio": "PLAIN",
+                "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT"
+            }, "SHELF"]
         }
     },
-    "2. Plastic Comp": {
-        "macro_en": "PLASTIC COMPONENT",
-        "Particolari": { "Esempio Plastica": ["PLASTIC EXAMPLE", {}] }
-    },
-    "3. Glass Comp": {
-        "macro_en": "GLASS COMPONENT",
-        "Particolari": { "Esempio Vetro": ["GLASS EXAMPLE", {}] }
-    },
-    "4. Wood Comp": {
-        "macro_en": "WOOD COMPONENT",
-        "Particolari": { "Esempio Legno": ["WOOD EXAMPLE", {}] }
-    },
-    "5. Electric Comp": {
-        "macro_en": "ELECTRIC COMPONENT",
-        "Particolari": { "Esempio Elettrico": ["ELECTRIC EXAMPLE", {}] }
-    },
-    "6. Fastener": {
-        "macro_en": "FASTENER",
-        "Particolari": { "Viti": ["SCREWS", {}], "Bulloni": ["BOLTS", {}] }
-    },
-    "7. Assembly": {
+    "2. Assembly": {
         "macro_en": "ASSEMBLY",
-        "Particolari": { "Assieme generale": ["GENERAL ASSEMBLY", {}] }
+        "Particolari": {
+            "Assieme Mobile": ["CABINET ASSEMBLY", {"Pre-montato": "PRE-ASSEMBLED"}, "ASSEMBLY"]
+        }
     },
-    "8. Weldcomp": {
+    "3. Weldcomp": {
         "macro_en": "WELDCOMP",
-        "Particolari": { "Componente saldato": ["WELDED COMPONENT", {}] }
-    },
-    "9. Other": {
-        "macro_en": "OTHER",
-        "Particolari": { "Accessorio": ["ACCESSORY", {}] }
+        "Particolari": {
+            "Telaio saldato": ["WELDED FRAME", {"Saldatura robot": "ROBOTIC WELDING"}, "WELDED"]
+        }
     }
+    # Puoi aggiungere le altre macro seguendo lo stesso schema
 }
 
 OPZIONI_COMPATIBILITA = ["F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
-EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT", "Idrorepellente": "WATER REPELLENT"}
+EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT"}
 
 # =========================================================
-# FUNZIONI DI SUPPORTO
+# FUNZIONI
 # =========================================================
 def reset_all():
     st.session_state["dim_val"] = ""
@@ -80,12 +67,10 @@ def reset_all():
     st.session_state["comp_tags"] = []
 
 # =========================================================
-# LOGICA INTERFACCIA
+# INTERFACCIA
 # =========================================================
+st.title("⚙️ Tech Description & Classification")
 
-st.title("⚙️ Universal Technical Generator")
-
-# Bottone Reset
 col_t, col_btn = st.columns([4, 1])
 with col_btn:
     if st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True):
@@ -105,44 +90,38 @@ with col_workarea:
     st.subheader("🔍 2. Particolare")
     part_dict = DATABASE[macro_it]["Particolari"]
     nomi_it_ordinati = sorted(list(part_dict.keys()))
-    scelta_part_it = st.radio("Seleziona dettaglio tecnico:", options=nomi_it_ordinati, horizontal=True)
+    scelta_part_it = st.radio("Seleziona dettaglio:", options=nomi_it_ordinati, horizontal=True)
     
-    # Recupero dati particolare scelto
     part_en = part_dict[scelta_part_it][0]
     extra_dedicati_dict = part_dict[scelta_part_it][1]
+    tag_suggerimento = part_dict[scelta_part_it][2]
 
     st.markdown("---")
     
     # 3. DIMENSIONI
     st.subheader("📏 3. Dimensioni")
-    dim_input = st.text_input("Inserisci misure (es. 500X200 MM):", key="dim_val").strip().upper()
+    dim_input = st.text_input("Misure (es. 1000X500):", key="dim_val").strip().upper()
 
-    # 4. EXTRA (Dinamici)
-    st.subheader(f"✨ 4. Extra specifici per: {scelta_part_it}")
+    # 4. EXTRA
+    st.subheader(f"✨ 4. Extra per {scelta_part_it}")
     col_ex1, col_ex2 = st.columns([2, 1])
-    
     with col_ex1:
-        # Uniamo gli extra comuni a quelli del particolare scelto
         opzioni_extra_visibili = {**EXTRA_COMUNI, **extra_dedicati_dict}
-        extra_selezionati = st.multiselect(
-            "Seleziona opzioni:", 
-            options=list(opzioni_extra_visibili.keys()), 
-            key="extra_tags"
-        )
+        extra_selezionati = st.multiselect("Seleziona opzioni:", options=list(opzioni_extra_visibili.keys()), key="extra_tags")
     with col_ex2:
-        extra_libero = st.text_input("Note libere (Traduzione IT->EN):", key="extra_text").strip()
+        extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
     # 5. COMPATIBILITÀ
     st.subheader("🔗 5. Compatibilità")
-    comp_selezionate = st.multiselect("Seleziona modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
+    comp_selezionate = st.multiselect("Modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
 
 # =========================================================
-# GENERAZIONE RISULTATO
+# GENERAZIONE
 # =========================================================
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # Traduzione e unione Extra
+    # Traduzione extra
     extra_final_list = [opzioni_extra_visibili[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
@@ -155,16 +134,13 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     comp_str = ", ".join(comp_selezionate) if comp_selezionate else "UNIVERSAL"
     dim_final = dim_input if dim_input else "N/A"
     
-    # COSTRUZIONE FINALE
-    res = f"{macro_en} - {part_en} - {dim_final} - {extra_str} - {comp_str}"
-    res = res.upper()
+    res = f"{macro_en} - {part_en} - {dim_final} - {extra_str} - {comp_str}".upper()
 
-    st.success("Stringa tecnica generata!")
+    # OUTPUT RISULTATI
+    st.success("Stringa tecnica generata correttamente!")
     st.code(res, language=None)
-    st.text_area("Copia rapida:", value=res, height=70)
 
-st.markdown("""
-<style>
-    .stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }
-</style>
-""", unsafe_allow_html=True)
+    st.markdown("### 💡 Suggerimento per la classificazione")
+    st.info(f"**TAG SUGGERITI:** {tag_suggerimento.upper()}")
+
+st.markdown("<style>.stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }</style>", unsafe_allow_html=True)
