@@ -2,63 +2,101 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # Configurazione Pagina
-st.set_page_config(page_title="Technical Description Generator", layout="wide")
+st.set_page_config(page_title="Technical Description Generator v2.0", layout="wide")
 
 # =========================================================
-# DATABASE GENERATO DAL TUO EXCEL
-# Struttura: "IT": ["EN", {Extra IT: Extra EN}, "Suggerimento"]
+# DATABASE COMPLETO (EXCEL + STORICO)
+# Struttura: "IT": ["EN", {Extra IT: Extra EN}, "Tag Suggerimento"]
 # =========================================================
 DATABASE = {
     "1. Sheet Metal": {
         "macro_en": "SHEET METAL",
         "Particolari": {
+            "Ante scorrevoli": ["SLIDING DOOR", {}, "DOOR"],
+            "Cesto in filo": ["WIRE BASKET", {}, "BASKET"],
+            "Chiusura": ["TOP COVER", {}, "COVER"],
+            "Cielino": ["CANOPY", {}, "CANOPY"],
+            "Coprifessura": ["JOINT COVER", {"Standard": "STANDARD", "A scatto": "SNAP-ON"}, "ACCESSORY"],
+            "Corrente": ["BEAM", {"Rinforzato": "REINFORCED", "Senza ganci": "WITHOUT HOOKS"}, "BEAM"],
+            "Diagonale": ["DIAGONAL", {}, "BRACING"],
+            "Distanziali": ["SPACER", {}, "ACCESSORY"],
+            "Divisori": ["DIVIDER", {}, "DIVIDER"],
+            "Ganci": ["HOOK", {}, "ACCESSORY"],
+            "Mensola": ["BRACKET", {}, "BRACKET"],
             "Montante": ["UPRIGHT", {
                 "70x30": "70X30", "90x30": "90X30", "Monoasolato": "WITH SLOTS ON ONE SIDE",
                 "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", "Estensione": "EXTENSION"
             }, "UPRIGHT"],
-            "Piede di base": ["BASE FOOT", {
-                "H90": "H90", "H100": "H100", "H150": "H150", 
-                "Con piedino regolabile": "WITH ADJUSTABLE FOOT", "Estensione": "EXTENSION"
-            }, "FOOT"],
-            "Zoccolatura": ["PLINTH", {
-                "H90": "H90", "H100": "H100", "H150": "H150", "Liscia": "PLAIN", 
-                "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", 
-                "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED"
-            }, "PLINTH"],
             "Pannello rivestimento": ["BACK PANEL", {
                 "Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Forato a rombo": "RUMBLE PERFORATED",
                 "Forato asolato": "SLOTTED PERFORATED", "Multilame": "MULTISTRIP", "Multibarra": "MULTIBAR",
                 "Con foro passacavi": "WITH CABLE-COVER HOLE", "Con 1 foro WLD": "WITH 1 WLD'S HOLE", "Con 2 fori WLD": "WITH 2 WLD'S HOLES"
             }, "PANEL"],
-            "Coprifessura": ["JOINT COVER", {
-                "Standard": "STANDARD", "A scatto": "SNAP-ON"
-            }, "ACCESSORY"],
+            "Pannello di rivestimento centrale": ["CENTRAL PANEL", {}, "PANEL"],
+            "Piede di base": ["BASE FOOT", {
+                "H90": "H90", "H100": "H100", "H150": "H150", 
+                "Con piedino regolabile": "WITH ADJUSTABLE FOOT", "Estensione": "EXTENSION"
+            }, "FOOT"],
+            "Piede di base centrale": ["CENTRAL BASE FOOT", {}, "FOOT"],
+            "Profilo": ["PROFILE", {}, "PROFILE"],
+            "Rinforzo": ["STIFFENER", {}, "STIFFENER"],
             "Ripiano": ["SHELF", {
                 "H30": "H30", "H20": "H20", "Slim": "SLIM VERSION", "Liscio": "PLAIN",
                 "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT"
-            }, "SHELF"]
+            }, "SHELF"],
+            "Staffa": ["PLATE", {}, "PLATE"],
+            "Zoccolatura": ["PLINTH", {
+                "H90": "H90", "H100": "H100", "H150": "H150", "Liscia": "PLAIN", 
+                "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", 
+                "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED"
+            }, "PLINTH"]
         }
     },
     "2. Assembly": {
         "macro_en": "ASSEMBLY",
         "Particolari": {
-            "Assieme Mobile": ["CABINET ASSEMBLY", {"Pre-montato": "PRE-ASSEMBLED"}, "ASSEMBLY"]
+            "Assieme Mobile": ["CABINET ASSEMBLY", {"Pre-montato": "PRE-ASSEMBLED"}, "ASSEMBLY"],
+            "Assieme generale": ["GENERAL ASSEMBLY", {}, "ASSEMBLY"]
         }
     },
     "3. Weldcomp": {
         "macro_en": "WELDCOMP",
         "Particolari": {
+            "Componente saldato": ["WELDED COMPONENT", {}, "WELDED"],
             "Telaio saldato": ["WELDED FRAME", {"Saldatura robot": "ROBOTIC WELDING"}, "WELDED"]
         }
+    },
+    "4. Plastic Comp": {
+        "macro_en": "PLASTIC COMPONENT",
+        "Particolari": { "Particolare in plastica": ["PLASTIC PART", {}, "PLASTIC"] }
+    },
+    "5. Glass Comp": {
+        "macro_en": "GLASS COMPONENT",
+        "Particolari": { "Vetro": ["GLASS", {}, "GLASS"] }
+    },
+    "6. Wood Comp": {
+        "macro_en": "WOOD COMPONENT",
+        "Particolari": { "Legno": ["WOOD", {}, "WOOD"] }
+    },
+    "7. Electric Comp": {
+        "macro_en": "ELECTRIC COMPONENT",
+        "Particolari": { "Componente elettrico": ["ELECTRIC PART", {}, "ELECTRIC"] }
+    },
+    "8. Fastener": {
+        "macro_en": "FASTENER",
+        "Particolari": { "Viti": ["SCREWS", {}, "FASTENER"], "Bulloni": ["BOLTS", {}, "FASTENER"] }
+    },
+    "9. Other": {
+        "macro_en": "OTHER",
+        "Particolari": { "Accessorio": ["ACCESSORY", {}, "OTHER"] }
     }
-    # Puoi aggiungere le altre macro seguendo lo stesso schema
 }
 
 OPZIONI_COMPATIBILITA = ["F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
-EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT"}
+EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT", "Idrorepellente": "WATER REPELLENT"}
 
 # =========================================================
-# FUNZIONI
+# FUNZIONI SESSIONE
 # =========================================================
 def reset_all():
     st.session_state["dim_val"] = ""
@@ -86,32 +124,29 @@ with col_macro:
     macro_en = DATABASE[macro_it]["macro_en"]
 
 with col_workarea:
-    # 2. PARTICOLARE
     st.subheader("🔍 2. Particolare")
     part_dict = DATABASE[macro_it]["Particolari"]
     nomi_it_ordinati = sorted(list(part_dict.keys()))
     scelta_part_it = st.radio("Seleziona dettaglio:", options=nomi_it_ordinati, horizontal=True)
     
+    # Estrazione dati
     part_en = part_dict[scelta_part_it][0]
     extra_dedicati_dict = part_dict[scelta_part_it][1]
     tag_suggerimento = part_dict[scelta_part_it][2]
 
     st.markdown("---")
     
-    # 3. DIMENSIONI
     st.subheader("📏 3. Dimensioni")
     dim_input = st.text_input("Misure (es. 1000X500):", key="dim_val").strip().upper()
 
-    # 4. EXTRA
     st.subheader(f"✨ 4. Extra per {scelta_part_it}")
     col_ex1, col_ex2 = st.columns([2, 1])
     with col_ex1:
         opzioni_extra_visibili = {**EXTRA_COMUNI, **extra_dedicati_dict}
-        extra_selezionati = st.multiselect("Seleziona opzioni:", options=list(opzioni_extra_visibili.keys()), key="extra_tags")
+        extra_selezionati = st.multiselect("Opzioni:", options=list(opzioni_extra_visibili.keys()), key="extra_tags")
     with col_ex2:
-        extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
+        extra_libero = st.text_input("Note libere (Traduzione IT->EN):", key="extra_text").strip()
 
-    # 5. COMPATIBILITÀ
     st.subheader("🔗 5. Compatibilità")
     comp_selezionate = st.multiselect("Modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
 
@@ -121,7 +156,6 @@ with col_workarea:
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # Traduzione extra
     extra_final_list = [opzioni_extra_visibili[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
@@ -136,7 +170,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     
     res = f"{macro_en} - {part_en} - {dim_final} - {extra_str} - {comp_str}".upper()
 
-    # OUTPUT RISULTATI
     st.success("Stringa tecnica generata correttamente!")
     st.code(res, language=None)
 
