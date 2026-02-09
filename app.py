@@ -2,10 +2,10 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # Configurazione Pagina
-st.set_page_config(page_title="Technical Generator v5.2", layout="wide")
+st.set_page_config(page_title="Technical Generator v6.0", layout="wide")
 
 # =========================================================
-# DATABASE ESTRATTO INTEGRALMENTE DAL FILE EXCEL (Invariato)
+# DATABASE ESTRATTO INTEGRALMENTE DAL FILE EXCEL
 # =========================================================
 DATABASE = {
     "1. Sheet Metal": {
@@ -79,6 +79,8 @@ DATABASE = {
 
 OPZIONI_COMPATIBILITA = ["F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT"}
+OPZIONI_SPESSORE = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
+OPZIONI_MATERIALE = ["IRON", "GALVANIZED", "INOX", "ALUMINIUM"]
 
 # =========================================================
 # FUNZIONI
@@ -110,7 +112,12 @@ with col_macro:
     macro_en = DATABASE[macro_it]["macro_en"]
 
 with col_workarea:
-    st.subheader("🔍 2. Particolare")
+    # MATERIALE (PRIMA DEL PARTICOLARE)
+    st.subheader("🛠️ 2. Materiale e Particolare")
+    mat_selezionato = st.radio("Seleziona Materiale:", options=OPZIONI_MATERIALE, horizontal=True)
+    
+    st.write("") # Spaziatore
+    
     part_dict = DATABASE[macro_it]["Particolari"]
     nomi_it_ordinati = sorted(list(part_dict.keys()))
     scelta_part_it = st.radio("Seleziona dettaglio:", options=nomi_it_ordinati, horizontal=True)
@@ -130,13 +137,13 @@ with col_workarea:
     with col_ex2:
         extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
-    # DIMENSIONI (PUNTO 4 - MODIFICATO)
+    # DIMENSIONI (PUNTO 4)
     st.subheader("📏 4. Dimensioni (mm)")
     c1, c2, c3, c4 = st.columns(4)
     with c1: dim_l = st.text_input("Lunghezza", key="dim_l")
     with c2: dim_p = st.text_input("Profondità", key="dim_p")
     with c3: dim_h = st.text_input("Altezza", key="dim_h")
-    with c4: dim_s = st.text_input("Spessore", key="dim_s")
+    with c4: dim_s = st.selectbox("Spessore", options=OPZIONI_SPESSORE, key="dim_s")
 
     # COMPATIBILITÀ (PUNTO 5)
     st.subheader("🔗 5. Compatibilità")
@@ -164,14 +171,17 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     extra_str = ", ".join(extra_final_list) if extra_final_list else "NONE"
     comp_str = ", ".join(comp_selezionate) if comp_selezionate else "UNIVERSAL"
     
-    # FORMATO RICHIESTO: MACRO - NOME DIMENSIONI, EXTRA - COMPATIBILITÀ
-    name_dim = f"{part_en} {dim_final}".strip()
-    res = f"{macro_en} - {name_dim}, {extra_str} - {comp_str}".upper()
+    # FORMATO: MACRO - MATERIALE PARTICOLARE DIMENSIONI, EXTRA - COMPATIBILITÀ
+    # Inseriamo il materiale prima del nome del particolare
+    descrizione_centrale = f"{mat_selezionato} {part_en} {dim_final}".strip()
+    res = f"{macro_en} - {descrizione_centrale}, {extra_str} - {comp_str}".upper()
 
     st.success("Stringa tecnica generata!")
     st.code(res, language=None)
 
-    st.markdown("### 💡 Suggerimento per la classificazione")
-    st.info(f"**TAG SUGGERITI:** {tag_suggerimento.upper()}")
+    # Suggerimenti Tag (inclusa compatibilità)
+    st.markdown("### 💡 Suggerimenti per la classificazione")
+    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_selezionate]
+    st.info(f"**TAGS:** {' | '.join(all_tags)}")
 
 st.markdown("<style>.stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }</style>", unsafe_allow_html=True)
