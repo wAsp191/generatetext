@@ -15,7 +15,6 @@ DATABASE = {
             "Cesto in filo": ["WIRE BASKET", {}, "BASKET"],
             "Chiusura": ["TOP COVER", {"Con scasso": "WITH RECESS"}, "COVER"],
             "Cielino": ["CANOPY", {}, "CANOPY"],
-            "Coprifessura": ["JOINT COVER", {"Standard": "STANDARD", "A scatto": "SNAP-ON"}, "ACCESSORY"],
             "Copripiede": ["FOOT COVER", {"H90": "WITH H90 FOOT", "H100": "WITH H100 FOOT", "H150": "WITH H150 FOOT"}, "COVER"],
             "Corrente": ["BEAM", {"Rinforzato": "REINFORCED", "Senza ganci": "WITHOUT HOOKS"}, "BEAM"],
             "Diagonale": ["DIAGONAL", {}, "BRACING"],
@@ -73,7 +72,7 @@ DATABASE = {
 }
 
 OPZIONI_COMPATIBILITA = ["F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
-EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT"}
+EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED"}
 
 # =========================================================
 # FUNZIONI
