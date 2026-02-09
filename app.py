@@ -2,10 +2,10 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # Configurazione Pagina
-st.set_page_config(page_title="Technical Generator v7.2", layout="wide")
+st.set_page_config(page_title="Technical Generator v7.3", layout="wide")
 
 # =========================================================
-# 1. CONFIGURAZIONE MATERIALI PER OGNI MACRO
+# 1. CONFIGURAZIONE MATERIALI
 # =========================================================
 MATERIALI_CONFIG = {
     "METAL COMP": {
@@ -41,20 +41,19 @@ DATABASE = {
             "Montante": ["UPRIGHT", {"70x30": "70X30", "90x30": "90X30", "Monoasolato": "WITH SLOTS ON ONE SIDE", "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", "Estensione": "EXTENSION", "Minirack": "MINIRACK"}, "UPRIGHT"],
             "Piede di base": ["BASE FOOT", {"H90": "H90", "H100": "H100", "H150": "H150", "Con piedino regolabile": "WITH ADJUSTABLE FOOT", "Estensione": "EXTENSION"}, "FOOT"],
             "Zoccolatura": ["PLINTH", {"H90": "FOR H90 BASE FOOT", "H100": "FOR BASE FOOT H100", "H150": "FOR BASE FOOT H150", "Liscia": "PLAIN", "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED"}, "PLINTH"],
-            "Pannello rivestimento": ["BACK PANEL", {"Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Forato a rombo": "RUMBLE PERFORATED", "Forato asolato": "SLOTTED PERFORATED", "Multilame": "MULTISTRIP", "Multibarra": "MULTIBAR", "Con foro passacavi": "WITH CABLE-COVER HOLE", "Con 1 foro WLD": "WITH 1 WLD'S HOLE", "Con 2 fori WLD": "WITH 2 WLD'S HOLES"}, "PANEL"],
+            "Pannello rivestimento": ["BACK PANEL", {"Scan.": "NOTCHED", "Forato euro": "EURO PERFORATED", "Forato rombo": "RUMBLE PERFORATED"}, "PANEL"],
             "Copripiede": ["FOOT COVER", {"H90": "FOR H90 FOOT", "H100": "FOR H100 FOOT", "H150": "FOR H150 FOOT"}, "COVER"],
             "Chiusura": ["TOP COVER", {"Con scasso": "WITH RECESS"}, "COVER"],
-            "Fiancata laterale": ["SIDE PANEL", {"Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", "H90": "FOR BASE FOOT H90", "H100": "FOR BASE FOOT H100", "H150": "FOR BASE FOOT H150"}, "SIDE-PANEL"],
-            "Mensola": ["BRACKET", {"SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "1 Posizione": "1 POSITION", "2 Posizioni": "2 POSITIONS", "Attacco montante": "HOOKS ONTO UPRIGHT", "Attacco multibarra": "FOR MULTIBAR", "Attacco multilame": "FOR MUTISTRIP"}, "BRACKET"],
-            "Ripiano": ["SHELF", {"Liscio": "PLAIN", "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT", "Con boccole": "WITH RIVET"}, "SHELF"],
+            "Fiancata laterale": ["SIDE PANEL", {"Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING"}, "SIDE-PANEL"],
+            "Mensola": ["BRACKET", {"SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED"}, "BRACKET"],
+            "Ripiano": ["SHELF", {"Liscio": "PLAIN", "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT"}, "SHELF"],
             "Cesto in filo": ["WIRE BASKET", {}, "BASKET"],
             "Cielino": ["CANOPY", {}, "CANOPY"],
-            "Corrente": ["BEAM", {"Rinforzato": "REINFORCED", "Senza ganci": "WITHOUT HOOKS"}, "BEAM"],
-            "Diagonale": ["DIAGONAL", {"Forata": "PERFORETED"}, "DIAGONAL"],
+            "Corrente": ["BEAM", {}, "BEAM"],
+            "Diagonale": ["DIAGONAL", {}, "DIAGONAL"],
             "Distanziali": ["SPACER", {}, "SPACER"],
             "Divisori": ["DIVIDER", {}, "DIVIDER"],
             "Ganci": ["HOOK", {}, "HOOK"],
-            "Pannello di rivestimento centrale": ["CENTRAL PANEL", {}, "PANEL"],
             "Profilo": ["PROFILE", {}, "PROFILE"],
             "Rinforzo": ["STIFFENER", {}, "STIFFENER"],
             "Staffa": ["PLATE", {}, "PLATE"],
@@ -102,7 +101,6 @@ DATABASE = {
     }
 }
 
-# COSTANTI DEFINITE
 EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT"}
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 OPZIONI_SPESSORE = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
@@ -154,46 +152,66 @@ with col_workarea:
     with col_ex2:
         extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
-    # --- SEZIONE DIMENSIONI ---
     st.subheader("📏 4. Dimensioni e Normative")
     if macro_it == "FASTENER":
         c1, c2, c3 = st.columns(3)
-        with c1: dim_l = st.text_input("Lunghezza (mm)", key="dim_l")
-        with c2: dim_dia = st.text_input("Diametro (Ø)", key="dim_dia")
+        with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+        with c2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
         with c3: normativa = st.selectbox("Normativa", options=OPZIONI_NORMATIVA)
         dim_p, dim_h, dim_s = "", "", "" 
     else:
         c1, c2, c3, c4 = st.columns(4)
-        with c1: dim_l = st.text_input("Lunghezza", key="dim_l")
-        with c2: dim_p = st.text_input("Profondità", key="dim_p")
-        with c3: dim_h = st.text_input("Altezza", key="dim_h")
-        with c4: dim_s = st.selectbox("Spessore", options=OPZIONI_SPESSORE, key="dim_s")
+        with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+        with c2: dim_p = st.text_input("Profondità (P)", key="dim_p")
+        with c3: dim_h = st.text_input("Altezza (H)", key="dim_h")
+        with c4: dim_s = st.selectbox("Spessore (S)", options=OPZIONI_SPESSORE, key="dim_s")
         dim_dia, normativa = "", ""
 
     st.subheader("🔗 5. Compatibilità")
     comp_selezionate = st.multiselect("Modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
 
 # =========================================================
-# GENERAZIONE STRINGA FINALE (MODIFICATA)
+# GENERAZIONE STRINGA FINALE (CON PREFISSI L, P, H, D)
 # =========================================================
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # Logica Dimensioni
+    # Logica Dimensioni con prefissi
+    dim_final_parts = []
+    
     if macro_it == "FASTENER":
         d_val = dim_dia.strip().upper()
         l_val = dim_l.strip().upper()
-        if d_val and not d_val.startswith('M'):
-            d_val = f"M{d_val}"
-        dims_part = [d for d in [d_val, l_val] if d]
-        dim_final = "X".join(dims_part)
+        
+        if d_val:
+            # Se è una vite e non ha già la M, la aggiungiamo, altrimenti usiamo D
+            prefix_d = "" if d_val.startswith('M') else "D"
+            dim_final_parts.append(f"{prefix_d}{d_val}")
+        if l_val:
+            dim_final_parts.append(f"L{l_val}")
+            
+        dim_final = "X".join(dim_final_parts)
         if normativa: dim_final += f" {normativa}"
     else:
-        lph_list = [d.strip().upper() for d in [dim_l, dim_p, dim_h] if d.strip()]
-        lph_str = "X".join(lph_list)
-        dim_final = f"{lph_str} {dim_s}".strip() if lph_str and dim_s else (lph_str or dim_s)
+        # Costruiamo L, P, H solo se compilati
+        if dim_l.strip(): dim_final_parts.append(f"L{dim_l.strip().upper()}")
+        if dim_p.strip(): dim_final_parts.append(f"P{dim_p.strip().upper()}")
+        if dim_h.strip(): dim_final_parts.append(f"H{dim_h.strip().upper()}")
+        
+        lph_str = "X".join(dim_final_parts)
+        
+        # Spessore (S) separato da spazio come richiesto precedentemente
+        s_val = dim_s.strip()
+        if lph_str and s_val:
+            dim_final = f"{lph_str} S{s_val}"
+        elif lph_str:
+            dim_final = lph_str
+        elif s_val:
+            dim_final = f"S{s_val}"
+        else:
+            dim_final = ""
 
-    # Elaborazione Extra (senza "NONE" se vuoto)
+    # Extra
     extra_final_list = [opzioni_extra_visibili[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
@@ -204,19 +222,16 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     
     extra_str = ", ".join(extra_final_list) if extra_final_list else ""
 
-    # Elaborazione Compatibilità (senza "UNIVERSAL" se vuoto)
+    # Compatibilità
     comp_list = [c for c in comp_selezionate if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
-    # Composizione finale descrizione
+    # Composizione finale
     descrizione_centrale = f"{mat_en} {part_en} {dim_final}".strip().replace("  ", " ")
     
-    # Unione finale dei segmenti solo se esistono
     final_segments = [f"{macro_it} - {descrizione_centrale}"]
-    if extra_str:
-        final_segments.append(extra_str)
-    if comp_str:
-        final_segments.append(comp_str)
+    if extra_str: final_segments.append(extra_str)
+    if comp_str: final_segments.append(comp_str)
         
     res = " - ".join(final_segments).upper()
 
