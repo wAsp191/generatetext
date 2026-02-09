@@ -46,7 +46,7 @@ DATABASE = {
             "Chiusura": ["TOP COVER", {"Con scasso": "WITH RECESS"}, "COVER"],
             "Fiancata laterale": ["SIDE PANEL", {"Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING"}, "SIDE-PANEL"],
             "Mensola": ["BRACKET", {"SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED"}, "BRACKET"],
-            "Ripiano": ["SHELF", {"Liscio": "PLAIN", "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT"}, "SHELF"],
+            "Ripiano": ["SHELF", {"Liscio": "PLAIN", "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT", Con inserti": "WITH RIVET"}, "SHELF"],
             "Cesto in filo": ["WIRE BASKET", {}, "BASKET"],
             "Cielino": ["CANOPY", {}, "CANOPY"],
             "Corrente": ["BEAM", {}, "BEAM"],
