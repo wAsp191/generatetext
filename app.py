@@ -198,7 +198,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     extra_str = ", ".join(extra_final_list) if extra_final_list else "NONE"
     comp_str = ", ".join(comp_selezionate) if comp_selezionate else "UNIVERSAL"
     
-    # COSTRUZIONE: MACRO - MATERIALE PARTICOLARE DIMENSIONI, EXTRA - COMPATIBILITÀ
+    # COSTRUZIONE: MATERIALE PARTICOLARE DIMENSIONI, EXTRA - COMPATIBILITÀ
     # Il replace gestisce i casi dove mat_en è vuoto evitando doppi spazi
     descrizione_centrale = f"{mat_en} {part_en} {dim_final}".strip().replace("  ", " ")
     res = f"{macro_it} - {descrizione_centrale}, {extra_str} - {comp_str}".upper()
