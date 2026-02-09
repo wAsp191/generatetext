@@ -32,7 +32,7 @@ MATERIALI_CONFIG = {
 }
 
 # =========================================================
-# 2. DATABASE INTEGRALE (Corretto e Aggiornato)
+# 2. DATABASE INTEGRALE
 # =========================================================
 DATABASE = {
     "METAL COMP": {
@@ -102,6 +102,8 @@ DATABASE = {
     }
 }
 
+# COSTANTI MANCANTI NEL TUO ULTIMO MESSAGGIO
+EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT"}
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 OPZIONI_SPESSORE = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
 OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
@@ -147,6 +149,7 @@ with col_workarea:
     st.subheader(f"✨ 3. Extra per {scelta_part_it}")
     col_ex1, col_ex2 = st.columns([2, 1])
     with col_ex1:
+        # Unione sicura dei dizionari
         opzioni_extra_visibili = {**EXTRA_COMUNI, **extra_dedicati_dict}
         extra_selezionati = st.multiselect("Opzioni:", options=list(opzioni_extra_visibili.keys()), key="extra_tags")
     with col_ex2:
@@ -159,7 +162,6 @@ with col_workarea:
         with c1: dim_l = st.text_input("Lunghezza (mm)", key="dim_l")
         with c2: dim_dia = st.text_input("Diametro (Ø)", key="dim_dia")
         with c3: normativa = st.selectbox("Normativa", options=OPZIONI_NORMATIVA)
-        # Reset campi non usati per evitare errori logici
         dim_p, dim_h, dim_s = "", "", "" 
     else:
         c1, c2, c3, c4 = st.columns(4)
@@ -180,7 +182,15 @@ st.divider()
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     # Logica Dimensioni Differenziata
     if macro_it == "FASTENER":
-        dims_part = [d.strip().upper() for d in [dim_dia, dim_l] if d.strip()]
+        # Formato: M[DIAMETRO]X[LUNGHEZZA]
+        d_val = dim_dia.strip().upper()
+        l_val = dim_l.strip().upper()
+        
+        # Aggiunge "M" davanti al diametro se è un numero (tipico delle viti)
+        if d_val and not d_val.startswith('M'):
+            d_val = f"M{d_val}"
+            
+        dims_part = [d for d in [d_val, l_val] if d]
         dim_final = "X".join(dims_part)
         if normativa: dim_final += f" {normativa}"
     else:
@@ -198,7 +208,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
             extra_final_list.append(extra_libero.upper())
     
     extra_str = ", ".join(extra_final_list) if extra_final_list else "NONE"
-    comp_str = ", ".join(comp_selezionate) if comp_selezionate else "UNIVERSAL"
+    comp_str = ", ".join([c for c in comp_selezionate if c]) if any(comp_selezionate) else "UNIVERSAL"
     
     descrizione_centrale = f"{mat_en} {part_en} {dim_final}".strip().replace("  ", " ")
     res = f"{macro_it} - {descrizione_centrale}, {extra_str} - {comp_str}".upper()
@@ -207,7 +217,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     st.code(res, language=None)
 
     st.markdown("### 💡 Suggerimenti per la classificazione")
-    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_selezionate]
+    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_selezionate if c]
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
 
 st.markdown("<style>.stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }</style>", unsafe_allow_html=True)
