@@ -39,7 +39,7 @@ DATABASE = {
                 "H90": "FOR H90 BASE FOOT", "H100": "FOR H100 BASE FOOT", "Stondata": "ROUNDED", "Trapezoidale": "SLOPING", "Curva": "CURVED"
             }, "SIDE PANEL"],
             "Mensola": ["BRACKET", {
-                "Sinistra": "LEFT", "Destra": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "Alti carichi": "HEAVY-DUTY", "2 Posizioni": "2 POSITION", "Attacco montante": "HOOKS ONTO UPRIGHT", "Attacco barra": "FIXING BAR", "Attacco multilame": FOR MULTISTRIP
+                "Sinistra": "LEFT", "Destra": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "Alti carichi": "HEAVY-DUTY", "2 Posizioni": "2 POSITION", "Attacco montante": "HOOKS ONTO UPRIGHT", "Attacco barra": "FIXING BAR", "Attacco multilame": "FOR MULTISTRIP"
             }, "BRACKET"],
             "Ripiano": ["SHELF", {
                 "Liscio": "PLAIN",  "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT", "Senza rinforzo": "WITHOUT REINFORCEMENT"
