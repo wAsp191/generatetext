@@ -2,10 +2,10 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # Configurazione Pagina
-st.set_page_config(page_title="Technical Description Generator v3.1", layout="wide")
+st.set_page_config(page_title="Technical Generator v4.0", layout="wide")
 
 # =========================================================
-# DATABASE INTEGRALE DAL FILE EXCEL (CORRETTO)
+# DATABASE INTEGRALE E CORRETTO DAL FILE EXCEL
 # =========================================================
 DATABASE = {
     "1. Sheet Metal": {
@@ -15,14 +15,19 @@ DATABASE = {
             "Cesto in filo": ["WIRE BASKET", {}, "BASKET"],
             "Chiusura": ["TOP COVER", {"Con scasso": "WITH RECESS"}, "COVER"],
             "Cielino": ["CANOPY", {}, "CANOPY"],
+            "Coprifessura": ["JOINT COVER", {"Standard": "STANDARD", "A scatto": "SNAP-ON"}, "ACCESSORY"],
             "Copripiede": ["FOOT COVER", {"H90": "WITH H90 FOOT", "H100": "WITH H100 FOOT", "H150": "WITH H150 FOOT"}, "COVER"],
             "Corrente": ["BEAM", {"Rinforzato": "REINFORCED", "Senza ganci": "WITHOUT HOOKS"}, "BEAM"],
             "Diagonale": ["DIAGONAL", {}, "BRACING"],
             "Distanziali": ["SPACER", {}, "ACCESSORY"],
             "Divisori": ["DIVIDER", {}, "DIVIDER"],
-            "Fiancata laterale": ["SIDE PANEL", {"Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", "H90": "H90", "H100": "H100"}, "PANEL"],
+            "Fiancata laterale": ["SIDE PANEL", {
+                "Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", 
+                "H90": "H90", "H100": "H100"
+            }, "PANEL"],
             "Ganci": ["HOOK", {}, "ACCESSORY"],
             "Mensola": ["BRACKET", {
+                "H30": "H30", "H20": "H20", "Slim": "SLIM VERSION", 
                 "Sinistra": "LEFT", "Destra": "RIGHT", "Rinforzata": "REINFORCED"
             }, "BRACKET"],
             "Montante": ["UPRIGHT", {
@@ -115,29 +120,30 @@ with col_workarea:
 
     st.markdown("---")
     
-    # 3. EXTRA (PUNTO 3)
+    # EXTRA (SPOSTATO AL PUNTO 3)
     st.subheader(f"✨ 3. Extra per {scelta_part_it}")
     col_ex1, col_ex2 = st.columns([2, 1])
     with col_ex1:
         opzioni_extra_visibili = {**EXTRA_COMUNI, **extra_dedicati_dict}
         extra_selezionati = st.multiselect("Opzioni:", options=list(opzioni_extra_visibili.keys()), key="extra_tags")
     with col_ex2:
-        extra_libero = st.text_input("Note libere (Traduzione IT->EN):", key="extra_text").strip()
+        extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
-    # 4. DIMENSIONI (PUNTO 4)
+    # DIMENSIONI (SPOSTATO AL PUNTO 4)
     st.subheader("📏 4. Dimensioni")
     dim_input = st.text_input("Misure (es. 1000X500):", key="dim_val").strip().upper()
 
-    # 5. COMPATIBILITÀ (PUNTO 5)
+    # COMPATIBILITÀ (PUNTO 5)
     st.subheader("🔗 5. Compatibilità")
     comp_selezionate = st.multiselect("Modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
 
 # =========================================================
-# GENERAZIONE
+# GENERAZIONE STRINGA (NUOVA LOGICA)
 # =========================================================
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
+    # Elaborazione Extra
     extra_final_list = [opzioni_extra_visibili[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
@@ -150,10 +156,11 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     comp_str = ", ".join(comp_selezionate) if comp_selezionate else "UNIVERSAL"
     dim_final = dim_input if dim_input else "N/A"
     
-    # STRINGA CON SEPARATORE VIRGOLA
-    res = f"{macro_en}, {part_en}, {dim_final}, {extra_str}, {comp_str}".upper()
+    # NUOVA LOGICA STRINGA: 
+    # [MACRO] - [PARTICOLARE EN] [DIMENSIONI], [EXTRA1, EXTRA2] - [COMPATIBILITA]
+    res = f"{macro_en} - {part_en} {dim_final}, {extra_str} - {comp_str}".upper()
 
-    st.success("Stringa tecnica generata correttamente!")
+    st.success("Stringa tecnica generata!")
     st.code(res, language=None)
 
     st.markdown("### 💡 Suggerimento per la classificazione")
