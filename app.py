@@ -2,10 +2,10 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # Configurazione Pagina
-st.set_page_config(page_title="Technical Generator v5.1", layout="wide")
+st.set_page_config(page_title="Technical Generator v4.1", layout="wide")
 
 # =========================================================
-# DATABASE ESTRATTO ESCLUSIVAMENTE DAL FILE EXCEL
+# DATABASE ESTRATTO INTEGRALMENTE DAL FILE EXCEL
 # =========================================================
 DATABASE = {
     "1. Sheet Metal": {
@@ -46,19 +46,33 @@ DATABASE = {
             "Ripiano": ["SHELF", {
                 "H30": "H30", "H20": "H20", "Liscio": "PLAIN",
                 "Forato": "PERFORATED", "Con rinforzo": "WITH REINFORCEMENT"
-            }, "SHELF"]
+            }, "SHELF"],
+            "Cesto in filo": ["WIRE BASKET", {}, "BASKET"],
+            "Cielino": ["CANOPY", {}, "CANOPY"],
+            "Corrente": ["BEAM", {"Rinforzato": "REINFORCED", "Senza ganci": "WITHOUT HOOKS"}, "BEAM"],
+            "Diagonale": ["DIAGONAL", {}, "BRACING"],
+            "Distanziali": ["SPACER", {}, "ACCESSORY"],
+            "Divisori": ["DIVIDER", {}, "DIVIDER"],
+            "Ganci": ["HOOK", {}, "ACCESSORY"],
+            "Pannello di rivestimento centrale": ["CENTRAL PANEL", {}, "PANEL"],
+            "Profilo": ["PROFILE", {}, "PROFILE"],
+            "Rinforzo": ["STIFFENER", {}, "STIFFENER"],
+            "Staffa": ["PLATE", {}, "PLATE"],
+            "Ante scorrevoli": ["SLIDING DOOR", {}, "DOOR"]
         }
     },
     "2. Assembly": {
         "macro_en": "ASSEMBLY",
         "Particolari": {
-            "Assieme Mobile": ["CABINET ASSEMBLY", {"Pre-montato": "PRE-ASSEMBLED"}, "ASSEMBLY"]
+            "Assieme Mobile": ["CABINET ASSEMBLY", {"Pre-montato": "PRE-ASSEMBLED"}, "ASSEMBLY"],
+            "Assieme generale": ["GENERAL ASSEMBLY", {}, "ASSEMBLY"]
         }
     },
     "3. Weldcomp": {
         "macro_en": "WELDCOMP",
         "Particolari": {
-            "Telaio saldato": ["WELDED FRAME", {"Saldatura robot": "ROBOTIC WELDING"}, "WELDED"]
+            "Telaio saldato": ["WELDED FRAME", {"Saldatura robot": "ROBOTIC WELDING"}, "WELDED"],
+            "Componente saldato": ["WELDED COMPONENT", {}, "WELDED"]
         }
     }
 }
@@ -70,10 +84,7 @@ EXTRA_COMUNI = {"Certificato CE": "CE CERTIFIED", "Ignifugo": "FIRE RETARDANT"}
 # FUNZIONI
 # =========================================================
 def reset_all():
-    st.session_state["dim_l"] = ""
-    st.session_state["dim_p"] = ""
-    st.session_state["dim_h"] = ""
-    st.session_state["dim_s"] = ""
+    st.session_state["dim_val"] = ""
     st.session_state["extra_text"] = ""
     st.session_state["extra_tags"] = []
     st.session_state["comp_tags"] = []
@@ -81,7 +92,7 @@ def reset_all():
 # =========================================================
 # INTERFACCIA
 # =========================================================
-st.title("⚙️ Technical Generator v5.1")
+st.title("⚙️ Technical Generator & Classification")
 
 col_t, col_btn = st.columns([4, 1])
 with col_btn:
@@ -117,12 +128,8 @@ with col_workarea:
         extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
     # DIMENSIONI (PUNTO 4)
-    st.subheader("📏 4. Dimensioni (mm)")
-    c1, c2, c3, c4 = st.columns(4)
-    with c1: dim_l = st.text_input("Lunghezza", key="dim_l")
-    with c2: dim_p = st.text_input("Profondità", key="dim_p")
-    with c3: dim_h = st.text_input("Altezza", key="dim_h")
-    with c4: dim_s = st.text_input("Spessore", key="dim_s")
+    st.subheader("📏 4. Dimensioni")
+    dim_input = st.text_input("Misure (es. 1000X500):", key="dim_val").strip().upper()
 
     # COMPATIBILITÀ (PUNTO 5)
     st.subheader("🔗 5. Compatibilità")
@@ -134,9 +141,7 @@ with col_workarea:
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    dims_list = [d.strip().upper() for d in [dim_l, dim_p, dim_h, dim_s] if d.strip()]
-    dim_final = "X".join(dims_list) if dims_list else ""
-    
+    # Elaborazione Extra
     extra_final_list = [opzioni_extra_visibili[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
@@ -147,10 +152,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     
     extra_str = ", ".join(extra_final_list) if extra_final_list else "NONE"
     comp_str = ", ".join(comp_selezionate) if comp_selezionate else "UNIVERSAL"
+    dim_final = dim_input if dim_input else "N/A"
     
-    # FORMATO: MACRO - NOME DIMENSIONI, EXTRA - COMPATIBILITA
-    name_dim = f"{part_en} {dim_final}".strip()
-    res = f"{macro_en} - {name_dim}, {extra_str} - {comp_str}".upper()
+    # FORMATO: MACRO - NOME DIMENSIONI, EXTRA - COMPATIBILITÀ
+    res = f"{macro_en} - {part_en} {dim_final}, {extra_str} - {comp_str}".upper()
 
     st.success("Stringa tecnica generata!")
     st.code(res, language=None)
