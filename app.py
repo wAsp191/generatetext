@@ -65,13 +65,13 @@ DATABASE = {
                 "Superiore": "TOP", "Tra ripiani di base": "INTER-BASE SHELF", "Con scasso": "WITH RECESS"
             }, "COVER"],
                                                                                                     "Fiancata laterale": ["SIDE PANEL", {
-                "Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING"
+                "Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", "Stondata": "ROUNDED", "Trapezoidale": "SLOPING", "Sagomata": "SHAPED"
             }, "SIDE-PANEL"],
                                                                                                     "Mensola": ["BRACKET", {
                 "SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED"
             }, "BRACKET"],
                                                                                                     "Ripiano": ["SHELF", {
-                "Liscio": "PLAIN", "Forato": "PERFORATED", 
+                "Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE"
                 "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET"
             }, "SHELF"],
                                                                                                     "Cesto in filo": ["WIRE BASKET", {
@@ -105,41 +105,80 @@ DATABASE = {
             }, "DRAWER"],
                                                                                                     "Coprimontante": ["UPRIGHT-COVER", {
             }, "COVER"],
+                                                                                                    "Pedana di base": ["BASE PLATFORM", {
+                "Con rinforzi": "WITH REINFORCEMENT"
+            }, "BASE"],
+                                                                                                    "Divisorio": ["DIVIDER", {
+               "In filo": "WIRE", "Trapezoidale": "SLOPING", "Per ripiano": "FOR SHELF"
+            }, "DIVIDER"],
+                                                                                                    "Frontalino": ["RISER", {
+               "In filo": "WIRE", "Per ripiano": "FOR SHELF"
+            }, "RISER"],
         }
     },
     "WOOD COMP": {
         "macro_en": "WOOD COMPONENT",
         "Particolari": {
-            "Ripiano Legno": ["WOODEN SHELF", {}, "SHELF"],
-            "Schienale Legno": ["WOODEN BACK", {}, "PANEL"],
-            "Cielino": ["CANOPY", {}, "CANOPY"],
-            "Zoccolatura": ["WOODEN PLINTH", {"H100": "H100", "H150": "H150"}, "PLINTH"],
-            "Fiancata": ["WOODEN SIDE PANEL", {}, "SIDE PANEL"],
-            "Copripiede": ["WOODEN FOOT-COVER", {"H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT"}, "COVER"],
-            "Coprimontante": ["WOODEN UPRIGHT-COVER", {}, "COVER"],
+                                                                                                    "Ripiano Legno": ["WOODEN SHELF", {
+                                                                                                        
+            }, "SHELF"],
+                                                                                                    "Schienale Legno": ["WOODEN BACK", {
+                                                                                                    
+            }, "PANEL"],
+                                                                                                    "Cielino": ["CANOPY", {
+                                                                                                        
+            }, "CANOPY"],
+                                                                                                    "Zoccolatura": ["WOODEN PLINTH", {
+                "H100": "H100", "H150": "H150"
+            }, "PLINTH"],
+                                                                                                    "Fiancata": ["WOODEN SIDE PANEL", {
+                "Sagomata": "SHAPED"
+            }, "SIDE PANEL"],
+                                                                                                    "Copripiede": ["WOODEN FOOT-COVER", {
+                "H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT"
+            }, "COVER"],
+                                                                                                    "Coprimontante": ["WOODEN UPRIGHT-COVER", {
+                                                                                                        
+            }, "COVER"],
         }
     },
     "PLASTIC COMP": {
         "macro_en": "PLASTIC COMPONENT",
         "Particolari": {
-            "Tappo": ["PLASTIC CAP", {}, "CAP"],
-            "Guarnizione": ["GASKET", {}, "ACCESSORY"]
+                                                                                                    "Tappo": ["PLASTIC CAP", {
+                                                                                                        
+            }, "CAP"],
+                                                                                                    "Guarnizione": ["GASKET", {
+                                                                                                        
+            }, "ACCESSORY"]
         }
     },
     "GLASS COMP": {
         "macro_en": "GLASS COMPONENT",
         "Particolari": {
-            "Ripiano": ["GLASS SHELF", {}, "SHELF"]
+                                                                                                    "Ripiano": ["GLASS SHELF", {
+                                                                                                        
+            }, "SHELF"]
         }
     },
     "FASTENER": {
         "macro_en": "FASTENER",
         "Particolari": {
-            "Vite": ["SCREW", {}, "FASTENER"],
-            "Bullone": ["BOLT", {}, "FASTENER"],
-            "Rondella": ["WASHER", {}, "FASTENER"],
-            "Dado": ["NUT", {}, "FASTENER"],
-            "Inserti filettati": ["RIVET", {}, "FASTENER"],
+                                                                                                    "Vite": ["SCREW", {
+                                                                                                        
+            }, "FASTENER"],
+                                                                                                    "Bullone": ["BOLT", {
+                                                                                                        
+            }, "FASTENER"],
+                                                                                                    "Rondella": ["WASHER", {
+                                                                                                        
+            }, "FASTENER"],
+                                                                                                    "Dado": ["NUT", {
+                                                                                                        
+            }, "FASTENER"],
+                                                                                                    "Inserti filettati": ["RIVET", {
+                                                                                                        
+            }, "FASTENER"],
         }
     },
     "ASSEMBLY": {
