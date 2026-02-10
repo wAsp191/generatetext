@@ -121,13 +121,13 @@ DATABASE = {
         "macro_en": "WOOD COMPONENT",
         "Particolari": {
                                                                                                     "Ripiano Legno": ["WOODEN SHELF", {
-                                                                                                        
+                                                                                                    
             }, "SHELF"],
                                                                                                     "Schienale Legno": ["WOODEN BACK", {
                                                                                                     
             }, "PANEL"],
                                                                                                     "Cielino": ["CANOPY", {
-                                                                                                        
+                                                                                                    
             }, "CANOPY"],
                                                                                                     "Zoccolatura": ["WOODEN PLINTH", {
                 "H100": "H100", "H150": "H150"
@@ -139,7 +139,7 @@ DATABASE = {
                 "H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT"
             }, "COVER"],
                                                                                                     "Coprimontante": ["WOODEN UPRIGHT-COVER", {
-               "Minirack": "MINIRACK"                                                                                           
+               "Minirack": "MINIRACK"                                                           
             }, "COVER"],
         }
     },
@@ -147,11 +147,11 @@ DATABASE = {
         "macro_en": "PLASTIC COMPONENT",
         "Particolari": {
                                                                                                     "Tappo": ["PLASTIC CAP", {
-                                                                                                        
-            }, "CAP"]
+                                                                                                             
+            }, "CAP"],
                                                                                                     "Guarnizione": ["GASKET", {
-                                                                                                        
-            }, "ACCESSORY"]
+                                                                                                             
+            }, "ACCESSORY"],
                                                                                                     "Divisorio": ["DIVIDER", {
                "Trapezoidale": "SLOPING", "Per ripiano": "FOR SHELF"
             }, "DIVIDER"],
@@ -164,7 +164,7 @@ DATABASE = {
         "macro_en": "GLASS COMPONENT",
         "Particolari": {
                                                                                                     "Ripiano": ["GLASS SHELF", {
-                                                                                                        
+                                                                                                             
             }, "SHELF"]
         }
     },
@@ -172,19 +172,19 @@ DATABASE = {
         "macro_en": "FASTENER",
         "Particolari": {
                                                                                                     "Vite": ["SCREW", {
-                                                                                                        
+                                                                                                             
             }, "FASTENER"],
                                                                                                     "Bullone": ["BOLT", {
-                                                                                                        
+                                                                                                             
             }, "FASTENER"],
                                                                                                     "Rondella": ["WASHER", {
-                                                                                                        
+                                                                                                             
             }, "FASTENER"],
                                                                                                     "Dado": ["NUT", {
-                                                                                                        
+                                                                                                             
             }, "FASTENER"],
                                                                                                     "Inserti filettati": ["RIVET", {
-                                                                                                        
+                                                                                                             
             }, "FASTENER"],
         }
     },
