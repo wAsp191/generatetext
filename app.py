@@ -25,10 +25,18 @@ MATERIALI_CONFIG = {
         "GOMMA": "RUBBER"
     },
     "GLASS COMP": {
-        "VETRO TEMPRATO": "TEMPERED GLASS"
+        "VETRO TEMPRATO": "TEMPERED GLASS",
+        "VETRO SATINATO": "SATIN GLASS"
     },
-    "FASTENER": {}, 
-    "ASSEMBLY": {}
+    "FASTENER": {
+        "ZINCATO": "GALVANIZED",
+        "BRUNITO": "BURNISHED",
+        "NERO": "BLACK"
+    }, 
+    "ASSEMBLY": {
+        "MONTATO": "ASSEMBLED",
+        "NON MONTATO: "NOT-ASSEMBLED"
+    }
 }
 
 # =========================================================
