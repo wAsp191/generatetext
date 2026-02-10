@@ -128,7 +128,7 @@ DATABASE = {
                                                                                                     
             }, "PANEL"],
                                                                                                     "Cielino": ["CANOPY", {
-                                                                                                    
+             "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING"                                                                                       
             }, "CANOPY"],
                                                                                                     "Zoccolatura": ["WOODEN PLINTH", {
                 "H100": "H100", "H150": "H150"
@@ -160,7 +160,7 @@ DATABASE = {
                "Per ripiano": "FOR SHELF"
             }, "RISER"],
                                                                                                     "Portaprezzo": ["TICKET-HOLDER", {
-            
+           "Trasparente": "TRASPARENT", "Colorato": "COLOURED", "Con tasca oscillante": "WITH LIFT-UP POCKET", "Adesivo": "ADHESIVE", "Con asola centrale": "WITH CENTRAL SLOT" 
             }, "TICKET-HOLDER"],
         }
     },
