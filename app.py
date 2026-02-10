@@ -276,9 +276,13 @@ with col_workarea:
     comp_selezionate = st.multiselect("Modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
 
 # =========================================================
-# GENERAZIONE STRINGA FINALE
+# GENERAZIONE, MODIFICA E COPIA
 # =========================================================
 st.divider()
+
+# Inizializza lo stato della stringa se non esiste
+if 'stringa_editabile' not in st.session_state:
+    st.session_state['stringa_editabile'] = ""
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     dim_final_parts = []
@@ -322,28 +326,40 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     
     prefix_str = " ".join(prefissi) if prefissi else ""
     extra_str = ", ".join(suffissi) if suffissi else ""
-
     comp_list = [c for c in comp_selezionate if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
-    # Composizione finale
     descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
-    
     final_segments = [descrizione_centrale]
     if extra_str: final_segments.append(extra_str)
     if comp_str: final_segments.append(comp_str)
         
-    res = " - ".join(final_segments).upper()
+    st.session_state['stringa_editabile'] = " - ".join(final_segments).upper()
 
-    # --- CONTROLLO LUNGHEZZA CARATTERI ---
-    if len(res) >= 99:
-        st.error(f"⚠️ ATTENZIONE! SUPERATO IL NUMERO DI CARATTERI DISPONIBILI (Totale: {len(res)})")
+# Visualizzazione Risultato
+if st.session_state['stringa_editabile']:
+    st.markdown("### 📝 1. Modifica la stringa (se necessario)")
+    # Campo per editare manualmente
+    stringa_modificata = st.text_input("Editing manuale:", value=st.session_state['stringa_editabile'])
     
-    st.success("Stringa tecnica generata!")
-    st.code(res, language=None)
+    # Sincronizza lo stato con la modifica manuale
+    st.session_state['stringa_editabile'] = stringa_modificata
 
-    st.markdown("### 💡 Suggerimenti per la classificazione")
-    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list]
+    st.markdown("### 📋 2. Copia il risultato finale")
+    # Visualizza la stringa finale in un blocco codice per avere il tasto "Copia"
+    st.code(st.session_state['stringa_editabile'], language=None)
+
+    # Controllo lunghezza
+    lunghezza = len(st.session_state['stringa_editabile'])
+    if lunghezza >= 99:
+        st.error(f"⚠️ ATTENZIONE! SUPERATO IL LIMITE DI 99 CARATTERI (Totale: {lunghezza})")
+    else:
+        st.success(f"Stringa corretta (Caratteri: {lunghezza})")
+
+    # Suggerimenti Tag
+    st.markdown("### 💡 Tag suggeriti")
+    comp_list = [c.upper() for c in comp_selezionate if c.strip()]
+    all_tags = [tag_suggerimento.upper()] + comp_list
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
 
 st.markdown("<style>.stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }</style>", unsafe_allow_html=True)
