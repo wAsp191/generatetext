@@ -170,10 +170,10 @@ DATABASE = {
         "macro_en": "GLASS COMPONENT",
         "Particolari": {
                                                                                                     "Ripiano": ["GLASS SHELF", {
-                                                                                                             
-            }, "SHELF"]
+                                                                                                        
+            }, "SHELF"],
                                                                                                     "Anta": ["GLASS DOOR", {
-         "SX": "LEFT", "DX": "RIGHT", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"                                                                                                    
+               "SX": "LEFT", "DX": "RIGHT", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"
             }, "DOOR"]
         }
     },
