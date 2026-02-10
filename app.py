@@ -79,7 +79,7 @@ DATABASE = {
                 "Per attacco montante": "FOR UPRIGHT", "Per attacco fiancata": "FOR SIDE-PANEL", "Impilabile": "STACKABLE"                                                                                       
             }, "BASKET"],
                                                                                                     "Cielino": ["CANOPY", {
-              "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Central": "CENTRAL", "Frontale in lamiera": "SHEET METAL FASCIA", "Con illuminazione": "WITH LIGHTING"
+              "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Frontale in lamiera": "SHEET METAL FASCIA", "Con illuminazione": "WITH LIGHTING"
             }, "CANOPY"],
                                                                                                     "Corrente": ["BEAM", {
             }, "BEAM"],
@@ -87,8 +87,6 @@ DATABASE = {
             }, "DIAGONAL"],
                                                                                                     "Distanziali": ["SPACER", {
             }, "SPACER"],
-                                                                                                    "Divisori": ["DIVIDER", {
-            }, "DIVIDER"],
                                                                                                     "Ganci": ["HOOK", {
              "Singolo": "SINGLE", "Predisposto per portaprezzo": "ACCEPTS TICKET-HOLDER", "Doppio": "DOUBLE", "Rovescio": "REVERSE", "Attacco barra": "HOOK FOR BAR", "Attacco multilame": "HOOK FOR MULTISTRIP", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"
             }, "HOOK"],
