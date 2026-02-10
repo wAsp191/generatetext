@@ -72,7 +72,7 @@ DATABASE = {
                 "Minirack": "MINIRACK"
             }, "BRACKET"],
                                                                                                     "Ripiano": ["SHELF", {
-                "Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE", "Semicircolare": "SEMICIRCULAR"
+                "Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE", "Semicircolare": "SEMICIRCULAR",
                 "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET"
             }, "SHELF"],
                                                                                                     "Cesto in filo": ["WIRE BASKET", {
