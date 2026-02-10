@@ -98,7 +98,9 @@ DATABASE = {
             "Profilo": ["PROFILE", {}, "PROFILE"],
             "Rinforzo": ["STIFFENER", {}, "STIFFENER"],
             "Staffa": ["PLATE", {}, "PLATE"],
-            "Ante scorrevoli": ["SLIDING DOOR", {}, "DOOR"],
+            "Ante": ["SHEET METAL DOOR", {
+                "Scorrevoli": "SLIDING", "Con foro serratura": "WITH LOCK HOLE"
+            }, "DOOR"],
             "Piastra di fissaggio": ["FIXING PLATE", {"Con viti": "COMPLETE WITH SCREW"}, "PLATE"],
             "Cassetto estraibile": ["PULL-OUT DRAWER", {
                 "Su ruote": "ON WHEELS", "Per piede H100": "FOR BASE FOOT H100", 
