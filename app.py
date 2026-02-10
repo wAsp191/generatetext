@@ -72,12 +72,14 @@ DATABASE = {
                 "Minirack": "MINIRACK"
             }, "BRACKET"],
                                                                                                     "Ripiano": ["SHELF", {
-                "Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE",
+                "Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE", "Semicircolare": "SEMICIRCULAR"
                 "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET"
             }, "SHELF"],
                                                                                                     "Cesto in filo": ["WIRE BASKET", {
+                "Per attacco montante": "FOR UPRIGHT", "Per attacco fiancata": "FOR SIDE-PANEL", "Impilabile": "STACKABLE"                                                                                       
             }, "BASKET"],
                                                                                                     "Cielino": ["CANOPY", {
+              "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Central": "CENTRAL", "Frontale in lamiera": "SHEET METAL FASCIA", "Con illuminazione": "WITH LIGHTING"
             }, "CANOPY"],
                                                                                                     "Corrente": ["BEAM", {
             }, "BEAM"],
@@ -88,6 +90,7 @@ DATABASE = {
                                                                                                     "Divisori": ["DIVIDER", {
             }, "DIVIDER"],
                                                                                                     "Ganci": ["HOOK", {
+             "Singolo": "SINGLE", "Predisposto per portaprezzo": "ACCEPTS TICKET-HOLDER", "Doppio": "DOUBLE", "Rovescio": "REVERSE", "Attacco barra": "HOOK FOR BAR", "Attacco multilame": "HOOK FOR MULTISTRIP", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"
             }, "HOOK"],
                                                                                                     "Profilo": ["PROFILE", {
             }, "PROFILE"],
@@ -158,6 +161,9 @@ DATABASE = {
                                                                                                     "Frontalino": ["RISER", {
                "Per ripiano": "FOR SHELF"
             }, "RISER"],
+                                                                                                    "Portaprezzo": ["TICKET-HOLDER", {
+            
+            }, "TICKET-HOLDER"],
         }
     },
     "GLASS COMP": {
@@ -166,6 +172,9 @@ DATABASE = {
                                                                                                     "Ripiano": ["GLASS SHELF", {
                                                                                                              
             }, "SHELF"]
+                                                                                                    "Anta": ["GLASS DOOR", {
+         "SX": "LEFT", "DX": "RIGHT", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"                                                                                                    
+            }, "DOOR"]
         }
     },
     "FASTENER": {
@@ -202,7 +211,7 @@ OPZIONI_SPESSORE = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/1
 OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
 
 # ELENCO TERMINI DA ANTICIPARE (PREFISSI)
-TERMINI_ANTICIPATI = ["CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH"]
+TERMINI_ANTICIPATI = ["CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED"]
 
 # =========================================================
 # FUNZIONI
