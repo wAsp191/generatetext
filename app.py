@@ -61,7 +61,8 @@ DATABASE = {
             "Copripiede": ["FOOT COVER", {
                 "H90": "FOR H90 FOOT", "H100": "FOR H100 FOOT", "H150": "FOR H150 FOOT"
             }, "COVER"],
-            "Chiusura": ["COVER", {"Superiore": "TOP", "Tra ripiani di base": "INTER-BASE SHELF", "Con scasso": "WITH RECESS"}, "COVER"],
+            "Chiusura": ["COVER", {"Superiore": "TOP", "Tra ripiani di base": "INTER-BASE SHELF", "Con scasso": "WITH RECESS"
+            }, "COVER"],
             "Fiancata laterale": ["SIDE PANEL", {
                 "Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING"
             }, "SIDE-PANEL"],
@@ -72,24 +73,37 @@ DATABASE = {
                 "Liscio": "PLAIN", "Forato": "PERFORATED", 
                 "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET"
             }, "SHELF"],
-            "Cesto in filo": ["WIRE BASKET", {}, "BASKET"],
-            "Cielino": ["CANOPY", {}, "CANOPY"],
-            "Corrente": ["BEAM", {}, "BEAM"],
-            "Diagonale": ["DIAGONAL", {}, "DIAGONAL"],
-            "Distanziali": ["SPACER", {}, "SPACER"],
-            "Divisori": ["DIVIDER", {}, "DIVIDER"],
-            "Ganci": ["HOOK", {}, "HOOK"],
-            "Profilo": ["PROFILE", {}, "PROFILE"],
-            "Rinforzo": ["STIFFENER", {}, "STIFFENER"],
-            "Staffa": ["PLATE", {}, "PLATE"],
-            "Ante scorrevoli": ["SLIDING DOOR", {}, "DOOR"],
-            "Piastra di fissaggio": ["FIXING PLATE", {"Con viti": "COMPLETE WITH SCREW"}, "PLATE"],
+            "Cesto in filo": ["WIRE BASKET", {
+            }, "BASKET"],
+            "Cielino": ["CANOPY", {
+            }, "CANOPY"],
+            "Corrente": ["BEAM", {
+            }, "BEAM"],
+            "Diagonale": ["DIAGONAL", {
+            }, "DIAGONAL"],
+            "Distanziali": ["SPACER", {
+            }, "SPACER"],
+            "Divisori": ["DIVIDER", {
+            }, "DIVIDER"],
+            "Ganci": ["HOOK", {
+            }, "HOOK"],
+            "Profilo": ["PROFILE", {
+            }, "PROFILE"],
+            "Rinforzo": ["STIFFENER", {
+            }, "STIFFENER"],
+            "Staffa": ["PLATE", {
+            }, "PLATE"],
+            "Ante scorrevoli": ["SLIDING DOOR", {
+            }, "DOOR"],
+            "Piastra di fissaggio": ["FIXING PLATE", {"Con viti": "COMPLETE WITH SCREW"
+            }, "PLATE"],
             "Cassetto estraibile": ["PULL-OUT DRAWER", {
                 "Su ruote": "ON WHEELS", "Per piede H100": "FOR BASE FOOT H100", 
                 "Per piede H150": "FOR BASE FOOT H150", "Con serratura": "WITH LOCK", 
                 "Senza serratura": "WITHOUT LOCK"
             }, "DRAWER"],
-            "Coprimontante": ["UPRIGHT-COVER", {}, "COVER"],
+            "Coprimontante": ["UPRIGHT-COVER", {
+            }, "COVER"],
         }
     },
     "WOOD COMP": {
