@@ -137,6 +137,10 @@ OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVER
 OPZIONI_SPESSORE = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
 OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
 
+# ELENCO TERMINI DA ANTICIPARE (PREFISSI)
+# Se una voce extra è in questa lista, verrà messa PRIMA del nome del particolare
+TERMINI_ANTICIPATI = ["CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER"]
+
 # =========================================================
 # FUNZIONI
 # =========================================================
@@ -241,29 +245,39 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         else:
             dim_final = ""
 
-    # Elaborazione Extra
-    extra_final_list = [extra_dedicati_dict[ex] for ex in extra_selezionati]
+    # --- INIZIO MODIFICA PREFISSI/SUFFISSI ---
+    
+    # 1. Raccogliamo tutti gli extra tradotti in una lista
+    extra_totali = [extra_dedicati_dict[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
             extra_tradotto = GoogleTranslator(source='it', target='en').translate(extra_libero).upper()
-            extra_final_list.append(extra_tradotto)
+            extra_totali.append(extra_tradotto)
         except:
-            extra_final_list.append(extra_libero.upper())
+            extra_totali.append(extra_libero.upper())
+
+    # 2. Separiamo quelli che devono stare DAVANTI (Prefissi) da quelli che stanno DIETRO (Suffissi)
+    prefissi = [ex for ex in extra_totali if ex in TERMINI_ANTICIPATI]
+    suffissi = [ex for ex in extra_totali if ex not in TERMINI_ANTICIPATI]
     
-    extra_str = ", ".join(extra_final_list) if extra_final_list else ""
+    prefix_str = " ".join(prefissi) if prefissi else ""
+    extra_str = ", ".join(suffissi) if suffissi else "" # Questi sono i suffissi (Extra veri e propri)
 
     # Compatibilità
     comp_list = [c for c in comp_selezionate if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
-    # Composizione finale: OMETTIAMO LA MACRO DALLA STRINGA
-    descrizione_centrale = f"{mat_en} {part_en} {dim_final}".strip().replace("  ", " ")
+    # Composizione finale: MAT_EN + PREFISSI + PART_EN + DIMENSIONI
+    # Il replace serve a togliere doppi spazi se qualche campo è vuoto
+    descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ").replace("  ", " ")
     
-    final_segments = [descrizione_centrale] # Macro rimossa da qui
+    final_segments = [descrizione_centrale]
     if extra_str: final_segments.append(extra_str)
     if comp_str: final_segments.append(comp_str)
         
     res = " - ".join(final_segments).upper()
+    
+    # --- FINE MODIFICA ---
 
     st.success("Stringa tecnica generata!")
     st.code(res, language=None)
