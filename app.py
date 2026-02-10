@@ -84,8 +84,7 @@ DATABASE = {
             "Staffa": ["PLATE", {}, "PLATE"],
             "Ante scorrevoli": ["SLIDING DOOR", {}, "DOOR"],
             "Piastra di fissaggio": ["FIXING PLATE", {"Con viti": "COMPLETE WITH SCREW"}, "PLATE"],
-            "Cassetto estraibile": ["PULL-OUT DRAWER", {
-                "Su ruote": "ON WHEELS", "Per piede H100": "FOR BASE FOOT H100", 
+            "Cassetto estraibile": ["PULL-OUT DRAWER", {"Su ruote": "ON WHEELS", "Per piede H100": "FOR BASE FOOT H100", 
                 "Per piede H150": "FOR BASE FOOT H150", "Con serratura": "WITH LOCK", 
                 "Senza serratura": "WITHOUT LOCK"}, "DRAWER"]
             "Coprimontante": ["UPRIGHT-COVER", {}, "COVER"],
