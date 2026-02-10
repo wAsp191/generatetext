@@ -55,7 +55,7 @@ DATABASE = {
                 "Completa di paracolpo ABS": "WITH ABS BUFFER"
             }, "PLINTH"],
                                                                                                     "Pannello rivestimento": ["BACK PANEL", {
-                "Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Multibarra": "MULTIBAR", "Multilame": "MULTISTRIP",
+                "Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Multibarra": "MULTIBAR", "Multilame": "MULTISTRIP", "In rete": "MESH",
                 "Forato rombo": "RUMBLE PERFORATED", "Nervato": "RIBBED"
             }, "PANEL"],
                                                                                                     "Copripiede": ["FOOT COVER", {
@@ -68,7 +68,8 @@ DATABASE = {
                 "Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", "Stondata": "ROUNDED", "Trapezoidale": "SLOPING", "Sagomata": "SHAPED"
             }, "SIDE-PANEL"],
                                                                                                     "Mensola": ["BRACKET", {
-                "SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED"
+                "SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "Per ripiano in vetro": "FOR GLASS SHELF", "Per ripiano in legno": "FOR WOODEN SHELF", "A pinza": "GRIPPED",
+                "Minirack": "MINIRACK"
             }, "BRACKET"],
                                                                                                     "Ripiano": ["SHELF", {
                 "Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE",
@@ -112,7 +113,7 @@ DATABASE = {
                "In filo": "WIRE", "Trapezoidale": "SLOPING", "Per ripiano": "FOR SHELF"
             }, "DIVIDER"],
                                                                                                     "Frontalino": ["RISER", {
-               "In filo": "WIRE", "Per ripiano": "FOR SHELF"
+               "In filo": "WIRE", "Per ripiano": "FOR SHELF", "Cromato": "CHROMED", "Verniciato": "PAINTED"
             }, "RISER"],
         }
     },
@@ -138,7 +139,7 @@ DATABASE = {
                 "H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT"
             }, "COVER"],
                                                                                                     "Coprimontante": ["WOODEN UPRIGHT-COVER", {
-                                                                                                        
+               "Minirack": "MINIRACK"                                                                                           
             }, "COVER"],
         }
     },
@@ -151,6 +152,12 @@ DATABASE = {
                                                                                                     "Guarnizione": ["GASKET", {
                                                                                                         
             }, "ACCESSORY"]
+                                                                                                    "Divisorio": ["DIVIDER", {
+               "Trapezoidale": "SLOPING", "Per ripiano": "FOR SHELF"
+            }, "DIVIDER"],
+                                                                                                    "Frontalino": ["RISER", {
+               "Per ripiano": "FOR SHELF"
+            }, "RISER"],
         }
     },
     "GLASS COMP": {
