@@ -38,17 +38,40 @@ DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
         "Particolari": {
-            "Montante": ["UPRIGHT", {"70x30": "70X30", "90x30": "90X30", "Monoasolato": "WITH SLOTS ON ONE SIDE", "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", "Estensione": "EXTENSION", "Minirack": "MINIRACK",
-            "L120": "L120", "L100": "L100", "Z/S Basso carico": "Z/S", "Z/M Alto carico": "Z/M"                        
-                                    }, "UPRIGHT"],
-            "Piede di base": ["BASE FOOT", {"H90": "H90", "H100": "H100", "H150": "H150", "Con piedino regolabile": "WITH ADJUSTABLE FOOT", "Estensione": "EXTENSION"}, "FOOT"],
-            "Zoccolatura": ["PLINTH", {"H90": "FOR H90 BASE FOOT", "H100": "FOR BASE FOOT H100", "H150": "FOR BASE FOOT H150", "Liscia": "PLAIN", "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED"}, "PLINTH"],
-            "Pannello rivestimento": ["BACK PANEL", {"Scan.": "NOTCHED", "Forato euro": "EURO PERFORATED", "Forato rombo": "RUMBLE PERFORATED"}, "PANEL"],
-            "Copripiede": ["FOOT COVER", {"H90": "FOR H90 FOOT", "H100": "FOR H100 FOOT", "H150": "FOR H150 FOOT"}, "COVER"],
+            "Montante": ["UPRIGHT", {
+                "70x30": "70X30", "90x30": "90X30", "Monoasolato": "WITH SLOTS ON ONE SIDE", 
+                "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", 
+                "Estensione": "-EXTENSION", "Minirack": "MINIRACK",
+                "L120": "L120", "L100": "L100", "Z/S Basso carico": "Z/S", "Z/M Alto carico": "Z/M"
+            }, "UPRIGHT"],
+            "Piede di base": ["BASE FOOT", {
+                "H90": "H90", "H100": "H100", "H150": "H150", 
+                "Con piedino regolabile": "WITH ADJUSTABLE FOOT", "Estensione": "-EXTENSION"
+            }, "FOOT"],
+            "Zoccolatura": ["PLINTH", {
+                "H90": "FOR H90 BASE FOOT", "H100": "FOR BASE FOOT H100", "H150": "FOR BASE FOOT H150", 
+                "Liscia": "PLAIN", "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", 
+                "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED", 
+                "Completa di paracolpo ABS": "WITH ABS BUFFER"
+            }, "PLINTH"],
+            "Pannello rivestimento": ["BACK PANEL", {
+                "Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", 
+                "Forato rombo": "RUMBLE PERFORATED", "Nervato": "RIBBED"
+            }, "PANEL"],
+            "Copripiede": ["FOOT COVER", {
+                "H90": "FOR H90 FOOT", "H100": "FOR H100 FOOT", "H150": "FOR H150 FOOT"
+            }, "COVER"],
             "Chiusura": ["TOP COVER", {"Con scasso": "WITH RECESS"}, "COVER"],
-            "Fiancata laterale": ["SIDE PANEL", {"Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING"}, "SIDE-PANEL"],
-            "Mensola": ["BRACKET", {"SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED"}, "BRACKET"],
-            "Ripiano": ["SHELF", {"Liscio": "PLAIN", "Forato": "PERFORATED", "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET"}, "SHELF"],
+            "Fiancata laterale": ["SIDE PANEL", {
+                "Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING"
+            }, "SIDE-PANEL"],
+            "Mensola": ["BRACKET", {
+                "SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED"
+            }, "BRACKET"],
+            "Ripiano": ["SHELF", {
+                "Liscio": "PLAIN", "Forato": "PERFORATED", 
+                "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET"
+            }, "SHELF"],
             "Cesto in filo": ["WIRE BASKET", {}, "BASKET"],
             "Cielino": ["CANOPY", {}, "CANOPY"],
             "Corrente": ["BEAM", {}, "BEAM"],
@@ -59,7 +82,13 @@ DATABASE = {
             "Profilo": ["PROFILE", {}, "PROFILE"],
             "Rinforzo": ["STIFFENER", {}, "STIFFENER"],
             "Staffa": ["PLATE", {}, "PLATE"],
-            "Ante scorrevoli": ["SLIDING DOOR", {}, "DOOR"]
+            "Ante scorrevoli": ["SLIDING DOOR", {}, "DOOR"],
+            "Piastra di fissaggio": ["FIXING PLATE", {"Con viti": "COMPLETE WITH SCREW"}, "PLATE"],
+            "Cassetto estraibile": ["PULL-OUT DRAWER", {
+                "Su ruote": "ON WHEELS", "Per piede H100": "FOR BASE FOOT H100", 
+                "Per piede H150": "FOR BASE FOOT H150", "Con serratura": "WITH LOCK", 
+                "Senza serratura": "WITHOUT LOCK"
+            }, "DRAWER"]
         }
     },
     "WOOD COMP": {
@@ -67,7 +96,8 @@ DATABASE = {
         "Particolari": {
             "Ripiano Legno": ["WOODEN SHELF", {}, "SHELF"],
             "Schienale Legno": ["WOODEN BACK", {}, "PANEL"],
-            "Cielino": ["CANOPY", {}, "CANOPY"]
+            "Cielino": ["CANOPY", {}, "CANOPY"],
+            "Zoccolatura": ["WOODEN PLINTH", {"H100": "H100", "H150": "H150"}, "PLINTH"]
         }
     },
     "PLASTIC COMP": {
