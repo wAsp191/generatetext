@@ -148,7 +148,7 @@ DATABASE = {
         "Particolari": {
                                                                                                     "Tappo": ["PLASTIC CAP", {
                                                                                                         
-            }, "CAP"],
+            }, "CAP"]
                                                                                                     "Guarnizione": ["GASKET", {
                                                                                                         
             }, "ACCESSORY"]
