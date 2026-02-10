@@ -35,7 +35,7 @@ MATERIALI_CONFIG = {
     }, 
     "ASSEMBLY": {
         "MONTATO": "ASSEMBLED",
-        "NON MONTATO: "NOT-ASSEMBLED"
+        "NON MONTATO": "NOT-ASSEMBLED"
     }
 }
 
