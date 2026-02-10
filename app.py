@@ -204,22 +204,20 @@ DATABASE = {
             }, "FASTENER", "RIVET"],
         }
     },
-    "ASSEMBLY": {
+   "ASSEMBLY": {
         "macro_en": "ASSEMBLY",
         "Particolari": {
-                                                                                                    "Vetrina": ["SHOWCASE", {
-            "Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING"
+            "Vetrina": ["SHOWCASE", {
+                "Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING"
             }, "SHOWCASE"],
-                                                                                                    "Espositore": ["DISPLAY", {
-            "Mobile": "MOBILE"                                                                                            
-            }, "DISPLAY"]
-                                                                                                    "Totem": ["TOTEM", {
-            "Mobile": "MOBILE"                                                                                            
+            "Espositore": ["DISPLAY", {
+                "Mobile": "MOBILE"                                                                                                          
+            }, "DISPLAY"],
+            "Totem": ["TOTEM", {
+                "Mobile": "MOBILE"                                                                                                          
             }, "DISPLAY"]
         }
     }
-}
-
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 OPZIONI_SPESSORE = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
 OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
