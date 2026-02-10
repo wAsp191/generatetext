@@ -55,13 +55,13 @@ DATABASE = {
                 "Completa di paracolpo ABS": "WITH ABS BUFFER"
             }, "PLINTH"],
             "Pannello rivestimento": ["BACK PANEL", {
-                "Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", 
+                "Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Multibarra": "MULTIBAR", "Multilame": "MULTISTRIP",
                 "Forato rombo": "RUMBLE PERFORATED", "Nervato": "RIBBED"
             }, "PANEL"],
             "Copripiede": ["FOOT COVER", {
                 "H90": "FOR H90 FOOT", "H100": "FOR H100 FOOT", "H150": "FOR H150 FOOT"
             }, "COVER"],
-            "Chiusura": ["TOP COVER", {"Con scasso": "WITH RECESS"}, "COVER"],
+            "Chiusura": ["COVER", {"Superiore": "TOP", "Tra ripiani di base": "INTER-BASE SHELF", "Con scasso": "WITH RECESS"}, "COVER"],
             "Fiancata laterale": ["SIDE PANEL", {
                 "Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING"
             }, "SIDE-PANEL"],
@@ -87,8 +87,8 @@ DATABASE = {
             "Cassetto estraibile": ["PULL-OUT DRAWER", {
                 "Su ruote": "ON WHEELS", "Per piede H100": "FOR BASE FOOT H100", 
                 "Per piede H150": "FOR BASE FOOT H150", "Con serratura": "WITH LOCK", 
-                "Senza serratura": "WITHOUT LOCK"
-            }, "DRAWER"]
+                "Senza serratura": "WITHOUT LOCK"}, "DRAWER"]
+            "Coprimontante": ["UPRIGHT-COVER", {}, "COVER"],
         }
     },
     "WOOD COMP": {
@@ -98,6 +98,9 @@ DATABASE = {
             "Schienale Legno": ["WOODEN BACK", {}, "PANEL"],
             "Cielino": ["CANOPY", {}, "CANOPY"],
             "Zoccolatura": ["WOODEN PLINTH", {"H100": "H100", "H150": "H150"}, "PLINTH"]
+            "Fiancata": ["WOODEN SIDE PANEL", {}, "SIDE PANEL"]
+            "Copripiede": ["WOODEN FOOT-COVER", {"H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT"}, "COVER"]
+            "Coprimontante": ["WOODEN UPRIGHT-COVER", {}, "COVER"],
         }
     },
     "PLASTIC COMP": {
@@ -121,7 +124,6 @@ DATABASE = {
             "Rondella": ["WASHER", {}, "FASTENER"],
             "Dado": ["NUT", {}, "FASTENER"],
             "Inserti filettati": ["RIVET", {}, "FASTENER"],
-            "Tasselli": ["ANCHOR", {}, "FASTENER"]
         }
     },
     "ASSEMBLY": {
@@ -139,7 +141,7 @@ OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
 
 # ELENCO TERMINI DA ANTICIPARE (PREFISSI)
 # Se una voce extra è in questa lista, verrà messa PRIMA del nome del particolare
-TERMINI_ANTICIPATI = ["CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER"]
+TERMINI_ANTICIPATI = ["CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF"]
 
 # =========================================================
 # FUNZIONI
