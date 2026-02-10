@@ -84,9 +84,11 @@ DATABASE = {
             "Staffa": ["PLATE", {}, "PLATE"],
             "Ante scorrevoli": ["SLIDING DOOR", {}, "DOOR"],
             "Piastra di fissaggio": ["FIXING PLATE", {"Con viti": "COMPLETE WITH SCREW"}, "PLATE"],
-            "Cassetto estraibile": ["PULL-OUT DRAWER", {"Su ruote": "ON WHEELS", "Per piede H100": "FOR BASE FOOT H100", 
+            "Cassetto estraibile": ["PULL-OUT DRAWER", {
+                "Su ruote": "ON WHEELS", "Per piede H100": "FOR BASE FOOT H100", 
                 "Per piede H150": "FOR BASE FOOT H150", "Con serratura": "WITH LOCK", 
-                "Senza serratura": "WITHOUT LOCK"}, "DRAWER"]
+                "Senza serratura": "WITHOUT LOCK"
+            }, "DRAWER"],
             "Coprimontante": ["UPRIGHT-COVER", {}, "COVER"],
         }
     },
@@ -96,9 +98,9 @@ DATABASE = {
             "Ripiano Legno": ["WOODEN SHELF", {}, "SHELF"],
             "Schienale Legno": ["WOODEN BACK", {}, "PANEL"],
             "Cielino": ["CANOPY", {}, "CANOPY"],
-            "Zoccolatura": ["WOODEN PLINTH", {"H100": "H100", "H150": "H150"}, "PLINTH"]
-            "Fiancata": ["WOODEN SIDE PANEL", {}, "SIDE PANEL"]
-            "Copripiede": ["WOODEN FOOT-COVER", {"H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT"}, "COVER"]
+            "Zoccolatura": ["WOODEN PLINTH", {"H100": "H100", "H150": "H150"}, "PLINTH"],
+            "Fiancata": ["WOODEN SIDE PANEL", {}, "SIDE PANEL"],
+            "Copripiede": ["WOODEN FOOT-COVER", {"H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT"}, "COVER"],
             "Coprimontante": ["WOODEN UPRIGHT-COVER", {}, "COVER"],
         }
     },
@@ -139,7 +141,6 @@ OPZIONI_SPESSORE = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/1
 OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
 
 # ELENCO TERMINI DA ANTICIPARE (PREFISSI)
-# Se una voce extra è in questa lista, verrà messa PRIMA del nome del particolare
 TERMINI_ANTICIPATI = ["CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF"]
 
 # =========================================================
@@ -163,7 +164,6 @@ col_macro, col_workarea = st.columns([1, 3], gap="large")
 
 with col_macro:
     st.subheader("📂 1. Macro Categoria")
-    # La Macro viene selezionata qui per filtrare, ma non sarà stampata
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
 
 with col_workarea:
@@ -184,7 +184,6 @@ with col_workarea:
     st.subheader(f"✨ 3. Extra per {scelta_part_it}")
     col_ex1, col_ex2 = st.columns([2, 1])
     with col_ex1:
-        # Ora mostra SOLO gli extra specifici del database
         extra_selezionati = st.multiselect("Opzioni:", options=list(extra_dedicati_dict.keys()), key="extra_tags")
     with col_ex2:
         extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
@@ -213,30 +212,24 @@ with col_workarea:
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # Logica Dimensioni con prefissi (L, P, H, D, S)
     dim_final_parts = []
     
     if macro_it == "FASTENER":
         d_val = dim_dia.strip().upper()
         l_val = dim_l.strip().upper()
-        
         if d_val:
-            # Se ha M (es. M8) non mette D, altrimenti mette D
             prefix_d = "" if d_val.startswith('M') else "D"
             dim_final_parts.append(f"{prefix_d}{d_val}")
         if l_val:
             dim_final_parts.append(f"L{l_val}")
-            
         dim_final = "X".join(dim_final_parts)
         if normativa: dim_final += f" {normativa}"
     else:
         if dim_l.strip(): dim_final_parts.append(f"L{dim_l.strip().upper()}")
         if dim_p.strip(): dim_final_parts.append(f"P{dim_p.strip().upper()}")
         if dim_h.strip(): dim_final_parts.append(f"H{dim_h.strip().upper()}")
-        
         lph_str = "X".join(dim_final_parts)
         s_val = dim_s.strip()
-        
         if lph_str and s_val:
             dim_final = f"{lph_str} S{s_val}"
         elif lph_str:
@@ -246,9 +239,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         else:
             dim_final = ""
 
-    # --- INIZIO MODIFICA PREFISSI/SUFFISSI ---
-    
-    # 1. Raccogliamo tutti gli extra tradotti in una lista
+    # Elaborazione Extra
     extra_totali = [extra_dedicati_dict[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
@@ -257,28 +248,23 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         except:
             extra_totali.append(extra_libero.upper())
 
-    # 2. Separiamo quelli che devono stare DAVANTI (Prefissi) da quelli che stanno DIETRO (Suffissi)
     prefissi = [ex for ex in extra_totali if ex in TERMINI_ANTICIPATI]
     suffissi = [ex for ex in extra_totali if ex not in TERMINI_ANTICIPATI]
     
     prefix_str = " ".join(prefissi) if prefissi else ""
-    extra_str = ", ".join(suffissi) if suffissi else "" # Questi sono i suffissi (Extra veri e propri)
+    extra_str = ", ".join(suffissi) if suffissi else ""
 
-    # Compatibilità
     comp_list = [c for c in comp_selezionate if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
-    # Composizione finale: MAT_EN + PREFISSI + PART_EN + DIMENSIONI
-    # Il replace serve a togliere doppi spazi se qualche campo è vuoto
-    descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ").replace("  ", " ")
+    # Composizione finale
+    descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
     
     final_segments = [descrizione_centrale]
     if extra_str: final_segments.append(extra_str)
     if comp_str: final_segments.append(comp_str)
         
     res = " - ".join(final_segments).upper()
-    
-    # --- FINE MODIFICA ---
 
     st.success("Stringa tecnica generata!")
     st.code(res, language=None)
