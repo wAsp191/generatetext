@@ -40,145 +40,126 @@ MATERIALI_CONFIG = {
 }
 
 # =========================================================
-# 2. DATABASE INTEGRALE (Formattazione Spaziata Preservata)
+# 2. DATABASE INTEGRALE (Corretto)
 # =========================================================
 DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
         "Particolari": {
-                                                                                                    "Montante": ["UPRIGHT", {
+            "Montante": ["UPRIGHT", {
                 "70x30": "70X30", "90x30": "90X30", "Monoasolato": "WITH SLOTS ON ONE SIDE", 
                 "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", 
                 "Estensione": "-EXTENSION", "Minirack": "MINIRACK",
                 "L120": "L120", "L100": "L100", "Z/S Basso carico": "Z/S", "Z/M Alto carico": "Z/M"
             }, "UPRIGHT"],
-                                                                                                    "Piede di base": ["BASE FOOT", {
+            "Piede di base": ["BASE FOOT", {
                 "H90": "H90", "H100": "H100", "H150": "H150", 
                 "Con piedino regolabile": "WITH ADJUSTABLE FOOT", "Estensione": "-EXTENSION"
             }, "FOOT"],
-                                                                                                    "Zoccolatura": ["PLINTH", {
+            "Zoccolatura": ["PLINTH", {
                 "H90": "FOR H90 BASE FOOT", "H100": "FOR BASE FOOT H100", "H150": "FOR BASE FOOT H150", 
                 "Liscia": "PLAIN", "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", 
                 "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED", 
                 "Completa di paracolpo ABS": "WITH ABS BUFFER"
             }, "PLINTH"],
-                                                                                                    "Pannello rivestimento": ["BACK PANEL", {
+            "Pannello rivestimento": ["BACK PANEL", {
                 "Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Multibarra": "MULTIBAR", "Multilame": "MULTISTRIP", "In rete": "MESH",
                 "Forato rombo": "RUMBLE PERFORATED", "Nervato": "RIBBED"
             }, "PANEL"],
-                                                                                                    "Copripiede": ["FOOT COVER", {
+            "Copripiede": ["FOOT COVER", {
                 "H90": "FOR H90 FOOT", "H100": "FOR H100 FOOT", "H150": "FOR H150 FOOT"
             }, "COVER"],
-                                                                                                    "Chiusura": ["COVER", {
+            "Chiusura": ["COVER", {
                 "Superiore": "TOP", "Tra ripiani di base": "INTER-BASE SHELF", "Con scasso": "WITH RECESS"
             }, "COVER"],
-                                                                                                    "Fiancata laterale": ["SIDE PANEL", {
+            "Fiancata laterale": ["SIDE PANEL", {
                 "Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", "Stondata": "ROUNDED", "Trapezoidale": "SLOPING", "Sagomata": "SHAPED"
             }, "SIDE-PANEL"],
-                                                                                                    "Mensola": ["BRACKET", {
+            "Mensola": ["BRACKET", {
                 "SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "Per ripiano in vetro": "FOR GLASS SHELF", "Per ripiano in legno": "FOR WOODEN SHELF", "A pinza": "GRIPPED",
                 "Minirack": "MINIRACK"
             }, "BRACKET"],
-                                                                                                    "Ripiano": ["SHELF", {
+            "Ripiano": ["SHELF", {
                 "Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE", "Semicircolare": "SEMICIRCULAR",
                 "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET"
             }, "SHELF"],
-                                                                                                    "Cesto in filo": ["WIRE BASKET", {
-                "Per attacco montante": "FOR UPRIGHT", "Per attacco fiancata": "FOR SIDE-PANEL", "Impilabile": "STACKABLE"                                                                                       
+            "Cesto in filo": ["WIRE BASKET", {
+                "Per attacco montante": "FOR UPRIGHT", "Per attacco fiancata": "FOR SIDE-PANEL", "Impilabile": "STACKABLE"
             }, "BASKET"],
-                                                                                                    "Cielino": ["CANOPY", {
+            "Cielino": ["CANOPY", {
               "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Frontale in lamiera": "SHEET METAL FASCIA", "Con illuminazione": "WITH LIGHTING"
             }, "CANOPY"],
-                                                                                                    "Corrente": ["BEAM", {
-            }, "BEAM"],
-                                                                                                    "Diagonale": ["DIAGONAL", {
-            }, "DIAGONAL"],
-                                                                                                    "Distanziali": ["SPACER", {
-            }, "SPACER"],
-                                                                                                    "Ganci": ["HOOK", {
+            "Corrente": ["BEAM", {}, "BEAM"],
+            "Diagonale": ["DIAGONAL", {}, "DIAGONAL"],
+            "Distanziali": ["SPACER", {}, "SPACER"],
+            "Ganci": ["HOOK", {
              "Singolo": "SINGLE", "Predisposto per portaprezzo": "ACCEPTS TICKET-HOLDER", "Doppio": "DOUBLE", "Rovescio": "REVERSE", "Attacco barra": "HOOK FOR BAR", "Attacco multilame": "HOOK FOR MULTISTRIP", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"
             }, "HOOK"],
-                                                                                                    "Profilo": ["PROFILE", {
-            }, "PROFILE"],
-                                                                                                    "Rinforzo": ["STIFFENER", {
-            }, "STIFFENER"],
-                                                                                                    "Staffa": ["PLATE", {
-            }, "PLATE"],
-                                                                                                    "Ante scorrevoli": ["SLIDING DOOR", {
-            }, "DOOR"],
-                                                                                                    "Piastra di fissaggio": ["FIXING PLATE", {"Con viti": "COMPLETE WITH SCREW"
-            }, "PLATE"],
-                                                                                                    "Cassetto estraibile": ["PULL-OUT DRAWER", {
+            "Profilo": ["PROFILE", {}, "PROFILE"],
+            "Rinforzo": ["STIFFENER", {}, "STIFFENER"],
+            "Staffa": ["PLATE", {}, "PLATE"],
+            "Ante scorrevoli": ["SLIDING DOOR", {}, "DOOR"],
+            "Piastra di fissaggio": ["FIXING PLATE", {"Con viti": "COMPLETE WITH SCREW"}, "PLATE"],
+            "Cassetto estraibile": ["PULL-OUT DRAWER", {
                 "Su ruote": "ON WHEELS", "Per piede H100": "FOR BASE FOOT H100", 
                 "Per piede H150": "FOR BASE FOOT H150", "Con serratura": "WITH LOCK", 
                 "Senza serratura": "WITHOUT LOCK"
             }, "DRAWER"],
-                                                                                                    "Coprimontante": ["UPRIGHT-COVER", {
-            }, "COVER"],
-                                                                                                    "Pedana di base": ["BASE PLATFORM", {
+            "Coprimontante": ["UPRIGHT-COVER", {}, "COVER"],
+            "Pedana di base": ["BASE PLATFORM", {
                 "Con rinforzi": "WITH REINFORCEMENT"
             }, "BASE"],
-                                                                                                    "Divisorio": ["DIVIDER", {
+            "Divisorio": ["DIVIDER", {
                "In filo": "WIRE", "Trapezoidale": "SLOPING", "Per ripiano": "FOR SHELF"
             }, "DIVIDER"],
-                                                                                                    "Frontalino": ["RISER", {
+            "Frontalino": ["RISER", {
                "In filo": "WIRE", "Per ripiano": "FOR SHELF", "Cromato": "CHROMED", "Verniciato": "PAINTED"
-            }, "RISER"],
+            }, "RISER"]
         }
     },
     "WOOD COMP": {
         "macro_en": "WOOD COMPONENT",
         "Particolari": {
-                                                                                                    "Ripiano Legno": ["WOODEN SHELF", {
-                                                                                                    
-            }, "SHELF"],
-                                                                                                    "Schienale Legno": ["WOODEN BACK", {
-                                                                                                    
-            }, "PANEL"],
-                                                                                                    "Cielino": ["CANOPY", {
-             "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING"                                                                                       
+            "Ripiano Legno": ["WOODEN SHELF", {}, "SHELF"],
+            "Schienale Legno": ["WOODEN BACK", {}, "PANEL"],
+            "Cielino": ["CANOPY", {
+             "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING"
             }, "CANOPY"],
-                                                                                                    "Zoccolatura": ["WOODEN PLINTH", {
+            "Zoccolatura": ["WOODEN PLINTH", {
                 "H100": "H100", "H150": "H150"
             }, "PLINTH"],
-                                                                                                    "Fiancata": ["WOODEN SIDE PANEL", {
+            "Fiancata": ["WOODEN SIDE PANEL", {
                 "Sagomata": "SHAPED"
             }, "SIDE PANEL"],
-                                                                                                    "Copripiede": ["WOODEN FOOT-COVER", {
+            "Copripiede": ["WOODEN FOOT-COVER", {
                 "H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT"
             }, "COVER"],
-                                                                                                    "Coprimontante": ["WOODEN UPRIGHT-COVER", {
-               "Minirack": "MINIRACK"                                                           
-            }, "COVER"],
+            "Coprimontante": ["WOODEN UPRIGHT-COVER", {
+               "Minirack": "MINIRACK"
+            }, "COVER"]
         }
     },
     "PLASTIC COMP": {
         "macro_en": "PLASTIC COMPONENT",
         "Particolari": {
-                                                                                                    "Tappo": ["PLASTIC CAP", {
-                                                                                                             
-            }, "CAP"],
-                                                                                                    "Guarnizione": ["GASKET", {
-                                                                                                             
-            }, "ACCESSORY"],
-                                                                                                    "Divisorio": ["DIVIDER", {
-               "Trapezoidale": "SLOPING", "Per ripiano": "FOR SHELF"
+            "Tappo": ["PLASTIC CAP", {}, "CAP"],
+            "Guarnizione": ["GASKET", {}, "ACCESSORY"],
+            "Divisorio": ["DIVIDER", {
+               "Sloping": "SLOPING", "Per ripiano": "FOR SHELF"
             }, "DIVIDER"],
-                                                                                                    "Frontalino": ["RISER", {
+            "Frontalino": ["RISER", {
                "Per ripiano": "FOR SHELF"
             }, "RISER"],
-                                                                                                    "Portaprezzo": ["TICKET-HOLDER", {
-           "Trasparente": "TRASPARENT", "Colorato": "COLOURED", "Con tasca oscillante": "WITH LIFT-UP POCKET", "Adesivo": "ADHESIVE", "Con asola centrale": "WITH CENTRAL SLOT" 
-            }, "TICKET-HOLDER"],
+            "Portaprezzo": ["TICKET-HOLDER", {
+               "Trasparente": "TRASPARENT", "Colorato": "COLOURED", "Con tasca oscillante": "WITH LIFT-UP POCKET", "Adesivo": "ADHESIVE", "Con asola centrale": "WITH CENTRAL SLOT" 
+            }, "TICKET-HOLDER"]
         }
     },
     "GLASS COMP": {
         "macro_en": "GLASS COMPONENT",
         "Particolari": {
-                                                                                                    "Ripiano": ["GLASS SHELF", {
-                                                                                                        
-            }, "SHELF"],
-                                                                                                    "Anta": ["GLASS DOOR", {
+            "Ripiano": ["GLASS SHELF", {}, "SHELF"],
+            "Anta": ["GLASS DOOR", {
                "SX": "LEFT", "DX": "RIGHT", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"
             }, "DOOR"]
         }
@@ -186,38 +167,30 @@ DATABASE = {
     "FASTENER": {
         "macro_en": "FASTENER",
         "Particolari": {
-                                                                                                    "Vite": ["SCREW", {
-        "Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUCK HEAD", "Testa esagonale": "HEX HEAD", "Testa a croce": "CROSS HEAD", "Testa esagono incassato": "HEXAGON SOCKET HEAD"
-                                                                                                             
-            }, "FASTENER", "SCREW", "SELF-DRILLING"],
-                                                                                                    "Bullone": ["BOLT", {
-                                                                                                             
+            "Vite": ["SCREW", {
+                "Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUCK HEAD", "Testa esagonale": "HEX HEAD", "Testa a croce": "CROSS HEAD", "Testa esagono incassato": "HEXAGON SOCKET HEAD"
             }, "FASTENER"],
-                                                                                                    "Rondella": ["WASHER", {
-                                                                                                             
-            }, "FASTENER", "WASHER"],
-                                                                                                    "Dado": ["NUT", {
-                                                                                                             
-            }, "FASTENER", "NUT"],
-                                                                                                    "Inserti filettati": ["RIVET", {
-                                                                                                             
-            }, "FASTENER", "RIVET"],
+            "Bullone": ["BOLT", {}, "FASTENER"],
+            "Rondella": ["WASHER", {}, "FASTENER"],
+            "Dado": ["NUT", {}, "FASTENER"],
+            "Inserti filettati": ["RIVET", {}, "FASTENER"]
         }
     },
-   "ASSEMBLY": {
+    "ASSEMBLY": {
         "macro_en": "ASSEMBLY",
         "Particolari": {
             "Vetrina": ["SHOWCASE", {
                 "Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING"
             }, "SHOWCASE"],
             "Espositore": ["DISPLAY", {
-                "Mobile": "MOBILE"                                                                                                          
+                "Mobile": "MOBILE"
             }, "DISPLAY"],
             "Totem": ["TOTEM", {
-                "Mobile": "MOBILE"                                                                                                          
+                "Mobile": "MOBILE"
             }, "DISPLAY"]
         }
     }
+}
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 OPZIONI_SPESSORE = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
 OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
