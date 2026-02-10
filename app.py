@@ -2,7 +2,7 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # Configurazione Pagina
-st.set_page_config(page_title="Technical Generator v7.3", layout="wide")
+st.set_page_config(page_title="Technical Generator v7.5", layout="wide")
 
 # =========================================================
 # 1. CONFIGURAZIONE MATERIALI
@@ -158,6 +158,7 @@ col_macro, col_workarea = st.columns([1, 3], gap="large")
 
 with col_macro:
     st.subheader("📂 1. Macro Categoria")
+    # La Macro viene selezionata qui per filtrare, ma non sarà stampata
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
 
 with col_workarea:
@@ -207,7 +208,7 @@ with col_workarea:
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # Logica Dimensioni con prefissi
+    # Logica Dimensioni con prefissi (L, P, H, D, S)
     dim_final_parts = []
     
     if macro_it == "FASTENER":
@@ -215,6 +216,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         l_val = dim_l.strip().upper()
         
         if d_val:
+            # Se ha M (es. M8) non mette D, altrimenti mette D
             prefix_d = "" if d_val.startswith('M') else "D"
             dim_final_parts.append(f"{prefix_d}{d_val}")
         if l_val:
@@ -239,7 +241,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         else:
             dim_final = ""
 
-    # Elaborazione Extra (Solo specifici + liberi)
+    # Elaborazione Extra
     extra_final_list = [extra_dedicati_dict[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
@@ -254,10 +256,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     comp_list = [c for c in comp_selezionate if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
-    # Composizione finale
+    # Composizione finale: OMETTIAMO LA MACRO DALLA STRINGA
     descrizione_centrale = f"{mat_en} {part_en} {dim_final}".strip().replace("  ", " ")
     
-    final_segments = [f"{macro_it} - {descrizione_centrale}"]
+    final_segments = [descrizione_centrale] # Macro rimossa da qui
     if extra_str: final_segments.append(extra_str)
     if comp_str: final_segments.append(comp_str)
         
