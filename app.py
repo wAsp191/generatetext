@@ -187,27 +187,35 @@ DATABASE = {
         "macro_en": "FASTENER",
         "Particolari": {
                                                                                                     "Vite": ["SCREW", {
+        "Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUCK HEAD", "Testa esagonale": "HEX HEAD", "Testa a croce": "CROSS HEAD", "Testa esagono incassato": "HEXAGON SOCKET HEAD"
                                                                                                              
-            }, "FASTENER"],
+            }, "FASTENER", "SCREW", "SELF-DRILLING"],
                                                                                                     "Bullone": ["BOLT", {
                                                                                                              
             }, "FASTENER"],
                                                                                                     "Rondella": ["WASHER", {
                                                                                                              
-            }, "FASTENER"],
+            }, "FASTENER", "WASHER"],
                                                                                                     "Dado": ["NUT", {
                                                                                                              
-            }, "FASTENER"],
+            }, "FASTENER", "NUT"],
                                                                                                     "Inserti filettati": ["RIVET", {
                                                                                                              
-            }, "FASTENER"],
+            }, "FASTENER", "RIVET"],
         }
     },
     "ASSEMBLY": {
         "macro_en": "ASSEMBLY",
         "Particolari": {
-            "Assieme Mobile": ["CABINET ASSEMBLY", {"Pre-montato": "PRE-ASSEMBLED"}, "ASSEMBLY"],
-            "Assieme generale": ["GENERAL ASSEMBLY", {}, "ASSEMBLY"]
+                                                                                                    "Vetrina": ["SHOWCASE", {
+            "Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING"
+            }, "SHOWCASE"],
+                                                                                                    "Espositore": ["DISPLAY", {
+            "Mobile": "MOBILE"                                                                                            
+            }, "DISPLAY"]
+                                                                                                    "Totem": ["TOTEM", {
+            "Mobile": "MOBILE"                                                                                            
+            }, "DISPLAY"]
         }
     }
 }
@@ -218,7 +226,7 @@ OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
 
 # ELENCO TERMINI DA ANTICIPARE (PREFISSI)
 TERMINI_ANTICIPATI = ["CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED",
-                      "STRAIGHT", "SEMICIRCULAR", "SINGLE", "DOUBLE"]
+                      "STRAIGHT", "SEMICIRCULAR", "SINGLE", "DOUBLE", "END"]
 
 # =========================================================
 # FUNZIONI
