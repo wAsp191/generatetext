@@ -71,7 +71,7 @@ DATABASE = {
                 "SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED"
             }, "BRACKET"],
                                                                                                     "Ripiano": ["SHELF", {
-                "Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE"
+                "Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE",
                 "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET"
             }, "SHELF"],
                                                                                                     "Cesto in filo": ["WIRE BASKET", {
