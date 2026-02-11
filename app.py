@@ -2,47 +2,54 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # =========================================================
-# CONFIGURAZIONE PAGINA
+# CONFIGURAZIONE PAGINA E CSS AVANZATO
 # =========================================================
 st.set_page_config(page_title="Technical Generator v7.6", layout="wide")
 
-# CSS PER COMPATTARE E COLORARE (Senza rimpicciolire i font)
 st.markdown("""
     <style>
-        /* Riduce lo spazio vuoto in alto */
+        /* 1. COMPATTAZIONE SPAZI */
         .block-container {
-            padding-top: 1.5rem !important;
+            padding-top: 1rem !important;
             padding-bottom: 1rem !important;
         }
-        
-        /* Compattazione verticale tra gli elementi (non estrema) */
         div[data-testid="stVerticalBlock"] > div {
-            margin-bottom: -8px !important;
+            margin-bottom: -10px !important;
         }
-        
-        /* Riduce lo spazio attorno ai divisori */
         hr {
-            margin-top: 0.8rem !important;
-            margin-bottom: 0.8rem !important;
+            margin-top: 0.5rem !important;
+            margin-bottom: 0.5rem !important;
         }
 
-        /* STILE GIALLINO PER PILLS COMPATIBILITÀ */
-        /* Usiamo un selettore mirato per l'area compatibilità */
+        /* 2. STILE GIALLO PER I PILLS DELLA COMPATIBILITÀ */
+        /* Targetta i pills che seguono il marker specifico */
         div[data-testid="stElementContainer"]:has(#modelli-compatibilita) + div [data-testid="stBaseButton-secondaryPill"] {
-            background-color: #fff9c4 !important; /* Giallino chiaro */
-            border: 1px solid #fbc02d !important; /* Bordo giallo più scuro */
-            color: #444 !important;
+            background-color: #fffde7 !important; /* Giallo chiarissimo */
+            border: 1px solid #fbc02d !important; /* Bordo giallo scuro */
+            color: #333 !important;
         }
         
+        /* Stile quando il pill giallo è SELEZIONATO */
+        div[data-testid="stElementContainer"]:has(#modelli-compatibilita) + div [data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
+            background-color: #fdd835 !important; /* Giallo intenso */
+            border: 1px solid #f9a825 !important;
+            color: black !important;
+            font-weight: bold !important;
+        }
+
         /* Hover sui pills gialli */
         div[data-testid="stElementContainer"]:has(#modelli-compatibilita) + div [data-testid="stBaseButton-secondaryPill"]:hover {
-            background-color: #fff59d !important;
+            border-color: #f57f17 !important;
         }
+        
+        /* 3. MIGLIORAMENTI VISIVI GENERALI */
+        .stRadio > div { flex-wrap: wrap; display: flex; gap: 8px; }
+        h3 { font-size: 1.1rem !important; margin-top: 5px !important; }
     </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 1. CONFIGURAZIONE MATERIALI
+# 1. DATI E CONFIGURAZIONI (TUE MODIFICHE INCLUSE)
 # =========================================================
 MATERIALI_CONFIG = {
     "METAL COMP": {"FERRO": "IRON", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
@@ -53,9 +60,6 @@ MATERIALI_CONFIG = {
     "ASSEMBLY": {"MONTATO": "ASSEMBLED", "NON MONTATO": "NOT-ASSEMBLED"}
 }
 
-# =========================================================
-# 2. DATABASE COMPATTO
-# =========================================================
 DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
@@ -143,9 +147,6 @@ DATABASE = {
     }
 }
 
-# =========================================================
-# LISTE OPZIONI E PREFISSI
-# =========================================================
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
 OPZIONI_SPESSORE_STD = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
@@ -177,11 +178,24 @@ with col_btn:
     st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
 
 st.markdown("---")
+# Colonna sinistra: Macro + Compatibilità
+# Colonna destra: Tutto il resto
 col_macro, col_workarea = st.columns([1, 3], gap="large")
 
 with col_macro:
-    st.subheader("📂 1. Macro Categoria")
+    st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
+    
+    # === SPOSTAMENTO QUI DEL MENU COMPATIBILITÀ ===
+    if macro_it != "FASTENER":
+        st.markdown("---")
+        st.subheader("🔗 Compatibilità")
+        # Marker invisibile per il CSS
+        st.markdown('<span id="modelli-compatibilita"></span>', unsafe_allow_html=True)
+        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+        comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
+    else:
+        comp_selezionate = []
 
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Particolare")
@@ -234,15 +248,6 @@ with col_workarea:
         
         dim_dia, normativa = "", ""
 
-    # LOGICA COMPATIBILITA (Pills Gialli)
-    if macro_it != "FASTENER":
-        st.markdown('<span id="modelli-compatibilita"></span>', unsafe_allow_html=True)
-        st.subheader("🔗 5. Compatibilità")
-        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-        comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
-    else:
-        comp_selezionate = []
-
 # =========================================================
 # GENERAZIONE, MODIFICA E COPIA
 # =========================================================
@@ -294,7 +299,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     prefix_str = " ".join(prefissi) if prefissi else ""
     extra_str = ", ".join(suffissi) if suffissi else ""
     
-    # Robustezza per comp_selezionate
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
