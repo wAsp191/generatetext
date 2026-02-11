@@ -201,11 +201,15 @@ with col_workarea:
         
         dim_dia, normativa = "", ""
 
+    # LOGICA COMPATIBILITA (Nascosta per FASTENER)
     if macro_it != "FASTENER":
         st.subheader("🔗 5. Compatibilità")
-        comp_selezionate = st.multiselect("Modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
+        # Filtriamo l'opzione vuota per non avere un tasto senza testo
+        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+        # Usiamo st.pills al posto di multiselect
+        comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
     else:
-        comp_selezionate = []
+        comp_selezionate = [] # Reset compatibilità se Fastener
 
 # =========================================================
 # GENERAZIONE, MODIFICA E COPIA
@@ -280,8 +284,7 @@ if st.session_state['stringa_editabile']:
     else:
         st.success(f"Lunghezza: {lunghezza} caratteri")
 
-    comp_list = [c.upper() for c in comp_selezionate if c.strip()]
-    all_tags = [tag_suggerimento.upper()] + comp_list
-    st.info(f"**TAGS:** {' | '.join(all_tags)}")
-
+    comp_list = [c for c in (comp_selezionate or []) if c.strip()]
+    comp_str = ", ".join(comp_list) if comp_list else ""
+    
 st.markdown("<style>.stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }</style>", unsafe_allow_html=True)
