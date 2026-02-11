@@ -8,7 +8,7 @@ st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
 
 st.markdown("""
     <style>
-        /* 1. COMPATTAZIONE SPAZI (GENERALE) */
+        /* 1. COMPATTAZIONE SPAZI */
         .block-container {
             padding-top: 1rem !important;
             padding-bottom: 2rem !important;
@@ -17,31 +17,35 @@ st.markdown("""
             margin-bottom: -5px !important; 
         }
         
-        /* 2. COLORAZIONE PULSANTI SELEZIONATI (VERDE INVECE DI ROSSO) */
+        /* 2. FORZATURA COLORE VERDE PER TUTTI I PILLS SELEZIONATI */
+        /* Questo sovrascrive il rosso di default di Streamlit */
         
-        /* Colore per TUTTI i pulsanti "pills" quando sono selezionati (attivi) */
-        div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
-            background-color: #e8f5e9 !important; /* Verde chiarissimo di sfondo */
-            border: 1px solid #2e7d32 !important; /* Bordo verde scuro */
-            color: #1b5e20 !important;           /* Testo verde scuro */
-            font-weight: bold !important;
+        /* Stato Selezionato (Active/Pressed) */
+        button[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
+            background-color: #2e7d32 !important; /* Verde scuro */
+            color: white !important;               /* Testo bianco per contrasto */
+            border-color: #1b5e20 !important;
         }
 
-        /* Eccezione specifica per la Colonna Sinistra (Compatibilità) per mantenerla gialla se preferisci, 
-           o lasciarla verde come il resto. Qui la forzo VERDE per coerenza con la tua richiesta. */
-        div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
-            background-color: #c8e6c9 !important; 
-            border: 1px solid #2e7d32 !important;
-            color: black !important;
+        /* Hover sullo stato selezionato */
+        button[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"]:hover {
+            background-color: #1b5e20 !important;
+            color: white !important;
         }
 
-        /* 3. SPAZIATURA PULSANTE GENERA */
+        /* Stato Non Selezionato (per renderlo più pulito) */
+        button[data-testid="stBaseButton-secondaryPill"][aria-pressed="false"] {
+            background-color: #f8f9fa !important;
+            color: #333 !important;
+            border: 1px solid #dee2e6 !important;
+        }
+
+        /* 3. SPAZIATURA E PULIZIA UI */
         hr {
             margin-top: 2rem !important;
             margin-bottom: 1rem !important;
         }
         
-        /* 4. MIGLIORAMENTI VISIVI */
         .stRadio > div { flex-wrap: wrap; display: flex; gap: 8px; }
         h3 { font-size: 1.1rem !important; margin-top: 5px !important; }
         
@@ -51,7 +55,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 1. DATI E CONFIGURAZIONI
+# 1. DATI E CONFIGURAZIONI (Invariati)
 # =========================================================
 MATERIALI_CONFIG = {
     "METAL COMP": {"FERRO": "IRON", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
@@ -181,7 +185,6 @@ with col_btn:
 
 st.markdown("---")
 
-# LAYOUT A DUE COLONNE
 col_macro, col_workarea = st.columns([1, 3], gap="large")
 
 with col_macro:
@@ -250,7 +253,6 @@ with col_workarea:
 # =========================================================
 # GENERAZIONE FINALE
 # =========================================================
-
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True) 
 st.divider()
 
@@ -277,14 +279,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         lph_str = "X".join(dim_final_parts)
         
         s_val = dim_s.strip()
-        if lph_str and s_val:
-            dim_final = f"{lph_str} S{s_val}"
-        elif lph_str:
-            dim_final = lph_str
-        elif s_val:
-            dim_final = f"S{s_val}"
-        else:
-            dim_final = ""
+        if lph_str and s_val: dim_final = f"{lph_str} S{s_val}"
+        elif lph_str: dim_final = lph_str
+        elif s_val: dim_final = f"S{s_val}"
+        else: dim_final = ""
 
     extra_totali = [extra_dedicati_dict[ex] for ex in extra_selezionati]
     if extra_libero:
@@ -297,25 +295,21 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     prefissi = [ex for ex in extra_totali if ex in TERMINI_ANTICIPATI]
     suffissi = [ex for ex in extra_totali if ex not in TERMINI_ANTICIPATI]
     
-    # LOGICA PULIZIA RIFUSI "WITH" -> "AND"
+    # LOGICA WITH -> AND
     cleaned_suffissi = []
     with_already_used = False
-    
     test_central = f"{mat_en} {' '.join(prefissi)} {part_en}".upper()
-    if "WITH " in test_central:
-        with_already_used = True
+    if "WITH " in test_central: with_already_used = True
         
     for s in suffissi:
         if s.startswith("WITH ") and with_already_used:
             cleaned_suffissi.append(s.replace("WITH ", "AND ", 1))
         else:
-            if "WITH " in s or s.startswith("WITH "):
-                with_already_used = True
+            if "WITH " in s or s.startswith("WITH "): with_already_used = True
             cleaned_suffissi.append(s)
 
     prefix_str = " ".join(prefissi) if prefissi else ""
     extra_str = ", ".join(cleaned_suffissi) if cleaned_suffissi else ""
-    
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
@@ -329,18 +323,12 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
 if st.session_state['stringa_editabile']:
     st.markdown("### 📋 Risultato Finale")
     st.code(st.session_state['stringa_editabile'], language=None)
-    
     with st.expander("✏️ Modifica testo manualmente"):
         st.text_input("Modifica qui e premi invio:", key='stringa_editabile', label_visibility="collapsed")
-
     lunghezza = len(st.session_state['stringa_editabile'])
-    if lunghezza >= 99:
-        st.error(f"⚠️ ATTENZIONE! SUPERATO IL LIMITE DI 99 CARATTERI (Totale: {lunghezza})")
-    else:
-        st.success(f"Lunghezza: {lunghezza} caratteri")
-
+    if lunghezza >= 99: st.error(f"⚠️ LIMITE SUPERATO ({lunghezza})")
+    else: st.success(f"Lunghezza: {lunghezza} caratteri")
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
-    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
-    st.info(f"**TAGS:** {' | '.join(all_tags)}")
+    st.info(f"**TAGS:** {' | '.join([tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags])}")
 
 st.markdown("<style>.stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }</style>", unsafe_allow_html=True)
