@@ -6,6 +6,41 @@ from deep_translator import GoogleTranslator
 # =========================================================
 st.set_page_config(page_title="Technical Generator v7.6", layout="wide")
 
+# CSS PER COMPATTARE E COLORARE (Senza rimpicciolire i font)
+st.markdown("""
+    <style>
+        /* Riduce lo spazio vuoto in alto */
+        .block-container {
+            padding-top: 1.5rem !important;
+            padding-bottom: 1rem !important;
+        }
+        
+        /* Compattazione verticale tra gli elementi (non estrema) */
+        div[data-testid="stVerticalBlock"] > div {
+            margin-bottom: -8px !important;
+        }
+        
+        /* Riduce lo spazio attorno ai divisori */
+        hr {
+            margin-top: 0.8rem !important;
+            margin-bottom: 0.8rem !important;
+        }
+
+        /* STILE GIALLINO PER PILLS COMPATIBILITÀ */
+        /* Usiamo un selettore mirato per l'area compatibilità */
+        div[data-testid="stElementContainer"]:has(#modelli-compatibilita) + div [data-testid="stBaseButton-secondaryPill"] {
+            background-color: #fff9c4 !important; /* Giallino chiaro */
+            border: 1px solid #fbc02d !important; /* Bordo giallo più scuro */
+            color: #444 !important;
+        }
+        
+        /* Hover sui pills gialli */
+        div[data-testid="stElementContainer"]:has(#modelli-compatibilita) + div [data-testid="stBaseButton-secondaryPill"]:hover {
+            background-color: #fff59d !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # =========================================================
 # 1. CONFIGURAZIONE MATERIALI
 # =========================================================
@@ -119,7 +154,7 @@ OPZIONI_SPESSORE_WOOD = ["", "18mm", "20mm", "25mm", "30mm", "35mm"]
 TERMINI_ANTICIPATI = [
     "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", 
     "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", 
-    "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING" 
+    "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING", 
     "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "UPRIGHT GRAFT"
 ]
 
@@ -183,7 +218,6 @@ with col_workarea:
         with c3: normativa = st.selectbox("Normativa", options=OPZIONI_NORMATIVA)
         dim_p, dim_h, dim_s = "", "", "" 
     else:
-        # Se la categoria è ASSEMBLY, mostriamo solo 3 colonne
         if macro_it == "ASSEMBLY":
             c1, c2, c3 = st.columns(3)
             dim_s = "" 
@@ -194,22 +228,20 @@ with col_workarea:
         with c2: dim_p = st.text_input("Profondità (P)", key="dim_p")
         with c3: dim_h = st.text_input("Altezza (H)", key="dim_h")
         
-        # Mostriamo lo spessore solo se NON è ASSEMBLY
         if macro_it != "ASSEMBLY":
             lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
             with c4: dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
         
         dim_dia, normativa = "", ""
 
-    # LOGICA COMPATIBILITA (Nascosta per FASTENER)
+    # LOGICA COMPATIBILITA (Pills Gialli)
     if macro_it != "FASTENER":
+        st.markdown('<span id="modelli-compatibilita"></span>', unsafe_allow_html=True)
         st.subheader("🔗 5. Compatibilità")
-        # Filtriamo l'opzione vuota per non avere un tasto senza testo
         pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-        # Usiamo st.pills al posto di multiselect
         comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
     else:
-        comp_selezionate = [] # Reset compatibilità se Fastener
+        comp_selezionate = []
 
 # =========================================================
 # GENERAZIONE, MODIFICA E COPIA
@@ -261,7 +293,9 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     
     prefix_str = " ".join(prefissi) if prefissi else ""
     extra_str = ", ".join(suffissi) if suffissi else ""
-    comp_list = [c for c in comp_selezionate if c.strip()]
+    
+    # Robustezza per comp_selezionate
+    comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
     descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
@@ -284,7 +318,8 @@ if st.session_state['stringa_editabile']:
     else:
         st.success(f"Lunghezza: {lunghezza} caratteri")
 
-    comp_list = [c for c in (comp_selezionate or []) if c.strip()]
-    comp_str = ", ".join(comp_list) if comp_list else ""
-    
+    comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
+    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
+    st.info(f"**TAGS:** {' | '.join(all_tags)}")
+
 st.markdown("<style>.stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }</style>", unsafe_allow_html=True)
