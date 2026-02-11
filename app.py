@@ -13,26 +13,26 @@ st.markdown("""
             padding-top: 1rem !important;
             padding-bottom: 2rem !important;
         }
-        /* Riduciamo il margine tra i blocchi verticali, ma non troppo */
         div[data-testid="stVerticalBlock"] > div {
             margin-bottom: -5px !important; 
         }
         
-        /* 2. SOLUZIONE PER I COLORI (MIRATA ALLE COLONNE) */
+        /* 2. COLORAZIONE PULSANTI SELEZIONATI (VERDE INVECE DI ROSSO) */
         
-        /* COLONNA SINISTRA (Compatibilità): Tasti GIALLI */
-        div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"] {
-            background-color: #fffde7 !important; /* Giallo pastello */
-            border: 1px solid #fbc02d !important; /* Bordo giallo scuro */
-            color: #333 !important;
-        }
-        
-        /* Colonna Sinistra: Quando SELEZIONATO */
-        div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
-            background-color: #fdd835 !important; /* Giallo intenso */
-            border: 1px solid #f9a825 !important;
-            color: black !important;
+        /* Colore per TUTTI i pulsanti "pills" quando sono selezionati (attivi) */
+        div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
+            background-color: #e8f5e9 !important; /* Verde chiarissimo di sfondo */
+            border: 1px solid #2e7d32 !important; /* Bordo verde scuro */
+            color: #1b5e20 !important;           /* Testo verde scuro */
             font-weight: bold !important;
+        }
+
+        /* Eccezione specifica per la Colonna Sinistra (Compatibilità) per mantenerla gialla se preferisci, 
+           o lasciarla verde come il resto. Qui la forzo VERDE per coerenza con la tua richiesta. */
+        div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
+            background-color: #c8e6c9 !important; 
+            border: 1px solid #2e7d32 !important;
+            color: black !important;
         }
 
         /* 3. SPAZIATURA PULSANTE GENERA */
@@ -248,7 +248,7 @@ with col_workarea:
         dim_dia, normativa = "", ""
 
 # =========================================================
-# GENERAZIONE, MODIFICA E COPIA
+# GENERAZIONE FINALE
 # =========================================================
 
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True) 
@@ -297,24 +297,21 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     prefissi = [ex for ex in extra_totali if ex in TERMINI_ANTICIPATI]
     suffissi = [ex for ex in extra_totali if ex not in TERMINI_ANTICIPATI]
     
-    # --- LOGICA DI PULIZIA RIFUSI "WITH" ---
+    # LOGICA PULIZIA RIFUSI "WITH" -> "AND"
     cleaned_suffissi = []
     with_already_used = False
     
-    # Controllo se WITH è presente nella parte centrale (Materiale + Prefissi + Parte)
     test_central = f"{mat_en} {' '.join(prefissi)} {part_en}".upper()
     if "WITH " in test_central:
         with_already_used = True
         
     for s in suffissi:
-        # Se l'extra inizia con WITH e abbiamo già usato un WITH in precedenza
         if s.startswith("WITH ") and with_already_used:
             cleaned_suffissi.append(s.replace("WITH ", "AND ", 1))
         else:
             if "WITH " in s or s.startswith("WITH "):
                 with_already_used = True
             cleaned_suffissi.append(s)
-    # --------------------------------------
 
     prefix_str = " ".join(prefissi) if prefissi else ""
     extra_str = ", ".join(cleaned_suffissi) if cleaned_suffissi else ""
