@@ -17,29 +17,27 @@ st.markdown("""
             margin-bottom: -5px !important; 
         }
         
-        /* 2. FORZATURA COLORE VERDE PER TUTTI I PILLS SELEZIONATI */
-        /* Questo sovrascrive il rosso di default di Streamlit */
+        /* 2. FORZATURA COLORE BLU PER I PILLS SELEZIONATI */
+        /* Utilizziamo selettori ad altissima specificità per sovrascrivere il tema Streamlit */
         
-        /* Stato Selezionato (Active/Pressed) */
-        button[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
-            background-color: #2e7d32 !important; /* Verde scuro */
-            color: white !important;               /* Testo bianco per contrasto */
-            border-color: #1b5e20 !important;
+        /* Cambia il colore di sfondo, del testo e del bordo quando il pill è selezionato */
+        div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
+            background-color: #004a99 !important; /* Blu intenso */
+            color: white !important;              /* Testo bianco */
+            border: 1px solid #003366 !important;
         }
 
-        /* Hover sullo stato selezionato */
-        button[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"]:hover {
-            background-color: #1b5e20 !important;
+        /* Cambia il colore quando ci passi sopra con il mouse (hover) mentre è selezionato */
+        div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"]:hover {
+            background-color: #003366 !important;
             color: white !important;
         }
 
-        /* Stato Non Selezionato (per renderlo più pulito) */
-        button[data-testid="stBaseButton-secondaryPill"][aria-pressed="false"] {
-            background-color: #f8f9fa !important;
-            color: #333 !important;
-            border: 1px solid #dee2e6 !important;
+        /* Cambia il colore del pallino/flag interno se presente */
+        div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] span {
+            color: white !important;
         }
-
+        
         /* 3. SPAZIATURA E PULIZIA UI */
         hr {
             margin-top: 2rem !important;
@@ -55,7 +53,7 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 1. DATI E CONFIGURAZIONI (Invariati)
+# 1. DATI E CONFIGURAZIONI
 # =========================================================
 MATERIALI_CONFIG = {
     "METAL COMP": {"FERRO": "IRON", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
@@ -295,7 +293,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     prefissi = [ex for ex in extra_totali if ex in TERMINI_ANTICIPATI]
     suffissi = [ex for ex in extra_totali if ex not in TERMINI_ANTICIPATI]
     
-    # LOGICA WITH -> AND
+    # LOGICA RIFUSI: WITH -> AND
     cleaned_suffissi = []
     with_already_used = False
     test_central = f"{mat_en} {' '.join(prefissi)} {part_en}".upper()
