@@ -21,7 +21,6 @@ st.markdown("""
         /* 2. SOLUZIONE PER I COLORI (MIRATA ALLE COLONNE) */
         
         /* COLONNA SINISTRA (Compatibilità): Tasti GIALLI */
-        /* Seleziona la prima colonna del layout principale e colora i pills al suo interno */
         div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"] {
             background-color: #fffde7 !important; /* Giallo pastello */
             border: 1px solid #fbc02d !important; /* Bordo giallo scuro */
@@ -36,13 +35,7 @@ st.markdown("""
             font-weight: bold !important;
         }
 
-        /* COLONNA DESTRA (Extra): Tasti ROSSI/STANDARD (Opzionale, per forzare la differenza) */
-        div[data-testid="column"]:nth-of-type(2) div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
-             /* Lasciamo il default di Streamlit (solitamente rosso/arancio) o forziamo un altro colore se vuoi */
-        }
-
         /* 3. SPAZIATURA PULSANTE GENERA */
-        /* Aggiunge spazio sopra la linea divisoria finale per staccare il bottone dai campi input */
         hr {
             margin-top: 2rem !important;
             margin-bottom: 1rem !important;
@@ -52,7 +45,6 @@ st.markdown("""
         .stRadio > div { flex-wrap: wrap; display: flex; gap: 8px; }
         h3 { font-size: 1.1rem !important; margin-top: 5px !important; }
         
-        /* Nasconde header/footer standard per recuperare spazio */
         header {visibility: hidden;}
         footer {visibility: hidden;}
     </style>
@@ -190,15 +182,12 @@ with col_btn:
 st.markdown("---")
 
 # LAYOUT A DUE COLONNE
-# Sinistra: Macro Categoria + Compatibilità (CSS Giallo applicato qui)
-# Destra: Area di lavoro principale
 col_macro, col_workarea = st.columns([1, 3], gap="large")
 
 with col_macro:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
     
-    # Compatibilità (Sotto la categoria, nella colonna sinistra)
     if macro_it != "FASTENER":
         st.markdown("---")
         st.subheader("🔗 Compatibilità")
@@ -226,7 +215,6 @@ with col_workarea:
     
     extra_options = list(extra_dedicati_dict.keys())
     if extra_options:
-        # Questi pills sono nella colonna destra, quindi rimarranno del colore standard (Rossi/Arancio)
         extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
     else:
         extra_selezionati = []
@@ -263,7 +251,6 @@ with col_workarea:
 # GENERAZIONE, MODIFICA E COPIA
 # =========================================================
 
-# Spaziatore esplicito per staccare il bottone dai campi input
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True) 
 st.divider()
 
@@ -310,8 +297,27 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     prefissi = [ex for ex in extra_totali if ex in TERMINI_ANTICIPATI]
     suffissi = [ex for ex in extra_totali if ex not in TERMINI_ANTICIPATI]
     
+    # --- LOGICA DI PULIZIA RIFUSI "WITH" ---
+    cleaned_suffissi = []
+    with_already_used = False
+    
+    # Controllo se WITH è presente nella parte centrale (Materiale + Prefissi + Parte)
+    test_central = f"{mat_en} {' '.join(prefissi)} {part_en}".upper()
+    if "WITH " in test_central:
+        with_already_used = True
+        
+    for s in suffissi:
+        # Se l'extra inizia con WITH e abbiamo già usato un WITH in precedenza
+        if s.startswith("WITH ") and with_already_used:
+            cleaned_suffissi.append(s.replace("WITH ", "AND ", 1))
+        else:
+            if "WITH " in s or s.startswith("WITH "):
+                with_already_used = True
+            cleaned_suffissi.append(s)
+    # --------------------------------------
+
     prefix_str = " ".join(prefissi) if prefissi else ""
-    extra_str = ", ".join(suffissi) if suffissi else ""
+    extra_str = ", ".join(cleaned_suffissi) if cleaned_suffissi else ""
     
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
