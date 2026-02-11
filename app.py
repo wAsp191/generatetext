@@ -2,82 +2,47 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # =========================================================
-# CONFIGURAZIONE PAGINA E CSS AVANZATO
+# CONFIGURAZIONE PAGINA
 # =========================================================
-st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
+st.set_page_config(page_title="Technical Generator v7.6", layout="wide")
 
+# CSS PER COMPATTARE E COLORARE (Senza rimpicciolire i font)
 st.markdown("""
     <style>
-        /* 1. COMPATTAZIONE SPAZI (GENERALE) */
+        /* Riduce lo spazio vuoto in alto */
         .block-container {
-            padding-top: 1rem !important;
-            padding-bottom: 2rem !important;
+            padding-top: 1.5rem !important;
+            padding-bottom: 1rem !important;
         }
-        /* Riduciamo il margine tra i blocchi verticali, ma non troppo */
+        
+        /* Compattazione verticale tra gli elementi (non estrema) */
         div[data-testid="stVerticalBlock"] > div {
-            margin-bottom: -5px !important; 
+            margin-bottom: -8px !important;
         }
         
-        /* 2. SOLUZIONE PER I COLORI (MIRATA ALLE COLONNE) */
-        
-        /* COLONNA SINISTRA (Compatibilità): Tasti GIALLI */
-        div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"] {
-            background-color: #fffde7 !important; 
-            border: 1px solid #fbc02d !important; 
-            color: #333 !important;
-        }
-        
-        div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
-            background-color: #fdd835 !important; 
-            border: 1px solid #f9a825 !important;
-            color: black !important;
-            font-weight: bold !important;
+        /* Riduce lo spazio attorno ai divisori */
+        hr {
+            margin-top: 0.8rem !important;
+            margin-bottom: 0.8rem !important;
         }
 
-        /* 3. SPAZIATURA PULSANTE GENERA */
-        hr {
-            margin-top: 2rem !important;
-            margin-bottom: 1rem !important;
+        /* STILE GIALLINO PER PILLS COMPATIBILITÀ */
+        /* Usiamo un selettore mirato per l'area compatibilità */
+        div[data-testid="stElementContainer"]:has(#modelli-compatibilita) + div [data-testid="stBaseButton-secondaryPill"] {
+            background-color: #fff9c4 !important; /* Giallino chiaro */
+            border: 1px solid #fbc02d !important; /* Bordo giallo più scuro */
+            color: #444 !important;
         }
         
-        /* 4. MIGLIORAMENTI VISIVI */
-        .stRadio > div { flex-wrap: wrap; display: flex; gap: 8px; }
-        h3 { font-size: 1.1rem !important; margin-top: 5px !important; }
-        
-        header {visibility: hidden;}
-        footer {visibility: hidden;}
+        /* Hover sui pills gialli */
+        div[data-testid="stElementContainer"]:has(#modelli-compatibilita) + div [data-testid="stBaseButton-secondaryPill"]:hover {
+            background-color: #fff59d !important;
+        }
     </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# HEADER: LOGO E TITOLO
-# =========================================================
-# Creiamo una colonna centrale per il logo per tenerlo bilanciato
-col_logo, col_spacer = st.columns([3, 1])
-
-with col_logo:
-    # Mostra l'immagine (caricata come logo.png)
-    try:
-        st.image("logo.png", width=300)
-    except:
-        st.warning("⚠️ Carica il file 'logo.png' nella cartella del codice per vedere il logo.")
-    
-    # Scritta richiesta sotto il logo
-    st.subheader("REG - Technical Generator & Classification")
-
-with col_spacer:
-    # Allineamento del tasto reset con l'header
-    st.markdown("<div style='height: 40px;'></div>", unsafe_allow_html=True)
-    if st.button("🔄 AZZERA TUTTO", use_container_width=True):
-        # Reset manuale della sessione
-        for key in st.session_state.keys():
-            del st.session_state[key]
-        st.rerun()
-
-st.markdown("---")
-
-# =========================================================
-# 1. DATI E CONFIGURAZIONI
+# 1. CONFIGURAZIONE MATERIALI
 # =========================================================
 MATERIALI_CONFIG = {
     "METAL COMP": {"FERRO": "IRON", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
@@ -88,6 +53,9 @@ MATERIALI_CONFIG = {
     "ASSEMBLY": {"MONTATO": "ASSEMBLED", "NON MONTATO": "NOT-ASSEMBLED"}
 }
 
+# =========================================================
+# 2. DATABASE COMPATTO
+# =========================================================
 DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
@@ -175,6 +143,9 @@ DATABASE = {
     }
 }
 
+# =========================================================
+# LISTE OPZIONI E PREFISSI
+# =========================================================
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
 OPZIONI_SPESSORE_STD = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
@@ -188,21 +159,29 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# LOGICA UI
+# FUNZIONI
 # =========================================================
+def reset_all():
+    keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags"]
+    for k in keys_to_reset:
+        if k in st.session_state:
+            st.session_state[k] = [] if "tags" in k else ""
+
+# =========================================================
+# INTERFACCIA
+# =========================================================
+st.title("⚙️ Technical Generator & Classification")
+
+col_t, col_btn = st.columns([4, 1])
+with col_btn:
+    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
+
+st.markdown("---")
 col_macro, col_workarea = st.columns([1, 3], gap="large")
 
 with col_macro:
-    st.subheader("📂 1. Categoria")
+    st.subheader("📂 1. Macro Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
-    
-    if macro_it != "FASTENER":
-        st.markdown("---")
-        st.subheader("🔗 Compatibilità")
-        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-        comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
-    else:
-        comp_selezionate = []
 
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Particolare")
@@ -255,7 +234,18 @@ with col_workarea:
         
         dim_dia, normativa = "", ""
 
-st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True) 
+    # LOGICA COMPATIBILITA (Pills Gialli)
+    if macro_it != "FASTENER":
+        st.markdown('<span id="modelli-compatibilita"></span>', unsafe_allow_html=True)
+        st.subheader("🔗 5. Compatibilità")
+        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+        comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
+    else:
+        comp_selezionate = []
+
+# =========================================================
+# GENERAZIONE, MODIFICA E COPIA
+# =========================================================
 st.divider()
 
 if 'stringa_editabile' not in st.session_state:
@@ -304,6 +294,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     prefix_str = " ".join(prefissi) if prefissi else ""
     extra_str = ", ".join(suffissi) if suffissi else ""
     
+    # Robustezza per comp_selezionate
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
@@ -330,3 +321,5 @@ if st.session_state['stringa_editabile']:
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
+
+st.markdown("<style>.stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }</style>", unsafe_allow_html=True)
