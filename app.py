@@ -26,7 +26,7 @@ DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
         "Particolari": {
-            "Montante": ["UPRIGHT", {"70x30": "70X30", "90x30": "90X30", "Monoasolato": "WITH SLOTS ON ONE SIDE", "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", "Estensione": "-EXTENSION", "Minirack": "MINIRACK", "L120": "L120", "L100": "L100", "Z/S Basso carico": "Z/S", "Z/M Alto carico": "Z/M"}, "UPRIGHT"],
+            # "Montante": ["UPRIGHT", {"70x30": "70X30", "90x30": "90X30", "Monoasolato": "WITH SLOTS ON ONE SIDE", "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", "Estensione": "-EXTENSION", "Minirack": "MINIRACK", "L120 Z/S": "L120 Z/S", "L120 Z/M": "L120 Z/M", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L80 Z/S": "L80Z/S", "L80 Z/M": "L80 Z/M", "L55": "L55"}, "UPRIGHT"],
             "Piede di base": ["BASE FOOT", {"H90": "H90", "H100": "H100", "H150": "H150", "Con piedino regolabile": "WITH ADJUSTABLE FOOT", "Estensione": "-EXTENSION"}, "FOOT"],
             "Zoccolatura": ["PLINTH", {"H90": "FOR H90 BASE FOOT", "H100": "FOR BASE FOOT H100", "H150": "FOR BASE FOOT H150", "Liscia": "PLAIN", "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED", "Completa di paracolpo ABS": "WITH ABS BUFFER"}, "PLINTH"],
             "Pannello rivestimento": ["BACK PANEL", {"Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Multibarra": "MULTIBAR", "Multilame": "MULTISTRIP", "In rete": "MESH", "Forato rombo": "RUMBLE PERFORATED", "Nervato": "RIBBED"}, "PANEL"],
