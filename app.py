@@ -21,12 +21,10 @@ MATERIALI_CONFIG = {
 # =========================================================
 # 2. DATABASE COMPATTO
 # =========================================================
-# Struttura: "Nome": ["EN_NAME", {OPZIONI}, "TAG"]
 DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
         "Particolari": {
-            # "Montante": ["UPRIGHT", {"70x30": "70X30", "90x30": "90X30", "Monoasolato": "WITH SLOTS ON ONE SIDE", "Biasolato": "WITH SLOTS ON TWO SIDE", "Con rinforzo": "WITH REINFORCEMENT", "Estensione": "-EXTENSION", "Minirack": "MINIRACK", "L120 Z/S": "L120 Z/S", "L120 Z/M": "L120 Z/M", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L80 Z/S": "L80Z/S", "L80 Z/M": "L80 Z/M", "L55": "L55"}, "UPRIGHT"],
             "Piede di base": ["BASE FOOT", {"H90": "H90", "H100": "H100", "H150": "H150", "Con piedino regolabile": "WITH ADJUSTABLE FOOT", "Estensione": "-EXTENSION"}, "FOOT"],
             "Zoccolatura": ["PLINTH", {"H90": "FOR H90 BASE FOOT", "H100": "FOR BASE FOOT H100", "H150": "FOR BASE FOOT H150", "Liscia": "PLAIN", "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED", "Completa di paracolpo ABS": "WITH ABS BUFFER"}, "PLINTH"],
             "Pannello rivestimento": ["BACK PANEL", {"Scantonato": "NOTCHED", "Forato euro": "EURO PERFORATED", "Multibarra": "MULTIBAR", "Multilame": "MULTISTRIP", "In rete": "MESH", "Forato rombo": "RUMBLE PERFORATED", "Nervato": "RIBBED"}, "PANEL"],
@@ -112,10 +110,7 @@ DATABASE = {
 # =========================================================
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
-
-# Spessori Standard (Metal)
 OPZIONI_SPESSORE_STD = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
-# Spessori Legno (Wood)
 OPZIONI_SPESSORE_WOOD = ["", "18mm", "20mm", "25mm", "30mm", "35mm"]
 
 TERMINI_ANTICIPATI = [
@@ -167,9 +162,7 @@ with col_workarea:
     st.markdown("---")
     st.subheader(f"✨ 3. Extra per {scelta_part_it}")
     
-    # LOGICA "FLAG" (Pills)
     extra_options = list(extra_dedicati_dict.keys())
-    # Usiamo st.pills per i flag visibili con scelta multipla
     if extra_options:
         extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
     else:
@@ -180,7 +173,6 @@ with col_workarea:
 
     st.subheader("📏 4. Dimensioni e Normative")
     
-    # LOGICA DIMENSIONI E NORMATIVE
     if macro_it == "FASTENER":
         c1, c2, c3 = st.columns(3)
         with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
@@ -188,30 +180,35 @@ with col_workarea:
         with c3: normativa = st.selectbox("Normativa", options=OPZIONI_NORMATIVA)
         dim_p, dim_h, dim_s = "", "", "" 
     else:
-        c1, c2, c3, c4 = st.columns(4)
+        # Se la categoria è ASSEMBLY, mostriamo solo 3 colonne
+        if macro_it == "ASSEMBLY":
+            c1, c2, c3 = st.columns(3)
+            dim_s = "" 
+        else:
+            c1, c2, c3, c4 = st.columns(4)
+        
         with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
         with c2: dim_p = st.text_input("Profondità (P)", key="dim_p")
         with c3: dim_h = st.text_input("Altezza (H)", key="dim_h")
         
-        # LOGICA SPESSORE DIVERSO PER WOOD
-        lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
-        with c4: dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
+        # Mostriamo lo spessore solo se NON è ASSEMBLY
+        if macro_it != "ASSEMBLY":
+            lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
+            with c4: dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
         
         dim_dia, normativa = "", ""
 
-    # LOGICA COMPATIBILITA (Nascosta per FASTENER)
     if macro_it != "FASTENER":
         st.subheader("🔗 5. Compatibilità")
         comp_selezionate = st.multiselect("Modelli:", options=OPZIONI_COMPATIBILITA, key="comp_tags")
     else:
-        comp_selezionate = [] # Reset compatibilità se Fastener
+        comp_selezionate = []
 
 # =========================================================
 # GENERAZIONE, MODIFICA E COPIA
 # =========================================================
 st.divider()
 
-# Inizializza lo stato della stringa se non esiste
 if 'stringa_editabile' not in st.session_state:
     st.session_state['stringa_editabile'] = ""
 
@@ -244,7 +241,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         else:
             dim_final = ""
 
-    # Elaborazione Extra
     extra_totali = [extra_dedicati_dict[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
@@ -268,27 +264,19 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         
     st.session_state['stringa_editabile'] = " - ".join(final_segments).upper()
 
-# Visualizzazione Risultato Compatta
 if st.session_state['stringa_editabile']:
     st.markdown("### 📋 Risultato Finale")
-    
-    # 1. VISUALIZZA IL CODICE (Questo ha il tasto COPIA automatico)
     st.code(st.session_state['stringa_editabile'], language=None)
     
-    # 2. SEZIONE MODIFICA (Nascosta in un expander per pulizia)
     with st.expander("✏️ Modifica testo manualmente"):
-        # Usiamo il key per legarlo direttamente allo stato. 
-        # Se modifichi qui, si aggiorna automaticamente il blocco st.code sopra al prossimo ricaricamento (immediato)
         st.text_input("Modifica qui e premi invio:", key='stringa_editabile', label_visibility="collapsed")
 
-    # Controllo lunghezza
     lunghezza = len(st.session_state['stringa_editabile'])
     if lunghezza >= 99:
         st.error(f"⚠️ ATTENZIONE! SUPERATO IL LIMITE DI 99 CARATTERI (Totale: {lunghezza})")
     else:
         st.success(f"Lunghezza: {lunghezza} caratteri")
 
-    # Suggerimenti Tag
     comp_list = [c.upper() for c in comp_selezionate if c.strip()]
     all_tags = [tag_suggerimento.upper()] + comp_list
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
