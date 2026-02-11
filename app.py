@@ -2,47 +2,64 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # =========================================================
-# CONFIGURAZIONE PAGINA
+# CONFIGURAZIONE PAGINA E CSS AVANZATO
 # =========================================================
-st.set_page_config(page_title="Technical Generator v7.6", layout="wide")
+st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
 
-# CSS PER COMPATTARE E COLORARE (Senza rimpicciolire i font)
 st.markdown("""
     <style>
-        /* Riduce lo spazio vuoto in alto */
+        /* 1. COMPATTAZIONE SPAZI (GENERALE) */
         .block-container {
-            padding-top: 1.5rem !important;
-            padding-bottom: 1rem !important;
+            padding-top: 1rem !important;
+            padding-bottom: 2rem !important;
         }
-        
-        /* Compattazione verticale tra gli elementi (non estrema) */
+        /* Riduciamo il margine tra i blocchi verticali, ma non troppo */
         div[data-testid="stVerticalBlock"] > div {
-            margin-bottom: -8px !important;
+            margin-bottom: -5px !important; 
         }
         
-        /* Riduce lo spazio attorno ai divisori */
-        hr {
-            margin-top: 0.8rem !important;
-            margin-bottom: 0.8rem !important;
+        /* 2. SOLUZIONE PER I COLORI (MIRATA ALLE COLONNE) */
+        
+        /* COLONNA SINISTRA (Compatibilità): Tasti GIALLI */
+        /* Seleziona la prima colonna del layout principale e colora i pills al suo interno */
+        div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"] {
+            background-color: #fffde7 !important; /* Giallo pastello */
+            border: 1px solid #fbc02d !important; /* Bordo giallo scuro */
+            color: #333 !important;
+        }
+        
+        /* Colonna Sinistra: Quando SELEZIONATO */
+        div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
+            background-color: #fdd835 !important; /* Giallo intenso */
+            border: 1px solid #f9a825 !important;
+            color: black !important;
+            font-weight: bold !important;
         }
 
-        /* STILE GIALLINO PER PILLS COMPATIBILITÀ */
-        /* Usiamo un selettore mirato per l'area compatibilità */
-        div[data-testid="stElementContainer"]:has(#modelli-compatibilita) + div [data-testid="stBaseButton-secondaryPill"] {
-            background-color: #fff9c4 !important; /* Giallino chiaro */
-            border: 1px solid #fbc02d !important; /* Bordo giallo più scuro */
-            color: #444 !important;
+        /* COLONNA DESTRA (Extra): Tasti ROSSI/STANDARD (Opzionale, per forzare la differenza) */
+        div[data-testid="column"]:nth-of-type(2) div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
+             /* Lasciamo il default di Streamlit (solitamente rosso/arancio) o forziamo un altro colore se vuoi */
+        }
+
+        /* 3. SPAZIATURA PULSANTE GENERA */
+        /* Aggiunge spazio sopra la linea divisoria finale per staccare il bottone dai campi input */
+        hr {
+            margin-top: 2rem !important;
+            margin-bottom: 1rem !important;
         }
         
-        /* Hover sui pills gialli */
-        div[data-testid="stElementContainer"]:has(#modelli-compatibilita) + div [data-testid="stBaseButton-secondaryPill"]:hover {
-            background-color: #fff59d !important;
-        }
+        /* 4. MIGLIORAMENTI VISIVI */
+        .stRadio > div { flex-wrap: wrap; display: flex; gap: 8px; }
+        h3 { font-size: 1.1rem !important; margin-top: 5px !important; }
+        
+        /* Nasconde header/footer standard per recuperare spazio */
+        header {visibility: hidden;}
+        footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 1. CONFIGURAZIONE MATERIALI
+# 1. DATI E CONFIGURAZIONI
 # =========================================================
 MATERIALI_CONFIG = {
     "METAL COMP": {"FERRO": "IRON", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
@@ -53,9 +70,6 @@ MATERIALI_CONFIG = {
     "ASSEMBLY": {"MONTATO": "ASSEMBLED", "NON MONTATO": "NOT-ASSEMBLED"}
 }
 
-# =========================================================
-# 2. DATABASE COMPATTO
-# =========================================================
 DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
@@ -143,9 +157,6 @@ DATABASE = {
     }
 }
 
-# =========================================================
-# LISTE OPZIONI E PREFISSI
-# =========================================================
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
 OPZIONI_SPESSORE_STD = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
@@ -177,11 +188,24 @@ with col_btn:
     st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
 
 st.markdown("---")
+
+# LAYOUT A DUE COLONNE
+# Sinistra: Macro Categoria + Compatibilità (CSS Giallo applicato qui)
+# Destra: Area di lavoro principale
 col_macro, col_workarea = st.columns([1, 3], gap="large")
 
 with col_macro:
-    st.subheader("📂 1. Macro Categoria")
+    st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
+    
+    # Compatibilità (Sotto la categoria, nella colonna sinistra)
+    if macro_it != "FASTENER":
+        st.markdown("---")
+        st.subheader("🔗 Compatibilità")
+        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+        comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
+    else:
+        comp_selezionate = []
 
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Particolare")
@@ -202,6 +226,7 @@ with col_workarea:
     
     extra_options = list(extra_dedicati_dict.keys())
     if extra_options:
+        # Questi pills sono nella colonna destra, quindi rimarranno del colore standard (Rossi/Arancio)
         extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
     else:
         extra_selezionati = []
@@ -234,18 +259,12 @@ with col_workarea:
         
         dim_dia, normativa = "", ""
 
-    # LOGICA COMPATIBILITA (Pills Gialli)
-    if macro_it != "FASTENER":
-        st.markdown('<span id="modelli-compatibilita"></span>', unsafe_allow_html=True)
-        st.subheader("🔗 5. Compatibilità")
-        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-        comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
-    else:
-        comp_selezionate = []
-
 # =========================================================
 # GENERAZIONE, MODIFICA E COPIA
 # =========================================================
+
+# Spaziatore esplicito per staccare il bottone dai campi input
+st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True) 
 st.divider()
 
 if 'stringa_editabile' not in st.session_state:
@@ -294,7 +313,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     prefix_str = " ".join(prefissi) if prefissi else ""
     extra_str = ", ".join(suffissi) if suffissi else ""
     
-    # Robustezza per comp_selezionate
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
