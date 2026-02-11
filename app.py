@@ -33,7 +33,7 @@ DATABASE = {
             "Copripiede": ["FOOT COVER", {"H90": "FOR H90 FOOT", "H100": "FOR H100 FOOT", "H150": "FOR H150 FOOT"}, "COVER"],
             "Chiusura": ["COVER", {"Superiore": "TOP", "Tra ripiani di base": "INTER-BASE SHELF", "Con scasso": "WITH RECESS"}, "COVER"],
             "Fiancata laterale": ["SIDE PANEL", {"Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", "Stondata": "ROUNDED", "Trapezoidale": "SLOPING", "Sagomata": "SHAPED"}, "SIDE-PANEL"],
-            "Mensola": ["BRACKET", {"SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "Per ripiano in vetro": "FOR GLASS SHELF", "Per ripiano in legno": "FOR WOODEN SHELF", "A pinza": "GRIPPED", "Minirack": "MINIRACK"}, "BRACKET"],
+            "Mensola": ["BRACKET", {"SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "Per ripiano in vetro": "FOR GLASS SHELF", "Per ripiano in legno": "FOR WOODEN SHELF", "A pinza": "GRIPPED", "Minirack": "MINIRACK", "1 Posizione": "ONE POSIION", "2 Posizioni": "TWO POSITION"}, "BRACKET"],
             "Ripiano": ["SHELF", {"Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE", "Semicircolare": "SEMICIRCULAR", "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET"}, "SHELF"],
             "Cesto in filo": ["WIRE BASKET", {"Per attacco montante": "FOR UPRIGHT", "Per attacco fiancata": "FOR SIDE-PANEL", "Impilabile": "STACKABLE"}, "BASKET"],
             "Cielino": ["CANOPY", {"Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Frontale in lamiera": "SHEET METAL FASCIA", "Con illuminazione": "WITH LIGHTING"}, "CANOPY"],
@@ -41,7 +41,7 @@ DATABASE = {
             "Diagonale": ["DIAGONAL", {}, "DIAGONAL"],
             "Distanziali": ["SPACER", {}, "SPACER"],
             "Ganci": ["HOOK", {"Singolo": "SINGLE", "Predisposto per portaprezzo": "ACCEPTS TICKET-HOLDER", "Doppio": "DOUBLE", "Rovescio": "REVERSE", "Attacco barra": "HOOK FOR BAR", "Attacco multilame": "HOOK FOR MULTISTRIP", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"}, "HOOK"],
-            "Profilo": ["PROFILE", {}, "PROFILE"],
+            "Profilo": ["PROFILE", {"Profilo a L": "L-SHAPED", "Profilo a U": "U-SHAPED"}, "PROFILE"],
             "Rinforzo": ["STIFFENER", {}, "STIFFENER"],
             "Staffa": ["PLATE", {}, "PLATE"],
             "Ante": ["SHEET METAL DOOR", {"Scorrevoli": "SLIDING", "Con foro serratura": "WITH LOCK HOLE"}, "DOOR"],
@@ -51,18 +51,21 @@ DATABASE = {
             "Pedana di base": ["BASE PLATFORM", {"Con rinforzi": "WITH REINFORCEMENT"}, "BASE"],
             "Divisorio": ["DIVIDER", {"In filo": "WIRE", "Trapezoidale": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
             "Frontalino": ["RISER", {"In filo": "WIRE", "Per ripiano": "FOR SHELF", "Cromato": "CHROMED", "Verniciato": "PAINTED"}, "RISER"]
+            "Compensazione": ["FILLER PIECE", {"Per piede di base": "FOR BASE FOOT"}, "SPACER"]
+            "Controventatura": ["BRACING", {"Per montante": "FOR UPRIGHT", "Con mensole saldate": "WITH WELDING BRACKET", "Passo 25": "PITCH 25", "Passo 50": "PITCH 50"}, "BRACING"]
         }
     },
     "WOOD COMP": {
         "macro_en": "WOOD COMPONENT",
         "Particolari": {
-            "Ripiano Legno": ["WOODEN SHELF", {}, "SHELF"],
-            "Schienale Legno": ["WOODEN BACK", {}, "PANEL"],
-            "Cielino": ["CANOPY", {"Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING"}, "CANOPY"],
-            "Zoccolatura": ["WOODEN PLINTH", {"H100": "H100", "H150": "H150"}, "PLINTH"],
-            "Fiancata": ["WOODEN SIDE PANEL", {"Sagomata": "SHAPED"}, "SIDE PANEL"],
-            "Copripiede": ["WOODEN FOOT-COVER", {"H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT"}, "COVER"],
-            "Coprimontante": ["WOODEN UPRIGHT-COVER", {"Minirack": "MINIRACK"}, "COVER"]
+            "Ripiano Legno": ["WOODEN SHELF", {"Con mensole": "WITH BRACKET", "Con lati bordati": "WITH EDGED SIDES", "Con zoccolatura": "WITH PLINTH", "Con viteria": "WITH SCREWS"}, "SHELF"],
+            "Schienale Legno": ["WOODEN BACK", {"Con mensole": "WITH BRACKET", "Con viteria": "WITH SCREWS", "Con lati bordati": "WITH EDGED SIDES"}, "PANEL"],
+            "Cielino": ["CANOPY", {"Con mensole": "WITH BRACKET", "Con viteria": "WITH SCREWS", "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con lati bordati": "WITH EDGED SIDES"}, "CANOPY"],
+            "Zoccolatura": ["WOODEN PLINTH", {"H100": "H100", "H150": "H150", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "PLINTH"],
+            "Fiancata": ["WOODEN SIDE PANEL", {"Con mensole": "WITH BRACKET", "Sagomata": "SHAPED", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "SIDE PANEL"],
+            "Copripiede": ["WOODEN FOOT-COVER", {"H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "COVER"],
+            "Coprimontante": ["WOODEN UPRIGHT-COVER", {"Minirack": "MINIRACK", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "COVER"]
+            "Compensazione": ["WOODEN FILLER PIECE", {"Per Top legno": "FOR TOP SHELF"}, "SPACER"]
         }
     },
     "PLASTIC COMP": {
@@ -71,7 +74,7 @@ DATABASE = {
             "Tappo": ["PLASTIC CAP", {}, "CAP"],
             "Guarnizione": ["GASKET", {}, "ACCESSORY"],
             "Divisorio": ["DIVIDER", {"Sloping": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
-            "Frontalino": ["RISER", {"Per ripiano": "FOR SHELF"}, "RISER"],
+            "Frontalino": ["RISER", {"Per ripiano": "FOR SHELF", "Trasparente": "TRASPARENT"}, "RISER"],
             "Portaprezzo": ["TICKET-HOLDER", {"Trasparente": "TRASPARENT", "Colorato": "COLOURED", "Con tasca oscillante": "WITH LIFT-UP POCKET", "Adesivo": "ADHESIVE", "Con asola centrale": "WITH CENTRAL SLOT"}, "TICKET-HOLDER"]
         }
     },
@@ -95,10 +98,11 @@ DATABASE = {
     "ASSEMBLY": {
         "macro_en": "ASSEMBLY",
         "Particolari": {
-            "Vetrina": ["SHOWCASE", {"Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING"}, "SHOWCASE"],
+            "Vetrina": ["SHOWCASE", {"Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con ante scorrevoli": "WITH SLIDING DOOR"}, "SHOWCASE"],
             "Espositore": ["DISPLAY", {"Mobile": "MOBILE"}, "DISPLAY"],
             "Totem": ["TOTEM", {"Mobile": "MOBILE"}, "DISPLAY"],
             "Spalla": ["FRAME", {"Antisismico": "SEISMIC-RESISTANT", "L100 Z/M": "L100 Z/M", "L100 Z/S": "L100 Z/S", "L120 Z/M": "L120 Z/M", "L120 Z/S": "L120 Z/S", "L80 Z/M": "L80 Z/M", "L80 Z/S": "L80 Z/S", "L55": "L55", "ZINCATO": "GALVANIZED"}, "FRAME"],
+            "Controventatura": ["CROSS-BRACING", {}, "CROSS-BRACING"],
         }
     }
 }
@@ -118,7 +122,7 @@ TERMINI_ANTICIPATI = [
     "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", 
     "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", 
     "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", 
-    "SEMICIRCULAR", "SINGLE", "DOUBLE", "END"
+    "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED"
 ]
 
 # =========================================================
