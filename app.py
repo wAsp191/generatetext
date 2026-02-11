@@ -2,58 +2,55 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # =========================================================
-# CONFIGURAZIONE PAGINA E CSS AVANZATO
+# CONFIGURAZIONE PAGINA E CSS "ULTRA-FORZATO"
 # =========================================================
 st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
 
 st.markdown("""
     <style>
         /* 1. COMPATTAZIONE SPAZI */
-        .block-container {
-            padding-top: 1rem !important;
-            padding-bottom: 2rem !important;
-        }
-        div[data-testid="stVerticalBlock"] > div {
-            margin-bottom: -5px !important; 
-        }
+        .block-container { padding-top: 1rem !important; padding-bottom: 2rem !important; }
+        div[data-testid="stVerticalBlock"] > div { margin-bottom: -5px !important; }
         
-        /* 2. FORZATURA COLORE BLU PER I PILLS SELEZIONATI */
-        /* Utilizziamo selettori ad altissima specificità per sovrascrivere il tema Streamlit */
+        /* 2. RESET TOTALE DEL COLORE ROSSO SUI PILLS */
+        /* Usiamo selettori universali con !important per sovrascrivere il framework */
         
-        /* Cambia il colore di sfondo, del testo e del bordo quando il pill è selezionato */
-        div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
-            background-color: #004a99 !important; /* Blu intenso */
-            color: white !important;              /* Testo bianco */
-            border: 1px solid #003366 !important;
+        /* Cambia lo sfondo e il bordo quando premuto */
+        button[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
+            background-color: #2ecc71 !important; /* Verde Smeraldo */
+            color: white !important;
+            border: 2px solid #27ae60 !important;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.2) !important;
         }
 
-        /* Cambia il colore quando ci passi sopra con il mouse (hover) mentre è selezionato */
-        div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"]:hover {
-            background-color: #003366 !important;
+        /* Cambia il colore dell'icona (check/flag) interna */
+        button[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] svg {
+            fill: white !important;
             color: white !important;
         }
 
-        /* Cambia il colore del pallino/flag interno se presente */
-        div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] span {
+        /* Effetto al passaggio del mouse sui selezionati */
+        button[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"]:hover {
+            background-color: #27ae60 !important;
+            border-color: #1e8449 !important;
+        }
+
+        /* Testo dei pulsanti selezionati */
+        button[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] p {
             color: white !important;
+            font-weight: bold !important;
         }
         
-        /* 3. SPAZIATURA E PULIZIA UI */
-        hr {
-            margin-top: 2rem !important;
-            margin-bottom: 1rem !important;
-        }
-        
+        /* 3. STILE GENERALE UI */
+        hr { margin-top: 2rem !important; margin-bottom: 1rem !important; }
         .stRadio > div { flex-wrap: wrap; display: flex; gap: 8px; }
-        h3 { font-size: 1.1rem !important; margin-top: 5px !important; }
-        
         header {visibility: hidden;}
         footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 1. DATI E CONFIGURAZIONI
+# 1. DATABASE E CONFIGURAZIONI (Invariati)
 # =========================================================
 MATERIALI_CONFIG = {
     "METAL COMP": {"FERRO": "IRON", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
@@ -156,46 +153,36 @@ OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
 OPZIONI_SPESSORE_STD = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
 OPZIONI_SPESSORE_WOOD = ["", "18mm", "20mm", "25mm", "30mm", "35mm"]
 
-TERMINI_ANTICIPATI = [
-    "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", 
-    "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", 
-    "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING", 
-    "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "UPRIGHT GRAFT"
-]
+TERMINI_ANTICIPATI = ["CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING", "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "UPRIGHT GRAFT"]
 
 # =========================================================
-# FUNZIONI
+# LOGICA AZZERA
 # =========================================================
 def reset_all():
     keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags"]
     for k in keys_to_reset:
-        if k in st.session_state:
-            st.session_state[k] = [] if "tags" in k else ""
+        if k in st.session_state: st.session_state[k] = [] if "tags" in k else ""
 
 # =========================================================
-# INTERFACCIA
+# LAYOUT
 # =========================================================
 st.title("⚙️ Technical Generator & Classification")
 
 col_t, col_btn = st.columns([4, 1])
-with col_btn:
-    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
+with col_btn: st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
 
 st.markdown("---")
-
 col_macro, col_workarea = st.columns([1, 3], gap="large")
 
 with col_macro:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
-    
     if macro_it != "FASTENER":
         st.markdown("---")
         st.subheader("🔗 Compatibilità")
         pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
         comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
-    else:
-        comp_selezionate = []
+    else: comp_selezionate = []
 
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Particolare")
@@ -207,24 +194,21 @@ with col_workarea:
     
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.radio("Seleziona dettaglio:", options=sorted(list(part_dict.keys())), horizontal=True)
-    
     dati_part = part_dict[scelta_part_it]
     part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
 
     st.markdown("---")
     st.subheader(f"✨ 3. Extra per {scelta_part_it}")
-    
     extra_options = list(extra_dedicati_dict.keys())
     if extra_options:
         extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
     else:
         extra_selezionati = []
-        st.info("Nessuna opzione extra disponibile per questo elemento.")
+        st.info("Nessuna opzione extra disponibile.")
 
     extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
     st.subheader("📏 4. Dimensioni e Normative")
-    
     if macro_it == "FASTENER":
         c1, c2, c3 = st.columns(3)
         with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
@@ -232,42 +216,29 @@ with col_workarea:
         with c3: normativa = st.selectbox("Normativa", options=OPZIONI_NORMATIVA)
         dim_p, dim_h, dim_s = "", "", "" 
     else:
-        if macro_it == "ASSEMBLY":
-            c1, c2, c3 = st.columns(3)
-            dim_s = "" 
-        else:
-            c1, c2, c3, c4 = st.columns(4)
-        
+        if macro_it == "ASSEMBLY": c1, c2, c3 = st.columns(3); dim_s = "" 
+        else: c1, c2, c3, c4 = st.columns(4)
         with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
         with c2: dim_p = st.text_input("Profondità (P)", key="dim_p")
         with c3: dim_h = st.text_input("Altezza (H)", key="dim_h")
-        
         if macro_it != "ASSEMBLY":
             lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
             with c4: dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
-        
         dim_dia, normativa = "", ""
 
 # =========================================================
 # GENERAZIONE FINALE
 # =========================================================
-st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True) 
 st.divider()
 
-if 'stringa_editabile' not in st.session_state:
-    st.session_state['stringa_editabile'] = ""
+if 'stringa_editabile' not in st.session_state: st.session_state['stringa_editabile'] = ""
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     dim_final_parts = []
-    
     if macro_it == "FASTENER":
-        d_val = dim_dia.strip().upper()
-        l_val = dim_l.strip().upper()
-        if d_val:
-            prefix_d = "" if d_val.startswith('M') else "D"
-            dim_final_parts.append(f"{prefix_d}{d_val}")
-        if l_val:
-            dim_final_parts.append(f"L{l_val}")
+        d_val, l_val = dim_dia.strip().upper(), dim_l.strip().upper()
+        if d_val: dim_final_parts.append(f"{'' if d_val.startswith('M') else 'D'}{d_val}")
+        if l_val: dim_final_parts.append(f"L{l_val}")
         dim_final = "X".join(dim_final_parts)
         if normativa: dim_final += f" {normativa}"
     else:
@@ -275,58 +246,40 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         if dim_p.strip(): dim_final_parts.append(f"P{dim_p.strip().upper()}")
         if dim_h.strip(): dim_final_parts.append(f"H{dim_h.strip().upper()}")
         lph_str = "X".join(dim_final_parts)
-        
         s_val = dim_s.strip()
-        if lph_str and s_val: dim_final = f"{lph_str} S{s_val}"
-        elif lph_str: dim_final = lph_str
-        elif s_val: dim_final = f"S{s_val}"
-        else: dim_final = ""
+        dim_final = f"{lph_str} S{s_val}".strip() if s_val else lph_str
 
     extra_totali = [extra_dedicati_dict[ex] for ex in extra_selezionati]
     if extra_libero:
-        try:
-            extra_tradotto = GoogleTranslator(source='it', target='en').translate(extra_libero).upper()
-            extra_totali.append(extra_tradotto)
-        except:
-            extra_totali.append(extra_libero.upper())
+        try: extra_totali.append(GoogleTranslator(source='it', target='en').translate(extra_libero).upper())
+        except: extra_totali.append(extra_libero.upper())
 
     prefissi = [ex for ex in extra_totali if ex in TERMINI_ANTICIPATI]
     suffissi = [ex for ex in extra_totali if ex not in TERMINI_ANTICIPATI]
     
-    # LOGICA RIFUSI: WITH -> AND
-    cleaned_suffissi = []
-    with_already_used = False
-    test_central = f"{mat_en} {' '.join(prefissi)} {part_en}".upper()
-    if "WITH " in test_central: with_already_used = True
-        
+    cleaned_suffissi, with_used = [], ("WITH " in f"{mat_en} {' '.join(prefissi)} {part_en}".upper())
     for s in suffissi:
-        if s.startswith("WITH ") and with_already_used:
-            cleaned_suffissi.append(s.replace("WITH ", "AND ", 1))
+        if s.startswith("WITH ") and with_used: cleaned_suffissi.append(s.replace("WITH ", "AND ", 1))
         else:
-            if "WITH " in s or s.startswith("WITH "): with_already_used = True
+            if "WITH " in s: with_used = True
             cleaned_suffissi.append(s)
 
-    prefix_str = " ".join(prefissi) if prefissi else ""
-    extra_str = ", ".join(cleaned_suffissi) if cleaned_suffissi else ""
+    prefix_str, extra_str = " ".join(prefissi), ", ".join(cleaned_suffissi)
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
-    comp_str = ", ".join(comp_list) if comp_list else ""
+    comp_str = ", ".join(comp_list)
 
-    descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
-    final_segments = [descrizione_centrale]
+    desc_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
+    final_segments = [desc_centrale]
     if extra_str: final_segments.append(extra_str)
     if comp_str: final_segments.append(comp_str)
-        
     st.session_state['stringa_editabile'] = " - ".join(final_segments).upper()
 
 if st.session_state['stringa_editabile']:
     st.markdown("### 📋 Risultato Finale")
     st.code(st.session_state['stringa_editabile'], language=None)
-    with st.expander("✏️ Modifica testo manualmente"):
-        st.text_input("Modifica qui e premi invio:", key='stringa_editabile', label_visibility="collapsed")
+    with st.expander("✏️ Modifica testo"):
+        st.text_input("Modifica:", key='stringa_editabile', label_visibility="collapsed")
     lunghezza = len(st.session_state['stringa_editabile'])
     if lunghezza >= 99: st.error(f"⚠️ LIMITE SUPERATO ({lunghezza})")
     else: st.success(f"Lunghezza: {lunghezza} caratteri")
-    comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
-    st.info(f"**TAGS:** {' | '.join([tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags])}")
-
-st.markdown("<style>.stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }</style>", unsafe_allow_html=True)
+    st.info(f"**TAGS:** {' | '.join([tag_suggerimento.upper()] + [c.upper() for c in (comp_selezionate or [])])}")
