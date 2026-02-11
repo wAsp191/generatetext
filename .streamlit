@@ -1,7 +1,1 @@
-config.toml
-[theme]
-primaryColor = "#2ecc71"  # Questo trasformerà il rosso in VERDE globalmente
-backgroundColor = "#FFFFFF"
-secondaryBackgroundColor = "#F0F2F6"
-textColor = "#31333F"
-font = "sans serif"
+
