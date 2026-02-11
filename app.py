@@ -1,60 +1,65 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
-import os
 
 # =========================================================
 # CONFIGURAZIONE PAGINA E CSS AVANZATO
 # =========================================================
-st.set_page_config(page_title="REG - Technical Generator", layout="wide")
+st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
 
 st.markdown("""
     <style>
-        .block-container { padding-top: 1rem !important; padding-bottom: 2rem !important; }
-        div[data-testid="stVerticalBlock"] > div { margin-bottom: -5px !important; }
+        /* 1. COMPATTAZIONE SPAZI (GENERALE) */
+        .block-container {
+            padding-top: 1rem !important;
+            padding-bottom: 2rem !important;
+        }
+        /* Riduciamo il margine tra i blocchi verticali, ma non troppo */
+        div[data-testid="stVerticalBlock"] > div {
+            margin-bottom: -5px !important; 
+        }
         
+        /* 2. SOLUZIONE PER I COLORI (MIRATA ALLE COLONNE) */
+        
+        /* COLONNA SINISTRA (Compatibilità): Tasti GIALLI */
+        /* Seleziona la prima colonna del layout principale e colora i pills al suo interno */
         div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"] {
-            background-color: #fffde7 !important; 
-            border: 1px solid #fbc02d !important; 
+            background-color: #fffde7 !important; /* Giallo pastello */
+            border: 1px solid #fbc02d !important; /* Bordo giallo scuro */
             color: #333 !important;
         }
+        
+        /* Colonna Sinistra: Quando SELEZIONATO */
         div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
-            background-color: #fdd835 !important; 
+            background-color: #fdd835 !important; /* Giallo intenso */
             border: 1px solid #f9a825 !important;
             color: black !important;
             font-weight: bold !important;
         }
 
-        hr { margin-top: 2rem !important; margin-bottom: 1rem !important; }
+        /* COLONNA DESTRA (Extra): Tasti ROSSI/STANDARD (Opzionale, per forzare la differenza) */
+        div[data-testid="column"]:nth-of-type(2) div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
+             /* Lasciamo il default di Streamlit (solitamente rosso/arancio) o forziamo un altro colore se vuoi */
+        }
+
+        /* 3. SPAZIATURA PULSANTE GENERA */
+        /* Aggiunge spazio sopra la linea divisoria finale per staccare il bottone dai campi input */
+        hr {
+            margin-top: 2rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        /* 4. MIGLIORAMENTI VISIVI */
         .stRadio > div { flex-wrap: wrap; display: flex; gap: 8px; }
         h3 { font-size: 1.1rem !important; margin-top: 5px !important; }
+        
+        /* Nasconde header/footer standard per recuperare spazio */
         header {visibility: hidden;}
         footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# HEADER: LOGO E TASTO RESET
-# =========================================================
-col_header_logo, col_header_reset = st.columns([4, 1])
-
-with col_header_logo:
-    if os.path.exists("logo.jpg"):
-        st.image("logo.jpg", width=450)
-    else:
-        st.error("⚠️ File 'logo.jpg' non trovato su GitHub.")
-        st.title("REG - Technical Generator & Classification")
-
-with col_header_reset:
-    st.markdown("<div style='height: 60px;'></div>", unsafe_allow_html=True)
-    if st.button("🔄 AZZERA TUTTO", use_container_width=True):
-        for key in st.session_state.keys():
-            del st.session_state[key]
-        st.rerun()
-
-st.markdown("---")
-
-# =========================================================
-# DATI E DATABASE (Invariati)
+# 1. DATI E CONFIGURAZIONI
 # =========================================================
 MATERIALI_CONFIG = {
     "METAL COMP": {"FERRO": "IRON", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
@@ -165,14 +170,35 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# LOGICA UI
+# FUNZIONI
 # =========================================================
+def reset_all():
+    keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags"]
+    for k in keys_to_reset:
+        if k in st.session_state:
+            st.session_state[k] = [] if "tags" in k else ""
+
+# =========================================================
+# INTERFACCIA
+# =========================================================
+st.title("⚙️ Technical Generator & Classification")
+
+col_t, col_btn = st.columns([4, 1])
+with col_btn:
+    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
+
+st.markdown("---")
+
+# LAYOUT A DUE COLONNE
+# Sinistra: Macro Categoria + Compatibilità (CSS Giallo applicato qui)
+# Destra: Area di lavoro principale
 col_macro, col_workarea = st.columns([1, 3], gap="large")
 
 with col_macro:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
     
+    # Compatibilità (Sotto la categoria, nella colonna sinistra)
     if macro_it != "FASTENER":
         st.markdown("---")
         st.subheader("🔗 Compatibilità")
@@ -200,6 +226,7 @@ with col_workarea:
     
     extra_options = list(extra_dedicati_dict.keys())
     if extra_options:
+        # Questi pills sono nella colonna destra, quindi rimarranno del colore standard (Rossi/Arancio)
         extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
     else:
         extra_selezionati = []
@@ -233,8 +260,10 @@ with col_workarea:
         dim_dia, normativa = "", ""
 
 # =========================================================
-# GENERAZIONE FINALE CON LOGICA WITH/AND
+# GENERAZIONE, MODIFICA E COPIA
 # =========================================================
+
+# Spaziatore esplicito per staccare il bottone dai campi input
 st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True) 
 st.divider()
 
@@ -244,7 +273,6 @@ if 'stringa_editabile' not in st.session_state:
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     dim_final_parts = []
     
-    # Gestione Dimensioni
     if macro_it == "FASTENER":
         d_val = dim_dia.strip().upper()
         l_val = dim_l.strip().upper()
@@ -260,10 +288,17 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         if dim_p.strip(): dim_final_parts.append(f"P{dim_p.strip().upper()}")
         if dim_h.strip(): dim_final_parts.append(f"H{dim_h.strip().upper()}")
         lph_str = "X".join(dim_final_parts)
+        
         s_val = dim_s.strip()
-        dim_final = f"{lph_str} S{s_val}" if lph_str and s_val else (lph_str or (f"S{s_val}" if s_val else ""))
+        if lph_str and s_val:
+            dim_final = f"{lph_str} S{s_val}"
+        elif lph_str:
+            dim_final = lph_str
+        elif s_val:
+            dim_final = f"S{s_val}"
+        else:
+            dim_final = ""
 
-    # Gestione Extra
     extra_totali = [extra_dedicati_dict[ex] for ex in extra_selezionati]
     if extra_libero:
         try:
@@ -274,28 +309,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
 
     prefissi = [ex for ex in extra_totali if ex in TERMINI_ANTICIPATI]
     suffissi = [ex for ex in extra_totali if ex not in TERMINI_ANTICIPATI]
-
-    # --- NUOVA LOGICA: Sostituzione WITH con AND ---
-    cleaned_suffissi = []
-    with_already_used = False
-
-    # Controlliamo se la stringa centrale (materiale + parte) contiene già WITH
-    test_central = f"{mat_en} {' '.join(prefissi)} {part_en}".upper()
-    if "WITH " in test_central:
-        with_already_used = True
-
-    for s in suffissi:
-        # Se l'extra inizia con WITH e ne abbiamo già usato uno
-        if s.startswith("WITH ") and with_already_used:
-            cleaned_suffissi.append(s.replace("WITH ", "AND ", 1))
-        else:
-            if "WITH " in s or s.startswith("WITH "):
-                with_already_used = True
-            cleaned_suffissi.append(s)
-    # -----------------------------------------------
-
+    
     prefix_str = " ".join(prefissi) if prefissi else ""
-    extra_str = ", ".join(cleaned_suffissi) if cleaned_suffissi else ""
+    extra_str = ", ".join(suffissi) if suffissi else ""
+    
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
@@ -306,13 +323,21 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         
     st.session_state['stringa_editabile'] = " - ".join(final_segments).upper()
 
-# Visualizzazione Risultato (Invariata)
 if st.session_state['stringa_editabile']:
     st.markdown("### 📋 Risultato Finale")
     st.code(st.session_state['stringa_editabile'], language=None)
+    
     with st.expander("✏️ Modifica testo manualmente"):
-        st.text_input("Modifica qui:", key='stringa_editabile', label_visibility="collapsed")
+        st.text_input("Modifica qui e premi invio:", key='stringa_editabile', label_visibility="collapsed")
+
     lunghezza = len(st.session_state['stringa_editabile'])
-    if lunghezza >= 99: st.error(f"⚠️ LIMITE SUPERATO! ({lunghezza})")
-    else: st.success(f"Lunghezza: {lunghezza} caratteri")
-    st.info(f"**TAGS:** {tag_suggerimento.upper()} | {' | '.join([c.upper() for c in (comp_selezionate or [])])}")
+    if lunghezza >= 99:
+        st.error(f"⚠️ ATTENZIONE! SUPERATO IL LIMITE DI 99 CARATTERI (Totale: {lunghezza})")
+    else:
+        st.success(f"Lunghezza: {lunghezza} caratteri")
+
+    comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
+    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
+    st.info(f"**TAGS:** {' | '.join(all_tags)}")
+
+st.markdown("<style>.stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }</style>", unsafe_allow_html=True)
