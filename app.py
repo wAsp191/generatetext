@@ -2,22 +2,64 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # =========================================================
-# CONFIGURAZIONE PAGINA
+# CONFIGURAZIONE PAGINA E CSS AVANZATO
 # =========================================================
 st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
 
-# CSS Minimo solo per l'estetica del layout (no colori widget)
 st.markdown("""
     <style>
-        .block-container { padding-top: 1rem !important; }
-        div[data-testid="stVerticalBlock"] > div { margin-bottom: -5px !important; }
-        .stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }
-        header, footer { visibility: hidden; }
+        /* 1. COMPATTAZIONE SPAZI (GENERALE) */
+        .block-container {
+            padding-top: 1rem !important;
+            padding-bottom: 2rem !important;
+        }
+        /* Riduciamo il margine tra i blocchi verticali, ma non troppo */
+        div[data-testid="stVerticalBlock"] > div {
+            margin-bottom: -5px !important; 
+        }
+        
+        /* 2. SOLUZIONE PER I COLORI (MIRATA ALLE COLONNE) */
+        
+        /* COLONNA SINISTRA (Compatibilità): Tasti GIALLI */
+        /* Seleziona la prima colonna del layout principale e colora i pills al suo interno */
+        div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"] {
+            background-color: #fffde7 !important; /* Giallo pastello */
+            border: 1px solid #fbc02d !important; /* Bordo giallo scuro */
+            color: #333 !important;
+        }
+        
+        /* Colonna Sinistra: Quando SELEZIONATO */
+        div[data-testid="column"]:nth-of-type(1) div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
+            background-color: #fdd835 !important; /* Giallo intenso */
+            border: 1px solid #f9a825 !important;
+            color: black !important;
+            font-weight: bold !important;
+        }
+
+        /* COLONNA DESTRA (Extra): Tasti ROSSI/STANDARD (Opzionale, per forzare la differenza) */
+        div[data-testid="column"]:nth-of-type(2) div[data-testid="stBaseButton-secondaryPill"][aria-pressed="true"] {
+             /* Lasciamo il default di Streamlit (solitamente rosso/arancio) o forziamo un altro colore se vuoi */
+        }
+
+        /* 3. SPAZIATURA PULSANTE GENERA */
+        /* Aggiunge spazio sopra la linea divisoria finale per staccare il bottone dai campi input */
+        hr {
+            margin-top: 2rem !important;
+            margin-bottom: 1rem !important;
+        }
+        
+        /* 4. MIGLIORAMENTI VISIVI */
+        .stRadio > div { flex-wrap: wrap; display: flex; gap: 8px; }
+        h3 { font-size: 1.1rem !important; margin-top: 5px !important; }
+        
+        /* Nasconde header/footer standard per recuperare spazio */
+        header {visibility: hidden;}
+        footer {visibility: hidden;}
     </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# DATABASE E CONFIGURAZIONI
+# 1. DATI E CONFIGURAZIONI
 # =========================================================
 MATERIALI_CONFIG = {
     "METAL COMP": {"FERRO": "IRON", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
@@ -30,6 +72,7 @@ MATERIALI_CONFIG = {
 
 DATABASE = {
     "METAL COMP": {
+        "macro_en": "METAL COMPONENT",
         "Particolari": {
             "Piede di base": ["BASE FOOT", {"H90": "H90", "H100": "H100", "H150": "H150", "Con piedino regolabile": "WITH ADJUSTABLE FOOT", "Estensione": "-EXTENSION", "Innesto montante": "UPRIGHT GRAFT"}, "FOOT"],
             "Zoccolatura": ["PLINTH", {"H90": "FOR H90 BASE FOOT", "H100": "FOR BASE FOOT H100", "H150": "FOR BASE FOOT H150", "Liscia": "PLAIN", "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED", "Completa di paracolpo ABS": "WITH ABS BUFFER"}, "PLINTH"],
@@ -37,138 +80,264 @@ DATABASE = {
             "Copripiede": ["FOOT COVER", {"H90": "FOR H90 FOOT", "H100": "FOR H100 FOOT", "H150": "FOR H150 FOOT"}, "COVER"],
             "Chiusura": ["COVER", {"Superiore": "TOP", "Tra ripiani di base": "INTER-BASE SHELF", "Con scasso": "WITH RECESS"}, "COVER"],
             "Fiancata laterale": ["SIDE PANEL", {"Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", "Stondata": "ROUNDED", "Trapezoidale": "SLOPING", "Sagomata": "SHAPED"}, "SIDE-PANEL"],
-            "Mensola": ["BRACKET", {"SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "Per ripiano in vetro": "FOR GLASS SHELF", "Per ripiano in legno": "FOR WOODEN SHELF", "A pinza": "GRIPPED", "Minirack": "MINIRACK"}, "BRACKET"],
-            "Ripiano": ["SHELF", {"Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE", "Semicircolare": "SEMICIRCULAR", "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET"}, "SHELF"],
-            "Cesto in filo": ["WIRE BASKET", {"Per attacco montante": "FOR UPRIGHT", "Impilabile": "STACKABLE"}, "BASKET"],
-            "Cielino": ["CANOPY", {"Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Stondato": "CURVED", "Con illuminazione": "WITH LIGHTING"}, "CANOPY"],
-            "Ganci": ["HOOK", {"Singolo": "SINGLE", "Doppio": "DOUBLE", "Attacco barra": "HOOK FOR BAR", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"}, "HOOK"],
+            "Mensola": ["BRACKET", {"SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "Per ripiano in vetro": "FOR GLASS SHELF", "Per ripiano in legno": "FOR WOODEN SHELF", "A pinza": "GRIPPED", "Minirack": "MINIRACK", "1 Posizione": "ONE POSIION", "2 Posizioni": "TWO POSITION"}, "BRACKET"],
+            "Ripiano": ["SHELF", {"Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE", "Semicircolare": "SEMICIRCULAR", "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET", "Con portaprezzo": "WITH TICKET-HOLDER"}, "SHELF"],
+            "Cesto in filo": ["WIRE BASKET", {"Per attacco montante": "FOR UPRIGHT", "Per attacco fiancata": "FOR SIDE-PANEL", "Impilabile": "STACKABLE"}, "BASKET"],
+            "Cielino": ["CANOPY", {"Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Frontale in lamiera": "SHEET METAL FASCIA", "Con illuminazione": "WITH LIGHTING"}, "CANOPY"],
+            "Corrente": ["BEAM", {}, "BEAM"],
+            "Diagonale": ["DIAGONAL", {"Forata": "PERFORATED"}, "DIAGONAL"],
+            "Distanziali": ["SPACER", {}, "SPACER"],
+            "Ganci": ["HOOK", {"Singolo": "SINGLE", "Predisposto per portaprezzo": "ACCEPTS TICKET-HOLDER", "Doppio": "DOUBLE", "Rovescio": "REVERSE", "Attacco barra": "HOOK FOR BAR", "Attacco multilame": "HOOK FOR MULTISTRIP", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"}, "HOOK"],
             "Profilo": ["PROFILE", {"Profilo a L": "L-SHAPED", "Profilo a U": "U-SHAPED"}, "PROFILE"],
+            "Rinforzo": ["STIFFENER", {}, "STIFFENER"],
+            "Staffa": ["PLATE", {}, "PLATE"],
             "Ante": ["SHEET METAL DOOR", {"Scorrevoli": "SLIDING", "Con foro serratura": "WITH LOCK HOLE"}, "DOOR"],
             "Piastra di fissaggio": ["FIXING PLATE", {"Con viti": "COMPLETE WITH SCREW"}, "PLATE"],
-            "Cassetto estraibile": ["PULL-OUT DRAWER", {"Su ruote": "ON WHEELS", "Con serratura": "WITH LOCK"}, "DRAWER"],
-            "Divisorio": ["DIVIDER", {"In filo": "WIRE", "Trapezoidale": "SLOPING"}, "DIVIDER"],
-            "Frontalino": ["RISER", {"In filo": "WIRE", "Cromato": "CHROMED", "Verniciato": "PAINTED"}, "RISER"],
-            "Spalla": ["FRAME", {"L100 Z/M": "L100 Z/M", "L100 Z/S": "L100 Z/S", "L120 Z/M": "L120 Z/M", "L120 Z/S": "L120 Z/S", "ZINCATO": "GALVANIZED"}, "FRAME"],
+            "Cassetto estraibile": ["PULL-OUT DRAWER", {"Su ruote": "ON WHEELS", "Per piede H100": "FOR BASE FOOT H100", "Per piede H150": "FOR BASE FOOT H150", "Con serratura": "WITH LOCK", "Senza serratura": "WITHOUT LOCK"}, "DRAWER"],
+            "Coprimontante": ["UPRIGHT-COVER", {"Per montante H70": "FOR H70 UPRIGHT", "Per montante H90": "FOR H90 UPRIGHT"}, "COVER"],
+            "Pedana di base": ["BASE PLATFORM", {"Con rinforzi": "WITH REINFORCEMENT"}, "BASE"],
+            "Divisorio": ["DIVIDER", {"In filo": "WIRE", "Trapezoidale": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
+            "Frontalino": ["RISER", {"In filo": "WIRE", "Per ripiano": "FOR SHELF", "Cromato": "CHROMED", "Verniciato": "PAINTED"}, "RISER"],
+            "Compensazione": ["FILLER PIECE", {"Per piede di base": "FOR BASE FOOT", "Per spalle L100/L120": "FOR L100/L120 FRAME"}, "SPACER"],
+            "Controventatura": ["BRACING", {"Per montante": "FOR UPRIGHT", "Con mensole saldate": "WITH WELDING BRACKET", "Passo 25": "PITCH 25", "Passo 50": "PITCH 50"}, "BRACING"],
+            "Traversini": ["CROSS BAR", {"Forato": "PERFORATED", "Con mensole saldate": "WITH WELDING BRACKET", "Con viteria": "WITH SCREWS"}, "CROSS BAR"],
         }
     },
     "WOOD COMP": {
+        "macro_en": "WOOD COMPONENT",
         "Particolari": {
-            "Ripiano Legno": ["WOODEN SHELF", {"Con mensole": "WITH BRACKET", "Con lati bordati": "WITH EDGED SIDES", "Fresata": "MILLING"}, "SHELF"],
-            "Schienale Legno": ["WOODEN BACK", {"Con mensole": "WITH BRACKET", "Con lati bordati": "WITH EDGED SIDES"}, "PANEL"],
-            "Cielino": ["WOODEN CANOPY", {"Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con illuminazione": "WITH LIGHTING"}, "CANOPY"],
-            "Zoccolatura": ["WOODEN PLINTH", {"H100": "H100", "H150": "H150", "Con lati bordati": "WITH EDGED SIDES"}, "PLINTH"],
-            "Fiancata": ["WOODEN SIDE PANEL", {"Sagomata": "SHAPED", "Fresata": "MILLING"}, "SIDE PANEL"],
+            "Ripiano Legno": ["WOODEN SHELF", {"Con mensole": "WITH BRACKET", "Con lati bordati": "WITH EDGED SIDES", "Con zoccolatura": "WITH PLINTH", "Con viteria": "WITH SCREWS", "Fresata": "MILLING"}, "SHELF"],
+            "Schienale Legno": ["WOODEN BACK", {"Con mensole": "WITH BRACKET", "Con viteria": "WITH SCREWS", "Con lati bordati": "WITH EDGED SIDES"}, "PANEL"],
+            "Cielino": ["WOODEN CANOPY", {"Con mensole": "WITH BRACKET", "Con viteria": "WITH SCREWS", "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con lati bordati": "WITH EDGED SIDES"}, "CANOPY"],
+            "Zoccolatura": ["WOODEN PLINTH", {"H100": "H100", "H150": "H150", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "PLINTH"],
+            "Fiancata": ["WOODEN SIDE PANEL", {"Con mensole": "WITH BRACKET", "Sagomata": "SHAPED", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS", "Fresata": "MILLING"}, "SIDE PANEL"],
+            "Copripiede": ["WOODEN FOOT-COVER", {"H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "COVER"],
+            "Coprimontante": ["WOODEN UPRIGHT-COVER", {"Minirack": "MINIRACK", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "COVER"],
+            "Compensazione": ["WOODEN FILLER PIECE", {"Per Top legno": "FOR TOP SHELF"}, "SPACER"]
+        }
+    },
+    "PLASTIC COMP": {
+        "macro_en": "PLASTIC COMPONENT",
+        "Particolari": {
+            "Tappo": ["PLASTIC CAP", {}, "CAP"],
+            "Guarnizione": ["GASKET", {}, "ACCESSORY"],
+            "Divisorio": ["DIVIDER", {"Sloping": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
+            "Frontalino": ["RISER", {"Per ripiano": "FOR SHELF", "Trasparente": "TRASPARENT"}, "RISER"],
+            "Portaprezzo": ["TICKET-HOLDER", {"Trasparente": "TRASPARENT", "Colorato": "COLOURED", "Con tasca oscillante": "WITH LIFT-UP POCKET", "Adesivo": "ADHESIVE", "Con asola centrale": "WITH CENTRAL SLOT"}, "TICKET-HOLDER"]
+        }
+    },
+    "GLASS COMP": {
+        "macro_en": "GLASS COMPONENT",
+        "Particolari": {
+            "Ripiano": ["GLASS SHELF", {}, "SHELF"],
+            "Anta": ["GLASS DOOR", {"SX": "LEFT", "DX": "RIGHT", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"}, "DOOR"],
+            "Cancelletto": ["GLASS ARM", {"SX": "LEFT", "DX": "RIGHT", "Illuminato": "ILLUMINATED"}, "ARM"],
         }
     },
     "FASTENER": {
+        "macro_en": "FASTENER",
         "Particolari": {
-            "Vite": ["SCREW", {"Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUCK HEAD", "Testa esagonale": "HEX HEAD"}, "FASTENER"],
+            "Vite": ["SCREW", {"Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUCK HEAD", "Testa esagonale": "HEX HEAD", "Testa a croce": "CROSS HEAD", "Testa esagono incassato": "HEXAGON SOCKET HEAD"}, "FASTENER"],
             "Bullone": ["BOLT", {}, "FASTENER"],
             "Rondella": ["WASHER", {"Dentellata": "SERRATED LOCK"}, "FASTENER"],
             "Dado": ["NUT", {}, "FASTENER"],
+            "Inserti filettati": ["RIVET", {}, "FASTENER"]
+        }
+    },
+    "ASSEMBLY": {
+        "macro_en": "ASSEMBLY",
+        "Particolari": {
+            "Vetrina": ["SHOWCASE", {"Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con ante scorrevoli": "WITH SLIDING DOOR"}, "SHOWCASE"],
+            "Espositore": ["DISPLAY", {"Mobile": "MOBILE"}, "DISPLAY"],
+            "Totem": ["TOTEM", {"Mobile": "MOBILE"}, "DISPLAY"],
+            "Spalla": ["FRAME", {"Antisismico": "SEISMIC-RESISTANT", "L100 Z/M": "L100 Z/M", "L100 Z/S": "L100 Z/S", "L120 Z/M": "L120 Z/M", "L120 Z/S": "L120 Z/S", "L80 Z/M": "L80 Z/M", "L80 Z/S": "L80 Z/S", "L55": "L55", "ZINCATO": "GALVANIZED"}, "FRAME"],
+            "Controventatura": ["CROSS-BRACING", {}, "CROSS-BRACING"],
+            "Banco espositore di legno": ["WOODEN DESK", {"Con cassetto": "WITH DRAWER"}, "DESK"]
         }
     }
 }
 
-OPZIONI_COMPATIBILITA = ["F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
-TERMINI_ANTICIPATI = ["CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "TOP", "ROUNDED", "SLOPING", "SHAPED", "WIRE", "CHROMED", "PAINTED", "SLIDING", "CURVED", "STRAIGHT", "SINGLE", "DOUBLE", "L-SHAPED", "U-SHAPED"]
+OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
+OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
+OPZIONI_SPESSORE_STD = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
+OPZIONI_SPESSORE_WOOD = ["", "18mm", "20mm", "25mm", "30mm", "35mm"]
+
+TERMINI_ANTICIPATI = [
+    "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", 
+    "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", 
+    "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING", 
+    "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "UPRIGHT GRAFT"
+]
 
 # =========================================================
-# LOGICA AZZERA
+# FUNZIONI
 # =========================================================
 def reset_all():
-    for k in ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags"]:
-        if k in st.session_state: st.session_state[k] = [] if "tags" in k else ""
+    keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags"]
+    for k in keys_to_reset:
+        if k in st.session_state:
+            st.session_state[k] = [] if "tags" in k else ""
 
 # =========================================================
-# UI PRINCIPALE
+# INTERFACCIA
 # =========================================================
-st.title("⚙️ Technical Generator")
+st.title("⚙️ Technical Generator & Classification")
 
 col_t, col_btn = st.columns([4, 1])
-with col_btn: st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
+with col_btn:
+    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
 
-st.divider()
+st.markdown("---")
+
+# LAYOUT A DUE COLONNE
+# Sinistra: Macro Categoria + Compatibilità (CSS Giallo applicato qui)
+# Destra: Area di lavoro principale
 col_macro, col_workarea = st.columns([1, 3], gap="large")
 
 with col_macro:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
     
+    # Compatibilità (Sotto la categoria, nella colonna sinistra)
     if macro_it != "FASTENER":
         st.markdown("---")
         st.subheader("🔗 Compatibilità")
-        comp_selezionate = st.pills("Modelli:", options=OPZIONI_COMPATIBILITA, selection_mode="multi", key="comp_tags")
-    else: comp_selezionate = []
+        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+        comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
+    else:
+        comp_selezionate = []
 
 with col_workarea:
-    st.subheader("🛠️ 2. Dettagli")
-    materiali = MATERIALI_CONFIG.get(macro_it, {})
+    st.subheader("🛠️ 2. Materiale e Particolare")
+    materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
     mat_en = ""
-    if materiali:
-        mat_it = st.radio("Materiale:", options=list(materiali.keys()), horizontal=True)
-        mat_en = materiali[mat_it]
+    if materiali_disponibili:
+        mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
+        mat_en = materiali_disponibili[mat_it]
     
     part_dict = DATABASE[macro_it]["Particolari"]
-    scelta_part_it = st.radio("Elemento:", options=sorted(list(part_dict.keys())), horizontal=True)
-    part_en, extra_dict, tag_sugg = part_dict[scelta_part_it]
+    scelta_part_it = st.radio("Seleziona dettaglio:", options=sorted(list(part_dict.keys())), horizontal=True)
+    
+    dati_part = part_dict[scelta_part_it]
+    part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
 
     st.markdown("---")
-    st.subheader("✨ 3. Opzioni Extra")
-    extra_selezionati = st.pills("Extra:", options=list(extra_dict.keys()), selection_mode="multi", key="extra_tags")
-    extra_libero = st.text_input("Note libere (IT):", key="extra_text")
+    st.subheader(f"✨ 3. Extra per {scelta_part_it}")
+    
+    extra_options = list(extra_dedicati_dict.keys())
+    if extra_options:
+        # Questi pills sono nella colonna destra, quindi rimarranno del colore standard (Rossi/Arancio)
+        extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
+    else:
+        extra_selezionati = []
+        st.info("Nessuna opzione extra disponibile per questo elemento.")
 
-    st.subheader("📏 4. Dimensioni")
+    extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
+
+    st.subheader("📏 4. Dimensioni e Normative")
+    
     if macro_it == "FASTENER":
-        c1, c2 = st.columns(2)
+        c1, c2, c3 = st.columns(3)
         with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
         with c2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
-        dim_p, dim_h, dim_s = "", "", ""
+        with c3: normativa = st.selectbox("Normativa", options=OPZIONI_NORMATIVA)
+        dim_p, dim_h, dim_s = "", "", "" 
     else:
-        c1, c2, c3, c4 = st.columns(4)
-        with c1: dim_l = st.text_input("L", key="dim_l")
-        with c2: dim_p = st.text_input("P", key="dim_p")
-        with c3: dim_h = st.text_input("H", key="dim_h")
-        with c4: dim_s = st.text_input("S", key="dim_s")
-        dim_dia = ""
+        if macro_it == "ASSEMBLY":
+            c1, c2, c3 = st.columns(3)
+            dim_s = "" 
+        else:
+            c1, c2, c3, c4 = st.columns(4)
+        
+        with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+        with c2: dim_p = st.text_input("Profondità (P)", key="dim_p")
+        with c3: dim_h = st.text_input("Altezza (H)", key="dim_h")
+        
+        if macro_it != "ASSEMBLY":
+            lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
+            with c4: dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
+        
+        dim_dia, normativa = "", ""
 
 # =========================================================
-# GENERAZIONE
+# GENERAZIONE, MODIFICA E COPIA
 # =========================================================
+
+# Spaziatore esplicito per staccare il bottone dai campi input
+st.markdown("<div style='margin-top: 30px;'></div>", unsafe_allow_html=True) 
 st.divider()
-if 'stringa_editabile' not in st.session_state: st.session_state['stringa_editabile'] = ""
 
-if st.button("🚀 GENERA STRINGA", use_container_width=True):
-    # Dimensioni
-    parts = []
+if 'stringa_editabile' not in st.session_state:
+    st.session_state['stringa_editabile'] = ""
+
+if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
+    dim_final_parts = []
+    
     if macro_it == "FASTENER":
-        if dim_dia: parts.append(f"{'D' if not dim_dia.upper().startswith('M') else ''}{dim_dia.upper()}")
-        if dim_l: parts.append(f"L{dim_l.upper()}")
+        d_val = dim_dia.strip().upper()
+        l_val = dim_l.strip().upper()
+        if d_val:
+            prefix_d = "" if d_val.startswith('M') else "D"
+            dim_final_parts.append(f"{prefix_d}{d_val}")
+        if l_val:
+            dim_final_parts.append(f"L{l_val}")
+        dim_final = "X".join(dim_final_parts)
+        if normativa: dim_final += f" {normativa}"
     else:
-        if dim_l: parts.append(f"L{dim_l.upper()}")
-        if dim_p: parts.append(f"P{dim_p.upper()}")
-        if dim_h: parts.append(f"H{dim_h.upper()}")
-    
-    dim_str = "X".join(parts)
-    if not macro_it == "FASTENER" and dim_s: dim_str += f" S{dim_s.upper()}"
+        if dim_l.strip(): dim_final_parts.append(f"L{dim_l.strip().upper()}")
+        if dim_p.strip(): dim_final_parts.append(f"P{dim_p.strip().upper()}")
+        if dim_h.strip(): dim_final_parts.append(f"H{dim_h.strip().upper()}")
+        lph_str = "X".join(dim_final_parts)
+        
+        s_val = dim_s.strip()
+        if lph_str and s_val:
+            dim_final = f"{lph_str} S{s_val}"
+        elif lph_str:
+            dim_final = lph_str
+        elif s_val:
+            dim_final = f"S{s_val}"
+        else:
+            dim_final = ""
 
-    # Traduzione extra
-    extra_en = [extra_dict[ex] for ex in extra_selezionati]
+    extra_totali = [extra_dedicati_dict[ex] for ex in extra_selezionati]
     if extra_libero:
-        try: extra_en.append(GoogleTranslator(source='it', target='en').translate(extra_libero).upper())
-        except: extra_en.append(extra_libero.upper())
+        try:
+            extra_tradotto = GoogleTranslator(source='it', target='en').translate(extra_libero).upper()
+            extra_totali.append(extra_tradotto)
+        except:
+            extra_totali.append(extra_libero.upper())
 
-    pref = [e for e in extra_en if e in TERMINI_ANTICIPATI]
-    suff = [e for e in extra_en if e not in TERMINI_ANTICIPATI]
+    prefissi = [ex for ex in extra_totali if ex in TERMINI_ANTICIPATI]
+    suffissi = [ex for ex in extra_totali if ex not in TERMINI_ANTICIPATI]
     
-    desc = f"{mat_en} {' '.join(pref)} {part_en} {dim_str}".strip().replace("  ", " ")
-    res = [desc.upper()]
-    if suff: res.append(", ".join(suff).upper())
-    if comp_selezionate: res.append(", ".join(comp_selezionate))
+    prefix_str = " ".join(prefissi) if prefissi else ""
+    extra_str = ", ".join(suffissi) if suffissi else ""
     
-    st.session_state['stringa_editabile'] = " - ".join(res)
+    comp_list = [c for c in (comp_selezionate or []) if c.strip()]
+    comp_str = ", ".join(comp_list) if comp_list else ""
+
+    descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
+    final_segments = [descrizione_centrale]
+    if extra_str: final_segments.append(extra_str)
+    if comp_str: final_segments.append(comp_str)
+        
+    st.session_state['stringa_editabile'] = " - ".join(final_segments).upper()
 
 if st.session_state['stringa_editabile']:
-    st.code(st.session_state['stringa_editabile'])
-    st.text_input("Modifica manuale:", key='stringa_editabile')
-    st.info(f"Tag: {tag_sugg.upper()}")
+    st.markdown("### 📋 Risultato Finale")
+    st.code(st.session_state['stringa_editabile'], language=None)
+    
+    with st.expander("✏️ Modifica testo manualmente"):
+        st.text_input("Modifica qui e premi invio:", key='stringa_editabile', label_visibility="collapsed")
+
+    lunghezza = len(st.session_state['stringa_editabile'])
+    if lunghezza >= 99:
+        st.error(f"⚠️ ATTENZIONE! SUPERATO IL LIMITE DI 99 CARATTERI (Totale: {lunghezza})")
+    else:
+        st.success(f"Lunghezza: {lunghezza} caratteri")
+
+    comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
+    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
+    st.info(f"**TAGS:** {' | '.join(all_tags)}")
+
+st.markdown("<style>.stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }</style>", unsafe_allow_html=True)
