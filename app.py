@@ -97,7 +97,8 @@ DATABASE = {
         "Particolari": {
             "Vetrina": ["SHOWCASE", {"Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING"}, "SHOWCASE"],
             "Espositore": ["DISPLAY", {"Mobile": "MOBILE"}, "DISPLAY"],
-            "Totem": ["TOTEM", {"Mobile": "MOBILE"}, "DISPLAY"]
+            "Totem": ["TOTEM", {"Mobile": "MOBILE"}, "DISPLAY"],
+            "Spalla": ["FRAME", {"Antisismico": "SEISMIC-RESISTANT", "L100 Z/M", "L100 Z/S", "L120 Z/M", "L120 Z/S", "L80 Z/M", "L80 Z/S" "L55", "ZINCATO": "GALVANIZED"}, "FRAME"],
         }
     }
 }
