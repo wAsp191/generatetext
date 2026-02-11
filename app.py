@@ -206,6 +206,7 @@ with col_workarea:
 # =========================================================
 st.divider()
 
+# Inizializza lo stato della stringa se non esiste
 if 'stringa_editabile' not in st.session_state:
     st.session_state['stringa_editabile'] = ""
 
@@ -262,22 +263,27 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         
     st.session_state['stringa_editabile'] = " - ".join(final_segments).upper()
 
-# Visualizzazione Risultato
+# Visualizzazione Risultato Compatta
 if st.session_state['stringa_editabile']:
-    st.markdown("### 📝 1. Modifica la stringa (se necessario)")
-    stringa_modificata = st.text_input("Editing manuale:", value=st.session_state['stringa_editabile'])
-    st.session_state['stringa_editabile'] = stringa_modificata
-
-    st.markdown("### 📋 2. Copia il risultato finale")
+    st.markdown("### 📋 Risultato Finale")
+    
+    # 1. VISUALIZZA IL CODICE (Questo ha il tasto COPIA automatico)
     st.code(st.session_state['stringa_editabile'], language=None)
+    
+    # 2. SEZIONE MODIFICA (Nascosta in un expander per pulizia)
+    with st.expander("✏️ Modifica testo manualmente"):
+        # Usiamo il key per legarlo direttamente allo stato. 
+        # Se modifichi qui, si aggiorna automaticamente il blocco st.code sopra al prossimo ricaricamento (immediato)
+        st.text_input("Modifica qui e premi invio:", key='stringa_editabile', label_visibility="collapsed")
 
+    # Controllo lunghezza
     lunghezza = len(st.session_state['stringa_editabile'])
     if lunghezza >= 99:
         st.error(f"⚠️ ATTENZIONE! SUPERATO IL LIMITE DI 99 CARATTERI (Totale: {lunghezza})")
     else:
-        st.success(f"Stringa corretta (Caratteri: {lunghezza})")
+        st.success(f"Lunghezza: {lunghezza} caratteri")
 
-    st.markdown("### 💡 Tag suggeriti")
+    # Suggerimenti Tag
     comp_list = [c.upper() for c in comp_selezionate if c.strip()]
     all_tags = [tag_suggerimento.upper()] + comp_list
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
