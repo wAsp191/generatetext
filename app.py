@@ -11,23 +11,23 @@ st.markdown("""
         /* 1. DISTANZA TRA LE RIGHE (Radio e Pills) */
         /* Aumenta lo spazio verticale tra le opzioni dei materiali e i dettagli */
         div[data-testid="stWidgetLabel"] {
-            margin-bottom: 10px !important; /* Spazio tra titolo e opzioni */
+            margin-bottom: 5px !important; /* Spazio tra titolo e opzioni */
         }
         
         .stRadio div[role="radiogroup"] {
-            gap: 15px !important; /* Spazio tra i bottoni rotondi */
+            gap: 5px !important; /* Spazio tra i bottoni rotondi */
         }
 
         /* 2. GRANDEZZA FONT DELLE OPZIONI (I "flag" o dettagli) */
         /* Rende più leggibili i testi dei radio button e dei pills */
         .stRadio label p, .stPills label p {
-            font-size: 1.0rem !important; /* Aumenta la dimensione del testo */
-            font-weight: 600 !important;   /* Lo rende leggermente più spesso */
+            font-size: 0.8rem !important; /* Aumenta la dimensione del testo */
+            font-weight: 400 !important;   /* Lo rende leggermente più spesso */
         }
 
         /* 3. GRANDEZZA TITOLI DELLE SEZIONI */
         h3 {
-            font-size: 1.5rem !important;
+            font-size: 2.0rem !important;
             margin-top: 25px !important;
             margin-bottom: 20px !important;
         }
@@ -41,7 +41,7 @@ st.markdown("""
         .stRadio > div { 
             flex-wrap: wrap; 
             display: flex; 
-            gap: 15px; 
+            gap: 10px; 
         }
     </style>
 """, unsafe_allow_html=True)
