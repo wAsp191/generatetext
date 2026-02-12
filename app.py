@@ -122,18 +122,32 @@ DATABASE = {
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 
 # MODIFICA: Dizionario mappatura normativa per il menu FASTENER
-MAPPA_NORMATIVE = {
-    "": "",
-    "DIN 912 - Esagono incassato (Brugola)": "DIN 912",
-    "DIN 933 - Testa esagonale filetto totale": "DIN 933",
-    "DIN 931 - Testa esagonale filetto parziale": "DIN 931",
-    "DIN 7991 - Testa svasata esagono incassato": "DIN 7991",
-    "ISO 7380 - Testa bombata esagono incassato": "ISO 7380",
-    "DIN 125 - Rondella piana": "DIN 125",
-    "DIN 9021 - Rondella fascia larga": "DIN 9021",
-    "DIN 6798 - Rondella dentellata": "DIN 6798",
-    "DIN 934 - Dado esagonale": "DIN 934",
-    "DIN 985 - Dado autobloccante": "DIN 985"
+MAPPA_NORMATIVE_FASTENER = {
+    "Vite": {
+        "": "",
+        "DIN 912 - Brugola testa cilindrica": "DIN 912",
+        "DIN 933 - Esagonale filetto totale": "DIN 933",
+        "DIN 931 - Esagonale filetto parziale": "DIN 931",
+        "DIN 7991 - Testa svasata esagono incassato": "DIN 7991",
+        "ISO 7380 - Testa bombata esagono incassato": "ISO 7380",
+        "DIN 571 - Tirafondo per legno": "DIN 571"
+    },
+    "Dado": {
+        "": "",
+        "DIN 934 - Esagonale standard": "DIN 934",
+        "DIN 985 - Autobloccante nylon": "DIN 985",
+        "DIN 6923 - Flangiato zigrinato": "DIN 6923"
+    },
+    "Rondella": {
+        "": "",
+        "DIN 125 - Piana standard": "DIN 125",
+        "DIN 9021 - Fascia larga": "DIN 9021",
+        "DIN 6798 - Dentellata": "DIN 6798",
+        "DIN 127 - Grower (elastica)": "DIN 127"
+    },
+    "Bullone": { "": "" },
+    "Inserti filettati": { "": "" }
+}
 }
 
 OPZIONI_SPESSORE_STD = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
@@ -208,25 +222,28 @@ with col_workarea:
 
     st.subheader("📏 4. Dimensioni e Normative")
     
+    st.subheader("📏 4. Dimensioni e Normative")
+    
     if macro_it == "FASTENER":
         c1, c2, c3 = st.columns(3)
         with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
         with c2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
-        # MODIFICA: Selectbox con mappatura normativa
+        
+        # --- LOGICA FILTRO DINAMICO NORMATIVE ---
+        # Legge il dizionario in base al particolare selezionato (Vite, Dado, ecc.)
+        opzioni_filtrare = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
+        
         with c3: 
-            norma_scelta_estesa = st.selectbox("Normativa", options=list(MAPPA_NORMATIVE.keys()))
-            normativa = MAPPA_NORMATIVE[norma_scelta_estesa] # Estrae solo il codice (es: DIN 912)
+            norma_scelta_estesa = st.selectbox(
+                f"Normativa {scelta_part_it}", 
+                options=list(opzioni_filtrare.keys())
+            )
+            # Salviamo solo il codice pulito (es. DIN 912)
+            normativa = opzioni_filtrare[norma_scelta_estesa]
+            
         dim_p, dim_h, dim_s = "", "", "" 
     else:
-        if macro_it == "ASSEMBLY":
-            c1, c2, c3 = st.columns(3)
-            dim_s = "" 
-        else:
-            c1, c2, c3, c4 = st.columns(4)
-        
-        with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-        with c2: dim_p = st.text_input("Profondità (P)", key="dim_p")
-        with c3: dim_h = st.text_input("Altezza (H)", key="dim_h")
+        # ... qui rimane il tuo codice per gli altri componenti (ASSEMBLY, ecc.) ...
         
         if macro_it != "ASSEMBLY":
             lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
