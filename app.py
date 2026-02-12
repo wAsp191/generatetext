@@ -20,7 +20,7 @@ st.markdown("""
         /* 2. GRANDEZZA FONT DELLE OPZIONI */
         .stRadio label p, .stPills label p {
             font-size: 1.0rem !important;
-            font-weight: 500 !important;
+            font-weight: 450 !important;
         }
 
         /* 3. GRANDEZZA TITOLI DELLE SEZIONI */
