@@ -346,7 +346,7 @@ with st.sidebar.expander("🆘 Segnala mancanza o errore", expanded=False):
     st.write("Usa questo spazio per suggerire nuovi materiali, particolari o correzioni.")
     tipo_segnalazione = st.selectbox(
         "Cosa vorresti aggiungere?", 
-        ["Particolare Mancante", "Materiale", "Normativa", "Errore Traduzione", "Altro"],
+        ["Particolare Mancante", "Materiale", "Aggiungi/rimuovi Extra", "Normativa", "Errore Traduzione", "Altro"],
         key="tipo_fb"
     )
     nota_feedback = st.text_area("Descrivi la modifica:", placeholder="Es: Manca la vite testa cilindrica DIN 912...", key="nota_fb")
