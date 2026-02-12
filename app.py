@@ -50,7 +50,7 @@ DATABASE = {
             "Controventatura": ["BRACING", {"Per montante": "FOR UPRIGHT", "Con mensole saldate": "WITH WELDING BRACKET", "Passo 25": "PITCH 25", "Passo 50": "PITCH 50"}, "BRACING"],
             "Traversini": ["CROSS BAR", {"Forato": "PERFORATED", "Con mensole saldate": "WITH WELDING BRACKET", "Con viteria": "WITH SCREWS"}, "CROSS BAR"],
             "Tubolare": ["TUBULAR", {"Piegato-saldato": "BENT AND WELDED", "Con mensole saldate": "WITH WELDING BRACKET", "Con viteria": "WITH SCREWS"}, "BAR"],
-            "Filo": ["WIRE", {"Piegato-saldato": "BENT AND WELDED", "Con viteria saldata": "WITH WELDING SCREWS"}, "WIRE"],
+            "Filo": ["WIRE", {"Piegato": "BENT", "Piegato-saldato": "BENT AND WELDED", "Con viteria saldata": "WITH WELDING SCREWS"}, "WIRE"],
         }
     },
     "WOOD COMP": {
@@ -99,11 +99,11 @@ DATABASE = {
         "Particolari": {
             "Vetrina": ["SHOWCASE", {"Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con ante scorrevoli": "WITH SLIDING DOOR"}, "SHOWCASE"],
             "Espositore": ["DISPLAY", {"Mobile": "MOBILE"}, "DISPLAY"],
-            "Totem": ["TOTEM", {"Mobile": "MOBILE"}, "DISPLAY"],
+            "Totem": ["TOTEM", {"Mobile": "MOBILE", "Girevole": "SWIVEL"}, "DISPLAY"],
             "Spalla": ["FRAME", {"Antisismico": "SEISMIC-RESISTANT", "L100 Z/M": "L100 Z/M", "L100 Z/S": "L100 Z/S", "L120 Z/M": "L120 Z/M", "L120 Z/S": "L120 Z/S", "L80 Z/M": "L80 Z/M", "L80 Z/S": "L80 Z/S", "L55": "L55", "ZINCATO": "GALVANIZED"}, "FRAME"],
             "Controventatura": ["CROSS-BRACING", {}, "CROSS-BRACING"],
-            "Banco espositore di legno": ["WOODEN DESK", {"Con cassetto": "WITH DRAWER"}, "DESK"],
-            "Avancassa": ["IMPULSE UNIT", {"Con ripiani": "WITH SHELF", "Con ripiani inclinati": "WITH INCLUNATED SHELF", "Con rete divisoria": "WITH DIVIDING NET"}, "DISPLAY"],
+            "Banco espositore di legno": ["WOODEN DESK", {"Con cassetto": "WITH DRAWER", "Con ruote": "WITH WHEELS"}, "DESK"],
+            "Avancassa": ["IMPULSE UNIT", {"Con ripiani": "WITH SHELF", "Con ripiani inclinati": "WITH INCLUNATED SHELF", "Con rete divisoria": "WITH DIVIDING NET", "Con ruote": "WITH WHEELS", "Con ganci": "WITH HOOKS", "Con batticarrello": "WITH TROLLEY BEATER"}, "DISPLAY"],
         }
     }
 }
@@ -132,7 +132,7 @@ def reset_all():
 # =========================================================
 # INTERFACCIA
 # =========================================================
-st.title("⚙️ Technical Generator & Classification")
+st.title("⚙️ REG - Title Generator & Classification")
 
 col_t, col_btn = st.columns([4, 1])
 with col_btn:
