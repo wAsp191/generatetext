@@ -6,6 +6,46 @@ from deep_translator import GoogleTranslator
 # =========================================================
 st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
 
+st.markdown("""
+    <style>
+        /* 1. DISTANZA TRA LE RIGHE (Radio e Pills) */
+        /* Aumenta lo spazio verticale tra le opzioni dei materiali e i dettagli */
+        div[data-testid="stWidgetLabel"] {
+            margin-bottom: 10px !important; /* Spazio tra titolo e opzioni */
+        }
+        
+        .stRadio div[role="radiogroup"] {
+            gap: 15px !important; /* Spazio tra i bottoni rotondi */
+        }
+
+        /* 2. GRANDEZZA FONT DELLE OPZIONI (I "flag" o dettagli) */
+        /* Rende più leggibili i testi dei radio button e dei pills */
+        .stRadio label p, .stPills label p {
+            font-size: 1.1rem !important; /* Aumenta la dimensione del testo */
+            font-weight: 500 !important;   /* Lo rende leggermente più spesso */
+        }
+
+        /* 3. GRANDEZZA TITOLI DELLE SEZIONI */
+        h3 {
+            font-size: 1.4rem !important;
+            margin-top: 20px !important;
+            margin-bottom: 15px !important;
+        }
+
+        /* 4. SPAZIO GENERALE TRA LE COLONNE */
+        [data-testid="column"] {
+            padding: 15px !important;
+        }
+        
+        /* Layout orizzontale per i radio (Materiali e Dettagli) */
+        .stRadio > div { 
+            flex-wrap: wrap; 
+            display: flex; 
+            gap: 15px; 
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 # =========================================================
 # 1. DATI E CONFIGURAZIONI
 # =========================================================
