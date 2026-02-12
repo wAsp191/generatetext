@@ -21,15 +21,15 @@ st.markdown("""
         /* 2. GRANDEZZA FONT DELLE OPZIONI (I "flag" o dettagli) */
         /* Rende più leggibili i testi dei radio button e dei pills */
         .stRadio label p, .stPills label p {
-            font-size: 1.1rem !important; /* Aumenta la dimensione del testo */
-            font-weight: 500 !important;   /* Lo rende leggermente più spesso */
+            font-size: 1.0rem !important; /* Aumenta la dimensione del testo */
+            font-weight: 600 !important;   /* Lo rende leggermente più spesso */
         }
 
         /* 3. GRANDEZZA TITOLI DELLE SEZIONI */
         h3 {
-            font-size: 1.4rem !important;
-            margin-top: 20px !important;
-            margin-bottom: 15px !important;
+            font-size: 1.5rem !important;
+            margin-top: 25px !important;
+            margin-bottom: 20px !important;
         }
 
         /* 4. SPAZIO GENERALE TRA LE COLONNE */
