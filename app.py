@@ -8,39 +8,12 @@ st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
 
 st.markdown("""
     <style>
-        /* 1. DISTANZA TRA LE RIGHE (Radio e Pills) */
-        div[data-testid="stWidgetLabel"] {
-            margin-bottom: 5px !important;
-        }
-        
-        .stRadio div[role="radiogroup"] {
-            gap: 5px !important;
-        }
-
-        /* 2. GRANDEZZA FONT DELLE OPZIONI */
-        .stRadio label p, .stPills label p {
-            font-size: 1.0rem !important;
-            font-weight: 450 !important;
-        }
-
-        /* 3. GRANDEZZA TITOLI DELLE SEZIONI */
-        h3 {
-            font-size: 2.0rem !important;
-            margin-top: 25px !important;
-            margin-bottom: 20px !important;
-        }
-
-        /* 4. SPAZIO GENERALE TRA LE COLONNE */
-        [data-testid="column"] {
-            padding: 15px !important;
-        }
-        
-        /* Layout orizzontale per i radio */
-        .stRadio > div { 
-            flex-wrap: wrap; 
-            display: flex; 
-            gap: 10px; 
-        }
+        div[data-testid="stWidgetLabel"] { margin-bottom: 5px !important; }
+        .stRadio div[role="radiogroup"] { gap: 5px !important; }
+        .stRadio label p, .stPills label p { font-size: 1.0rem !important; font-weight: 450 !important; }
+        h3 { font-size: 2.0rem !important; margin-top: 25px !important; margin-bottom: 20px !important; }
+        [data-testid="column"] { padding: 15px !important; }
+        .stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -125,7 +98,7 @@ DATABASE = {
     "FASTENER": {
         "macro_en": "FASTENER",
         "Particolari": {
-            "Vite": ["SCREW", {"Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUCK HEAD", "Testa esagonale": "HEX HEAD", "Testa a croce": "CROSS HEAD", "Testa esagono incassato": "HEXAGON SOCKET HEAD"}, "FASTENER"],
+            "Vite": ["SCREW", {"Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUCK HEAD", "Testa esagonale": "HEX HEAD", "Testa a croce": "CROSS HEAD", "Testa esagono incassato": "HEXAGON SOCKET HEAD", "Testa Bombata": "T-BOM"}, "FASTENER"],
             "Bullone": ["BOLT", {}, "FASTENER"],
             "Rondella": ["WASHER", {"Dentellata": "SERRATED LOCK"}, "FASTENER"],
             "Dado": ["NUT", {}, "FASTENER"],
@@ -136,7 +109,7 @@ DATABASE = {
         "macro_en": "ASSEMBLY",
         "Particolari": {
             "Vetrina": ["SHOWCASE", {"Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con ante scorrevoli": "WITH SLIDING DOOR"}, "SHOWCASE"],
-            "Espositore": ["DISPLAY", {"Mobile": "MOBILE"}, "DISPLAY"],
+            "Espositore": ["DISPLAY", {"Mobile": "MOBILE", "Per alimenti": "FOR FOOD"}, "DISPLAY"],
             "Totem": ["TOTEM", {"Mobile": "MOBILE", "Girevole": "SWIVEL"}, "DISPLAY"],
             "Spalla": ["FRAME", {"Antisismico": "SEISMIC-RESISTANT", "L100 Z/M": "L100 Z/M", "L100 Z/S": "L100 Z/S", "L120 Z/M": "L120 Z/M", "L120 Z/S": "L120 Z/S", "L80 Z/M": "L80 Z/M", "L80 Z/S": "L80 Z/S", "L55": "L55", "ZINCATO": "GALVANIZED"}, "FRAME"],
             "Controventatura": ["CROSS-BRACING", {}, "CROSS-BRACING"],
@@ -147,7 +120,22 @@ DATABASE = {
 }
 
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
-OPZIONI_NORMATIVA = ["", "DIN 912", "DIN 933"]
+
+# MODIFICA: Dizionario mappatura normativa per il menu FASTENER
+MAPPA_NORMATIVE = {
+    "": "",
+    "DIN 912 - Esagono incassato (Brugola)": "DIN 912",
+    "DIN 933 - Testa esagonale filetto totale": "DIN 933",
+    "DIN 931 - Testa esagonale filetto parziale": "DIN 931",
+    "DIN 7991 - Testa svasata esagono incassato": "DIN 7991",
+    "ISO 7380 - Testa bombata esagono incassato": "ISO 7380",
+    "DIN 125 - Rondella piana": "DIN 125",
+    "DIN 9021 - Rondella fascia larga": "DIN 9021",
+    "DIN 6798 - Rondella dentellata": "DIN 6798",
+    "DIN 934 - Dado esagonale": "DIN 934",
+    "DIN 985 - Dado autobloccante": "DIN 985"
+}
+
 OPZIONI_SPESSORE_STD = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
 OPZIONI_SPESSORE_WOOD = ["", "18mm", "20mm", "25mm", "30mm", "35mm"]
 
@@ -224,7 +212,10 @@ with col_workarea:
         c1, c2, c3 = st.columns(3)
         with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
         with c2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
-        with c3: normativa = st.selectbox("Normativa", options=OPZIONI_NORMATIVA)
+        # MODIFICA: Selectbox con mappatura normativa
+        with c3: 
+            norma_scelta_estesa = st.selectbox("Normativa", options=list(MAPPA_NORMATIVE.keys()))
+            normativa = MAPPA_NORMATIVE[norma_scelta_estesa] # Estrae solo il codice (es: DIN 912)
         dim_p, dim_h, dim_s = "", "", "" 
     else:
         if macro_it == "ASSEMBLY":
@@ -264,6 +255,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         if l_val:
             dim_final_parts.append(f"L{l_val}")
         dim_final = "X".join(dim_final_parts)
+        # Qui usiamo 'normativa' che contiene solo il codice pulito
         if normativa: dim_final += f" {normativa}"
     else:
         if dim_l.strip(): dim_final_parts.append(f"L{dim_l.strip().upper()}")
@@ -303,16 +295,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     if extra_str: final_segments.append(extra_str)
     if comp_str: final_segments.append(comp_str)
     
-    # --- LOGICA CORREZIONE WITH / AND ---
-    # Uniamo tutto in una stringa temporanea in maiuscolo
     temp_str = " - ".join(final_segments).upper().replace("  ", " ")
-    
-    # 1. Rimuove raddoppi immediati (es: WITH WITH -> WITH)
     temp_str = temp_str.replace("WITH WITH", "WITH")
     
-    # 2. Se WITH compare più di una volta, trasforma i successivi in AND
     if temp_str.count("WITH") > 1:
-        # Trova la posizione della fine del primo "WITH"
         first_with_end = temp_str.find("WITH") + 4
         parte_iniziale = temp_str[:first_with_end]
         parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
@@ -335,4 +321,7 @@ if st.session_state['stringa_editabile']:
 
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
+    # Se è stata scelta una normativa, la aggiungiamo anche ai TAGS
+    if normativa:
+        all_tags.append(normativa.upper())
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
