@@ -333,3 +333,59 @@ if st.session_state['stringa_editabile']:
     if normativa:
         all_tags.append(normativa.upper())
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
+
+# =========================================================
+# 5. SISTEMA FEEDBACK PER BETA TEST (Aggiungi in fondo)
+# =========================================================
+
+st.sidebar.markdown("---")
+st.sidebar.header("📢 Beta Test Feedback")
+
+# Area per i colleghi
+with st.sidebar.expander("🆘 Segnala mancanza o errore", expanded=False):
+    st.write("Usa questo spazio per suggerire nuovi materiali, particolari o correzioni.")
+    tipo_segnalazione = st.selectbox(
+        "Cosa vorresti aggiungere?", 
+        ["Particolare Mancante", "Materiale", "Normativa", "Errore Traduzione", "Altro"],
+        key="tipo_fb"
+    )
+    nota_feedback = st.text_area("Descrivi la modifica:", placeholder="Es: Manca la vite testa cilindrica DIN 912...", key="nota_fb")
+    
+    if st.button("Invia Segnalazione", use_container_width=True):
+        if nota_feedback:
+            # Formattazione riga: Data/Ora (opzionale), Tipo, Messaggio
+            import datetime
+            ora = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            # Pulizia del testo per evitare problemi col CSV (rimozione punti e virgola)
+            nota_pulita = nota_feedback.replace(";", ",").replace("\n", " ")
+            nuova_riga = f"{ora};{tipo_segnalazione};{nota_pulita}\n"
+            
+            # Scrittura su file (Append mode)
+            try:
+                with open("feedback.csv", "a", encoding="utf-8") as f:
+                    f.write(nuova_riga)
+                st.success("✅ Ricevuto! Grazie per l'aiuto.")
+            except Exception as e:
+                st.error(f"Errore nel salvataggio: {e}")
+        else:
+            st.warning("Inserisci un messaggio prima di inviare.")
+
+# Area riservata a te per il recupero dati
+st.sidebar.markdown("---")
+with st.sidebar.expander("🛠️ Area Admin (Download)"):
+    pw = st.text_input("Password accesso dati", type="password")
+    # Puoi scegliere una password semplice, es: "admin2024"
+    if pw == "admin2024": 
+        try:
+            with open("feedback.csv", "rb") as file:
+                st.download_button(
+                    label="📥 SCARICA TUTTI I FEEDBACK",
+                    data=file,
+                    file_name="feedback_colleghi.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
+        except FileNotFoundError:
+            st.info("Nessun feedback presente al momento.")
+    elif pw != "":
+        st.error("Password errata")
