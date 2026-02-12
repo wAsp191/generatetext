@@ -49,6 +49,8 @@ DATABASE = {
             "Compensazione": ["FILLER PIECE", {"Per piede di base": "FOR BASE FOOT", "Per spalle L100/L120": "FOR L100/L120 FRAME"}, "SPACER"],
             "Controventatura": ["BRACING", {"Per montante": "FOR UPRIGHT", "Con mensole saldate": "WITH WELDING BRACKET", "Passo 25": "PITCH 25", "Passo 50": "PITCH 50"}, "BRACING"],
             "Traversini": ["CROSS BAR", {"Forato": "PERFORATED", "Con mensole saldate": "WITH WELDING BRACKET", "Con viteria": "WITH SCREWS"}, "CROSS BAR"],
+            "Tubolare": ["TUBULAR", {"Piegato-saldato": "BENT AND WELDED", "Con mensole saldate": "WITH WELDING BRACKET", "Con viteria": "WITH SCREWS"}, "BAR"],
+            "Filo": ["WIRE", {"Piegato-saldato": "BENT AND WELDED", "Con viteria saldata": "WITH WELDING SCREWS"}, "WIRE"],
         }
     },
     "WOOD COMP": {
@@ -100,7 +102,8 @@ DATABASE = {
             "Totem": ["TOTEM", {"Mobile": "MOBILE"}, "DISPLAY"],
             "Spalla": ["FRAME", {"Antisismico": "SEISMIC-RESISTANT", "L100 Z/M": "L100 Z/M", "L100 Z/S": "L100 Z/S", "L120 Z/M": "L120 Z/M", "L120 Z/S": "L120 Z/S", "L80 Z/M": "L80 Z/M", "L80 Z/S": "L80 Z/S", "L55": "L55", "ZINCATO": "GALVANIZED"}, "FRAME"],
             "Controventatura": ["CROSS-BRACING", {}, "CROSS-BRACING"],
-            "Banco espositore di legno": ["WOODEN DESK", {"Con cassetto": "WITH DRAWER"}, "DESK"]
+            "Banco espositore di legno": ["WOODEN DESK", {"Con cassetto": "WITH DRAWER"}, "DESK"],
+            "Avancassa": ["IMPULSE UNIT", {"Con ripiani": "WITH SHELF", "Con ripiani inclinati": "WITH INCLUNATED SHELF", "Con rete divisoria": "WITH DIVIDING NET"}, "DISPLAY"],
         }
     }
 }
