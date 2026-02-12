@@ -9,20 +9,18 @@ st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
 st.markdown("""
     <style>
         /* 1. DISTANZA TRA LE RIGHE (Radio e Pills) */
-        /* Aumenta lo spazio verticale tra le opzioni dei materiali e i dettagli */
         div[data-testid="stWidgetLabel"] {
-            margin-bottom: 5px !important; /* Spazio tra titolo e opzioni */
+            margin-bottom: 5px !important;
         }
         
         .stRadio div[role="radiogroup"] {
-            gap: 5px !important; /* Spazio tra i bottoni rotondi */
+            gap: 5px !important;
         }
 
-        /* 2. GRANDEZZA FONT DELLE OPZIONI (I "flag" o dettagli) */
-        /* Rende più leggibili i testi dei radio button e dei pills */
+        /* 2. GRANDEZZA FONT DELLE OPZIONI */
         .stRadio label p, .stPills label p {
-            font-size: 1.0rem !important; /* Aumenta la dimensione del testo */
-            font-weight: 500 !important;   /* Lo rende leggermente più spesso */
+            font-size: 1.0rem !important;
+            font-weight: 500 !important;
         }
 
         /* 3. GRANDEZZA TITOLI DELLE SEZIONI */
@@ -37,7 +35,7 @@ st.markdown("""
             padding: 15px !important;
         }
         
-        /* Layout orizzontale per i radio (Materiali e Dettagli) */
+        /* Layout orizzontale per i radio */
         .stRadio > div { 
             flex-wrap: wrap; 
             display: flex; 
@@ -300,12 +298,27 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
-   descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
+    descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
     final_segments = [descrizione_centrale]
     if extra_str: final_segments.append(extra_str)
     if comp_str: final_segments.append(comp_str)
-        
-    st.session_state['stringa_editabile'] = " - ".join(final_segments).upper()
+    
+    # --- LOGICA CORREZIONE WITH / AND ---
+    # Uniamo tutto in una stringa temporanea in maiuscolo
+    temp_str = " - ".join(final_segments).upper().replace("  ", " ")
+    
+    # 1. Rimuove raddoppi immediati (es: WITH WITH -> WITH)
+    temp_str = temp_str.replace("WITH WITH", "WITH")
+    
+    # 2. Se WITH compare più di una volta, trasforma i successivi in AND
+    if temp_str.count("WITH") > 1:
+        # Trova la posizione della fine del primo "WITH"
+        first_with_end = temp_str.find("WITH") + 4
+        parte_iniziale = temp_str[:first_with_end]
+        parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
+        temp_str = parte_iniziale + parte_restante
+    
+    st.session_state['stringa_editabile'] = temp_str.replace("  ", " ")
 
 if st.session_state['stringa_editabile']:
     st.markdown("### 📋 Risultato Finale")
