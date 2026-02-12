@@ -148,7 +148,6 @@ MAPPA_NORMATIVE_FASTENER = {
     "Bullone": { "": "" },
     "Inserti filettati": { "": "" }
 }
-}
 
 OPZIONI_SPESSORE_STD = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
 OPZIONI_SPESSORE_WOOD = ["", "18mm", "20mm", "25mm", "30mm", "35mm"]
