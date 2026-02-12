@@ -121,7 +121,6 @@ DATABASE = {
 
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F50", "F50 BESPOKE", "UNIVERSAL", "FORTISSIMO"]
 
-# MODIFICA: Dizionario mappatura normativa per il menu FASTENER
 MAPPA_NORMATIVE_FASTENER = {
     "Vite": {
         "": "",
@@ -221,28 +220,27 @@ with col_workarea:
 
     st.subheader("📏 4. Dimensioni e Normative")
     
-    st.subheader("📏 4. Dimensioni e Normative")
-    
     if macro_it == "FASTENER":
         c1, c2, c3 = st.columns(3)
         with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
         with c2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
         
-        # --- LOGICA FILTRO DINAMICO NORMATIVE ---
-        # Legge il dizionario in base al particolare selezionato (Vite, Dado, ecc.)
         opzioni_filtrare = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-        
         with c3: 
-            norma_scelta_estesa = st.selectbox(
-                f"Normativa {scelta_part_it}", 
-                options=list(opzioni_filtrare.keys())
-            )
-            # Salviamo solo il codice pulito (es. DIN 912)
+            norma_scelta_estesa = st.selectbox(f"Normativa {scelta_part_it}", options=list(opzioni_filtrare.keys()))
             normativa = opzioni_filtrare[norma_scelta_estesa]
             
         dim_p, dim_h, dim_s = "", "", "" 
     else:
-        # ... qui rimane il tuo codice per gli altri componenti (ASSEMBLY, ecc.) ...
+        if macro_it == "ASSEMBLY":
+            c1, c2, c3 = st.columns(3)
+            dim_s = "" 
+        else:
+            c1, c2, c3, c4 = st.columns(4)
+        
+        with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+        with c2: dim_p = st.text_input("Profondità (P)", key="dim_p")
+        with c3: dim_h = st.text_input("Altezza (H)", key="dim_h")
         
         if macro_it != "ASSEMBLY":
             lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
@@ -251,7 +249,7 @@ with col_workarea:
         dim_dia, normativa = "", ""
 
 # =========================================================
-# GENERAZIONE, MODIFICA E COPIA
+# GENERAZIONE
 # =========================================================
 
 st.divider()
@@ -271,7 +269,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         if l_val:
             dim_final_parts.append(f"L{l_val}")
         dim_final = "X".join(dim_final_parts)
-        # Qui usiamo 'normativa' che contiene solo il codice pulito
         if normativa: dim_final += f" {normativa}"
     else:
         if dim_l.strip(): dim_final_parts.append(f"L{dim_l.strip().upper()}")
@@ -280,14 +277,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         lph_str = "X".join(dim_final_parts)
         
         s_val = dim_s.strip()
-        if lph_str and s_val:
-            dim_final = f"{lph_str} S{s_val}"
-        elif lph_str:
-            dim_final = lph_str
-        elif s_val:
-            dim_final = f"S{s_val}"
-        else:
-            dim_final = ""
+        if lph_str and s_val: dim_final = f"{lph_str} S{s_val}"
+        elif lph_str: dim_final = lph_str
+        elif s_val: dim_final = f"S{s_val}"
+        else: dim_final = ""
 
     extra_totali = [extra_dedicati_dict[ex] for ex in extra_selezionati]
     if extra_libero:
@@ -337,7 +330,6 @@ if st.session_state['stringa_editabile']:
 
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
-    # Se è stata scelta una normativa, la aggiungiamo anche ai TAGS
     if normativa:
         all_tags.append(normativa.upper())
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
