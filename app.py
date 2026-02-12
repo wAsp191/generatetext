@@ -300,9 +300,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
-    # Assembla, pulisce i doppi spazi e corregge il raddoppio di WITH
-descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
-descrizione_centrale = descrizione_centrale.replace("WITH WITH", "WITH").replace("WITH  WITH", "WITH")
+   descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
     final_segments = [descrizione_centrale]
     if extra_str: final_segments.append(extra_str)
     if comp_str: final_segments.append(comp_str)
