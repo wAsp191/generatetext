@@ -21,8 +21,8 @@ st.markdown("""
         /* 2. GRANDEZZA FONT DELLE OPZIONI (I "flag" o dettagli) */
         /* Rende più leggibili i testi dei radio button e dei pills */
         .stRadio label p, .stPills label p {
-            font-size: 0.8rem !important; /* Aumenta la dimensione del testo */
-            font-weight: 400 !important;   /* Lo rende leggermente più spesso */
+            font-size: 1.0rem !important; /* Aumenta la dimensione del testo */
+            font-weight: 500 !important;   /* Lo rende leggermente più spesso */
         }
 
         /* 3. GRANDEZZA TITOLI DELLE SEZIONI */
