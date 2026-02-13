@@ -1,5 +1,6 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
+import datetime
 
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA
@@ -187,16 +188,18 @@ with col_macro:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
     
-    ce_1090_active = False # Inizializzazione
+    # CORREZIONE: Inizializzazione coerente
+    uni_en_1090_active = False 
+    
     if macro_it != "FASTENER":
         st.markdown("---")
         st.subheader("🔗 Compatibilità")
         pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
         comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
         
-        # MODIFICA RICHIESTA: Selezionando FORTISSIMO appare opzione UNI EN-1090-1
         if "FORTISSIMO" in comp_selezionate:
             st.warning("⚡ Configurazione Strutturale")
+            # CORREZIONE: Utilizzo dello stesso nome variabile
             uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", value=False)
     else:
         comp_selezionate = []
@@ -322,9 +325,9 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
         temp_str = parte_iniziale + parte_restante
     
-    # MODIFICA RICHIESTA: Prefisso EN-1090 all'inizio della stringa
-    if en_1090_active:
-        temp_str = f" EN-1090 - {temp_str}"
+    # CORREZIONE: Utilizzo della variabile corretta e prefisso
+    if uni_en_1090_active:
+        temp_str = f"UNI EN-1090 - {temp_str}"
         
     st.session_state['stringa_editabile'] = temp_str.replace("  ", " ")
 
@@ -344,7 +347,7 @@ if st.session_state['stringa_editabile']:
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
     
-    # Aggiunta tag UNI EN-1090-1 se attivo
+    # CORREZIONE: Utilizzo variabile corretta
     if uni_en_1090_active:
         all_tags.append("UNI EN-1090-1")
         
@@ -370,7 +373,6 @@ with st.sidebar.expander("🆘 Segnala mancanza o errore", expanded=False):
     
     if st.button("Invia Segnalazione", use_container_width=True):
         if nota_feedback:
-            import datetime
             ora = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
             nota_pulita = nota_feedback.replace(";", ",").replace("\n", " ")
             nuova_riga = f"{ora};{tipo_segnalazione};{nota_pulita}\n"
