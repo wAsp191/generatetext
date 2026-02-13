@@ -2,7 +2,7 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # =========================================================
-# CONFIGURAZIONE PAGINA
+# 0. CONFIGURAZIONE PAGINA
 # =========================================================
 st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
 
