@@ -22,8 +22,6 @@ st.markdown("""
 # 1. DATI E CONFIGURAZIONI
 # =========================================================
 
-# --- NUOVA SEZIONE: CONFIGURAZIONE SOTTO-MENU (Modificabile in autonomia) ---
-# Se un'opzione extra è presente qui, apparirà un menu a tendina dedicato.
 SUB_OPTIONS_CONFIG = {
     "VPA": {
         "Serie S": "S SERIES",
@@ -35,7 +33,8 @@ SUB_OPTIONS_CONFIG = {
         "L100": "L100",
         "L150": "L150",
         "L200": "L200",
-        "L250": "L250"}
+        "L250": "L250"
+    }
 }
 
 MATERIALI_CONFIG = {
@@ -43,8 +42,8 @@ MATERIALI_CONFIG = {
     "WOOD COMP": {"LAMINATO": "LAMINATED", "NOBILITATO": "MELAMINE", "TRUCIOLARE": "OSB"},
     "PLASTIC COMP": {"POLICARBONATO": "POLYCARBONATE", "PVC": "PVC", "GOMMA": "RUBBER"},
     "GLASS COMP": {"VETRO TEMPRATO": "TEMPERED GLASS", "VETRO SATINATO": "SATIN GLASS"},
-    "FASTENER": {"ZINCATO": "GALVANIZED", "BRUNITO": "BURNISHED", "NERO": "BLACK"},
-    "ASSEMBLY": {"MONTATO": "ASSEMBLED", "NON MONTATO": "NOT-ASSEMBLED"}
+    "FASTENER": {"ZINCATO": "GALVANIZED", "BRUNITO": "BURNISHED", "NERO": "BLACK"}
+    # ASSEMBLY rimosso da qui perché gestito con checkbox
 }
 
 DATABASE = {
@@ -183,14 +182,19 @@ TERMINI_ANTICIPATI = [
 # 2. FUNZIONI
 # =========================================================
 def reset_all():
-    keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags"]
+    keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags", "check_assembled"]
     # Pulisci anche le chiavi dei sottomenù dinamici
     sub_keys = [k for k in st.session_state.keys() if k.startswith("sub_")]
     keys_to_reset.extend(sub_keys)
     
     for k in keys_to_reset:
         if k in st.session_state:
-            st.session_state[k] = [] if "tags" in k else ""
+            if "tags" in k:
+                st.session_state[k] = []
+            elif "check" in k:
+                st.session_state[k] = False
+            else:
+                st.session_state[k] = ""
 
 # =========================================================
 # 3. INTERFACCIA
@@ -225,11 +229,16 @@ with col_macro:
 
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Particolare")
-    materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
+    
+    # --- LOGICA DINAMICA PER ASSEMBLY (CHECKBOX INVECE DI RADIO) ---
     mat_en = ""
-    if materiali_disponibili:
-        mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
-        mat_en = materiali_disponibili[mat_it]
+    if macro_it == "ASSEMBLY":
+        st.checkbox("ASSEMBLATA", key="check_assembled")
+    else:
+        materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
+        if materiali_disponibili:
+            mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
+            mat_en = materiali_disponibili[mat_it]
     
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.radio("Seleziona dettaglio:", options=sorted(list(part_dict.keys())), horizontal=True)
@@ -244,7 +253,6 @@ with col_workarea:
     if extra_options:
         extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
         
-        # --- LOGICA SOTTO-MENU DINAMICI ---
         if extra_selezionati:
             for ex in extra_selezionati:
                 if ex in SUB_OPTIONS_CONFIG:
@@ -321,18 +329,14 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         elif s_val: dim_final = f"S{s_val}"
         else: dim_final = ""
 
-    # Raccolta extra e gestione sottomenù
     extra_totali = []
     for ex in extra_selezionati:
-        # Se ha un sottomenù, componi la stringa (es. VPA + S SERIES)
         if ex in SUB_OPTIONS_CONFIG:
             sub_key = f"sub_{ex}"
             valore_sub_it = st.session_state.get(sub_key, "")
             traduzione_sub = SUB_OPTIONS_CONFIG[ex].get(valore_sub_it, "")
-            # Unisce il nome base dell'extra alla sua variante tradotta
             extra_totali.append(f"{extra_dedicati_dict[ex]} {traduzione_sub}".strip())
         else:
-            # Altrimenti prendi la traduzione standard
             extra_totali.append(extra_dedicati_dict[ex])
 
     if extra_libero:
@@ -364,11 +368,15 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         parte_iniziale = temp_str[:first_with_end]
         parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
         temp_str = parte_iniziale + parte_restante
+
+    # --- LOGICA PREFIX PER ASSEMBLY E CERTIFICAZIONI ---
+    if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled", False):
+        temp_str = f"ASSEMBLED - {temp_str}"
     
     if uni_en_1090_active:
         temp_str = f"UNI EN-1090 - {temp_str}"
         
-    st.session_state['stringa_editabile'] = temp_str.replace("  ", " ")
+    st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
 
 if st.session_state['stringa_editabile']:
     st.markdown("### 📋 Risultato Finale")
@@ -388,7 +396,6 @@ if st.session_state['stringa_editabile']:
     
     if uni_en_1090_active:
         all_tags.append("UNI EN-1090-1")
-        
     if normativa:
         all_tags.append(normativa.upper())
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
