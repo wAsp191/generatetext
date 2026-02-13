@@ -194,10 +194,10 @@ with col_macro:
         pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
         comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
         
-        # MODIFICA RICHIESTA: Selezionando FORTISSIMO appare opzione CE-1090
+        # MODIFICA RICHIESTA: Selezionando FORTISSIMO appare opzione EN-1090
         if "FORTISSIMO" in comp_selezionate:
             st.warning("⚡ Configurazione Strutturale")
-            ce_1090_active = st.checkbox("Certificazione CE-1090", value=False)
+            en_1090_active = st.checkbox("Certificazione EN-1090", value=False)
     else:
         comp_selezionate = []
 
