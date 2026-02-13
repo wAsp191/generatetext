@@ -21,6 +21,17 @@ st.markdown("""
 # =========================================================
 # 1. DATI E CONFIGURAZIONI
 # =========================================================
+
+# --- NUOVA SEZIONE: CONFIGURAZIONE SOTTO-MENU (Modificabile in autonomia) ---
+# Se un'opzione extra è presente qui, apparirà un menu a tendina dedicato.
+SUB_OPTIONS_CONFIG = {
+    "VPA": {
+        "Serie S": "S SERIES",
+        "Serie M": "M SERIES",
+        "Serie L": "L SERIES"
+    }
+}
+
 MATERIALI_CONFIG = {
     "METAL COMP": {"METAL": "METAL", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
     "WOOD COMP": {"LAMINATO": "LAMINATED", "NOBILITATO": "MELAMINE", "TRUCIOLARE": "OSB"},
@@ -44,7 +55,7 @@ DATABASE = {
             "Ripiano": ["SHELF", {"Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE", "Semicircolare": "SEMICIRCULAR", "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET", "Con portaprezzo": "WITH TICKET-HOLDER", "Scantonato": "NOTCHED"}, "SHELF"],
             "Cesto in filo": ["WIRE BASKET", {"Per attacco montante": "FOR UPRIGHT", "Per attacco fiancata": "FOR SIDE-PANEL", "Impilabile": "STACKABLE"}, "BASKET"],
             "Cielino": ["CANOPY", {"Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Frontale in lamiera": "SHEET METAL FASCIA", "Con illuminazione": "WITH LIGHTING"}, "CANOPY"],
-            "Corrente": ["BEAM", {"A seggiola": "L-SHAPED PROFILE", "VPA serie L": "VPA L SERIES", "VPA serie M": "VPA M SERIES", "VPA serie S": "VPA S SERIES", "VPA serie SS": "VPA SS SERIES"}, "BEAM"],
+            "Corrente": ["BEAM", {"A seggiola": "L-SHAPED PROFILE", "VPA": "VPA"}, "BEAM"],
             "Diagonale": ["DIAGONAL", {"Forata": "PERFORATED", "Per crociera verticale": "FOR VERTICAL CROSS-WALL"}, "DIAGONAL"],
             "Distanziale": ["SPACER", {"Per controventatura": "FOR CROSS-WALL"}, "SPACER"],
             "Gancio": ["HOOK", {"Singolo": "SINGLE", "Predisposto per portaprezzo": "ACCEPTS TICKET-HOLDER", "Doppio": "DOUBLE", "Rovescio": "REVERSE", "Attacco barra": "HOOK FOR BAR", "Attacco multilame": "HOOK FOR MULTISTRIP", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"}, "HOOK"],
@@ -167,6 +178,10 @@ TERMINI_ANTICIPATI = [
 # =========================================================
 def reset_all():
     keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags"]
+    # Pulisci anche le chiavi dei sottomenù dinamici
+    sub_keys = [k for k in st.session_state.keys() if k.startswith("sub_")]
+    keys_to_reset.extend(sub_keys)
+    
     for k in keys_to_reset:
         if k in st.session_state:
             st.session_state[k] = [] if "tags" in k else ""
@@ -188,7 +203,6 @@ with col_macro:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
     
-    # CORREZIONE: Inizializzazione coerente
     uni_en_1090_active = False 
     
     if macro_it != "FASTENER":
@@ -199,7 +213,6 @@ with col_macro:
         
         if "FORTISSIMO" in comp_selezionate:
             st.warning("⚡ Configurazione Strutturale")
-            # CORREZIONE: Utilizzo dello stesso nome variabile
             uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", value=False)
     else:
         comp_selezionate = []
@@ -224,6 +237,14 @@ with col_workarea:
     extra_options = list(extra_dedicati_dict.keys())
     if extra_options:
         extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
+        
+        # --- LOGICA SOTTO-MENU DINAMICI ---
+        if extra_selezionati:
+            for ex in extra_selezionati:
+                if ex in SUB_OPTIONS_CONFIG:
+                    st.info(f"Dettaglio richiesto per: **{ex}**")
+                    opzioni_sub = SUB_OPTIONS_CONFIG[ex]
+                    st.selectbox(f"Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}")
     else:
         extra_selezionati = []
         st.info("Nessuna opzione extra disponibile per questo elemento.")
@@ -294,7 +315,20 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         elif s_val: dim_final = f"S{s_val}"
         else: dim_final = ""
 
-    extra_totali = [extra_dedicati_dict[ex] for ex in extra_selezionati]
+    # Raccolta extra e gestione sottomenù
+    extra_totali = []
+    for ex in extra_selezionati:
+        # Se ha un sottomenù, componi la stringa (es. VPA + S SERIES)
+        if ex in SUB_OPTIONS_CONFIG:
+            sub_key = f"sub_{ex}"
+            valore_sub_it = st.session_state.get(sub_key, "")
+            traduzione_sub = SUB_OPTIONS_CONFIG[ex].get(valore_sub_it, "")
+            # Unisce il nome base dell'extra alla sua variante tradotta
+            extra_totali.append(f"{extra_dedicati_dict[ex]} {traduzione_sub}".strip())
+        else:
+            # Altrimenti prendi la traduzione standard
+            extra_totali.append(extra_dedicati_dict[ex])
+
     if extra_libero:
         try:
             extra_tradotto = GoogleTranslator(source='it', target='en').translate(extra_libero).upper()
@@ -302,8 +336,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         except:
             extra_totali.append(extra_libero.upper())
 
-    prefissi = [ex for ex in extra_totali if ex in TERMINI_ANTICIPATI]
-    suffissi = [ex for ex in extra_totali if ex not in TERMINI_ANTICIPATI]
+    prefissi = [ex for ex in extra_totali if any(p in ex for p in TERMINI_ANTICIPATI)]
+    suffissi = [ex for ex in extra_totali if not any(p in ex for p in TERMINI_ANTICIPATI)]
     
     prefix_str = " ".join(prefissi) if prefissi else ""
     extra_str = ", ".join(suffissi) if suffissi else ""
@@ -325,7 +359,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
         temp_str = parte_iniziale + parte_restante
     
-    # CORREZIONE: Utilizzo della variabile corretta e prefisso
     if uni_en_1090_active:
         temp_str = f"UNI EN-1090 - {temp_str}"
         
@@ -347,7 +380,6 @@ if st.session_state['stringa_editabile']:
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
     
-    # CORREZIONE: Utilizzo variabile corretta
     if uni_en_1090_active:
         all_tags.append("UNI EN-1090-1")
         
