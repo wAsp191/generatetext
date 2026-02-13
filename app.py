@@ -322,9 +322,9 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
         temp_str = parte_iniziale + parte_restante
     
-    # MODIFICA RICHIESTA: Prefisso CE-1090 all'inizio della stringa
-    if ce_1090_active:
-        temp_str = f"CE-1090 - {temp_str}"
+    # MODIFICA RICHIESTA: Prefisso EN-1090 all'inizio della stringa
+    if en_1090_active:
+        temp_str = f" EN-1090 - {temp_str}"
         
     st.session_state['stringa_editabile'] = temp_str.replace("  ", " ")
 
