@@ -187,11 +187,17 @@ with col_macro:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
     
+    ce_1090_active = False # Inizializzazione
     if macro_it != "FASTENER":
         st.markdown("---")
         st.subheader("🔗 Compatibilità")
         pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
         comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
+        
+        # MODIFICA RICHIESTA: Selezionando FORTISSIMO appare opzione CE-1090
+        if "FORTISSIMO" in comp_selezionate:
+            st.warning("⚡ Configurazione Strutturale")
+            ce_1090_active = st.checkbox("Certificazione CE-1090", value=False)
     else:
         comp_selezionate = []
 
@@ -316,6 +322,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
         temp_str = parte_iniziale + parte_restante
     
+    # MODIFICA RICHIESTA: Prefisso CE-1090 all'inizio della stringa
+    if ce_1090_active:
+        temp_str = f"CE-1090 - {temp_str}"
+        
     st.session_state['stringa_editabile'] = temp_str.replace("  ", " ")
 
 if st.session_state['stringa_editabile']:
@@ -333,18 +343,22 @@ if st.session_state['stringa_editabile']:
 
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
+    
+    # Aggiunta tag CE-1090 se attivo
+    if ce_1090_active:
+        all_tags.append("CE-1090")
+        
     if normativa:
         all_tags.append(normativa.upper())
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
 
 # =========================================================
-# 5. SISTEMA FEEDBACK PER BETA TEST (Aggiungi in fondo)
+# 5. SISTEMA FEEDBACK PER BETA TEST 
 # =========================================================
 
 st.sidebar.markdown("---")
 st.sidebar.header("📢 Beta Test Feedback")
 
-# Area per i colleghi
 with st.sidebar.expander("🆘 Segnala mancanza o errore", expanded=False):
     st.write("Usa questo spazio per suggerire nuovi materiali, particolari o correzioni.")
     tipo_segnalazione = st.selectbox(
@@ -356,14 +370,11 @@ with st.sidebar.expander("🆘 Segnala mancanza o errore", expanded=False):
     
     if st.button("Invia Segnalazione", use_container_width=True):
         if nota_feedback:
-            # Formattazione riga: Data/Ora (opzionale), Tipo, Messaggio
             import datetime
             ora = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
-            # Pulizia del testo per evitare problemi col CSV (rimozione punti e virgola)
             nota_pulita = nota_feedback.replace(";", ",").replace("\n", " ")
             nuova_riga = f"{ora};{tipo_segnalazione};{nota_pulita}\n"
             
-            # Scrittura su file (Append mode)
             try:
                 with open("feedback.csv", "a", encoding="utf-8") as f:
                     f.write(nuova_riga)
@@ -373,11 +384,9 @@ with st.sidebar.expander("🆘 Segnala mancanza o errore", expanded=False):
         else:
             st.warning("Inserisci un messaggio prima di inviare.")
 
-# Area riservata a te per il recupero dati
 st.sidebar.markdown("---")
 with st.sidebar.expander("🛠️ Area Admin (Download)"):
     pw = st.text_input("Password accesso dati", type="password")
-    # Puoi scegliere una password semplice, es: "admin2024"
     if pw == "admin2024": 
         try:
             with open("feedback.csv", "rb") as file:
