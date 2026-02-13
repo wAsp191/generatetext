@@ -129,7 +129,10 @@ MAPPA_NORMATIVE_FASTENER = {
         "DIN 931 - Esagonale filetto parziale": "DIN 931",
         "DIN 7991 - Testa svasata esagono incassato": "DIN 7991",
         "ISO 7380 - Testa bombata esagono incassato": "ISO 7380",
-        "DIN 571 - Tirafondo per legno": "DIN 571"
+        "DIN 571 - Tirafondo per legno": "DIN 571",
+        "DIN 7504-K - Autoperforante Esagonale": "DIN 7504-K",
+        "DIN 7504-N - Autoperforante Bombata": "DIN 7504-N",
+        "DIN 7504-P - Autoperforante Svasata": "DIN 7504-P"
     },
     "Dado": {
         "": "",
@@ -148,7 +151,7 @@ MAPPA_NORMATIVE_FASTENER = {
     "Inserti filettati": { "": "" }
 }
 
-OPZIONI_SPESSORE_STD = ["", "5/10", "6/10", "8/10", "10/10", "12/10", "15/10", "20/10", "25/10", "30/10", "35/10", "40/10", "45/10", "50/10"]
+OPZIONI_SPESSORE_STD = ["", "0.5", "0.6", "0.75", "0.8", "1", "1.2", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"]
 OPZIONI_SPESSORE_WOOD = ["", "18mm", "20mm", "25mm", "30mm", "35mm"]
 
 TERMINI_ANTICIPATI = [
