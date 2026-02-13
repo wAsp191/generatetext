@@ -30,7 +30,7 @@ SUB_OPTIONS_CONFIG = {
         "Serie SS": "SS SERIES",
         "Serie M": "M SERIES",
         "Serie L": "L SERIES"
-    }
+    },
     "Con Distanziale": {
         "L100": "L100",
         "L150": "L150",
