@@ -345,7 +345,7 @@ if st.session_state['stringa_editabile']:
     all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
     
     # Aggiunta tag UNI EN-1090-1 se attivo
-    if uni en_1090-1_active:
+    if uni en_1090_active:
         all_tags.append("UNI EN-1090-1")
         
     if normativa:
