@@ -197,7 +197,7 @@ with col_macro:
         # MODIFICA RICHIESTA: Selezionando FORTISSIMO appare opzione UNI EN-1090-1
         if "FORTISSIMO" in comp_selezionate:
             st.warning("⚡ Configurazione Strutturale")
-            uni en_1090_active = st.checkbox("Certificazione UNI EN-1090-1", value=False)
+            uni en_1090_active = st.checkbox("Certificazione UNI EN-1090", value=False)
     else:
         comp_selezionate = []
 
