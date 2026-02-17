@@ -19,11 +19,9 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 1. DIZIONARI E DATABASE (Configurazioni Tecniche)
+# 1. DIZIONARI E DATABASE
 # =========================================================
 
-# --- GLOSSARIO ECCEZIONI (Per Note Libere) ---
-# Queste parole verranno sostituite PRIMA della traduzione di Google
 GLOSSARIO_TECNICO = {
     "mensola": "BRACKET",
     "gondola": "GONDOLA",
@@ -31,7 +29,6 @@ GLOSSARIO_TECNICO = {
     "innesto": "COUPLING"
 }
 
-# --- CONFIGURAZIONI SOTTOMENU ---
 SUB_OPTIONS_CONFIG = {
     "VPA": {
         "Serie S": "S SERIES",
@@ -47,7 +44,9 @@ SUB_OPTIONS_CONFIG = {
     },
 }
 
-# --- CONFIGURAZIONI MATERIALI ---
+# Elenco delle opzioni che attivano una stringa di testo manuale
+EXTRA_CON_INPUT_MANUALE = ["Sezione circolare", "Sezione quadrata"]
+
 MATERIALI_CONFIG = {
     "METAL COMP": {"METAL": "METAL", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
     "WOOD COMP": {"LAMINATO": "LAMINATED", "NOBILITATO": "MELAMINE", "TRUCIOLARE": "OSB"},
@@ -56,7 +55,6 @@ MATERIALI_CONFIG = {
     "FASTENER": {"ZINCATO": "GALVANIZED", "BRUNITO": "BURNISHED", "NERO": "BLACK"}
 }
 
-# --- DATABASE PRINCIPALE ---
 DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
@@ -147,7 +145,6 @@ DATABASE = {
     }
 }
 
-# --- ALTRE CONFIGURAZIONI ---
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F25 READY", "F50", "F50 BESPOKE", "F50 READY", "UNIVERSAL", "FORTISSIMO"]
 
 MAPPA_NORMATIVE_FASTENER = {
@@ -185,19 +182,18 @@ OPZIONI_SPESSORE_WOOD = ["", "10mm", "15mm", "18mm", "19mm", "20mm", "22mm", "24
 
 TERMINI_ANTICIPATI = [
     "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "STATIC", "ADJUSTABLE", "SEISMIC",
-    "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "CONNECTING", "SHUTTER",
+    "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "CONNECTING", "SHUTTER", "COUPLING",
     "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING", 
     "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "UPRIGHT GRAFT"
 ]
 
 # =========================================================
-# 2. LOGICA FUNZIONALE (Reset e Utility)
+# 2. LOGICA FUNZIONALE
 # =========================================================
 
 def reset_all():
-    """Ripristina tutti i campi di input allo stato iniziale"""
     keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags", "check_assembled"]
-    sub_keys = [k for k in st.session_state.keys() if k.startswith("sub_")]
+    sub_keys = [k for k in st.session_state.keys() if k.startswith("sub_") or k.startswith("manual_")]
     keys_to_reset.extend(sub_keys)
     
     for k in keys_to_reset:
@@ -210,12 +206,11 @@ def reset_all():
                 st.session_state[k] = ""
 
 # =========================================================
-# 3. INTERFACCIA UTENTE (Layout Streamlit)
+# 3. INTERFACCIA UTENTE
 # =========================================================
 
 st.title("⚙️ REG - Title Generator & Classification")
 
-# Header con tasto reset
 col_t, col_btn = st.columns([4, 1])
 with col_btn:
     st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
@@ -224,7 +219,6 @@ st.markdown("---")
 
 col_macro, col_workarea = st.columns([1, 3], gap="large")
 
-# --- SEZIONE SINISTRA: CATEGORIE ---
 with col_macro:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
@@ -243,7 +237,6 @@ with col_macro:
     else:
         comp_selezionate = []
 
-# --- SEZIONE DESTRA: DETTAGLI E DIMENSIONI ---
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Particolare")
     
@@ -270,16 +263,22 @@ with col_workarea:
         extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
         
         if extra_selezionati:
+            # Layout dinamico per input extra
             for ex in extra_selezionati:
+                # Caso A: Sottomenu predefiniti
                 if ex in SUB_OPTIONS_CONFIG:
                     st.info(f"Dettaglio richiesto per: **{ex}**")
                     opzioni_sub = SUB_OPTIONS_CONFIG[ex]
                     st.selectbox(f"Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}")
+                
+                # Caso B: Stringa manuale (Richiesta Utente)
+                elif ex in EXTRA_CON_INPUT_MANUALE:
+                    st.text_input(f"Specifica valore per {ex} (es. 40x40 o D30):", key=f"manual_{ex}")
+
     else:
         extra_selezionati = []
         st.info("Nessuna opzione extra disponibile per questo elemento.")
 
-    # Input Note Libere (Soggetto a Glossario Tecnico)
     extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
     st.subheader("📏 4. Dimensioni e Normative")
@@ -322,7 +321,7 @@ if 'stringa_editabile' not in st.session_state:
     st.session_state['stringa_editabile'] = ""
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # --- A. Gestione Dimensioni ---
+    # --- A. Dimensioni ---
     dim_final_parts = []
     if macro_it == "FASTENER":
         d_val = dim_dia.strip().upper()
@@ -346,34 +345,43 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         elif s_val: dim_final = f"S{s_val}"
         else: dim_final = ""
 
-    # --- B. Gestione Extra Selezionati (Pills) ---
+    # --- B. Extra (Pills + Manuali + Sub) ---
     extra_totali = []
     for ex in extra_selezionati:
+        base_trans = extra_dedicati_dict.get(ex, ex.upper())
+        
+        # 1. Se ha un sottomenu
         if ex in SUB_OPTIONS_CONFIG:
             sub_key = f"sub_{ex}"
             valore_sub_it = st.session_state.get(sub_key, "")
             traduzione_sub = SUB_OPTIONS_CONFIG[ex].get(valore_sub_it, "")
-            extra_totali.append(f"{extra_dedicati_dict[ex]} {traduzione_sub}".strip())
+            extra_totali.append(f"{base_trans} {traduzione_sub}".strip())
+        
+        # 2. Se ha un input manuale (Modifica richiesta)
+        elif ex in EXTRA_CON_INPUT_MANUALE:
+            manual_val = st.session_state.get(f"manual_{ex}", "").strip().upper()
+            if manual_val:
+                extra_totali.append(f"{base_trans} {manual_val}")
+            else:
+                extra_totali.append(base_trans)
+        
+        # 3. Extra standard
         else:
-            extra_totali.append(extra_dedicati_dict[ex])
+            extra_totali.append(base_trans)
 
-    # --- C. Gestione Note Libere (Con Glossario Tecnico) ---
+    # --- C. Note Libere ---
     if extra_libero:
         testo_pulito = extra_libero.lower()
-        
-        # Sostituzione forzata termini del glossario
         for ita, eng in GLOSSARIO_TECNICO.items():
             if ita in testo_pulito:
                 testo_pulito = testo_pulito.replace(ita, eng)
-        
         try:
-            # Traduzione di quello che rimane (Google manterrà i termini già tradotti in maiuscolo)
             extra_tradotto = GoogleTranslator(source='it', target='en').translate(testo_pulito).upper()
             extra_totali.append(extra_tradotto)
         except:
             extra_totali.append(extra_libero.upper())
 
-    # --- D. Ordinamento Termini (Anticipati vs Posticipati) ---
+    # --- D. Ordinamento ---
     prefissi = [ex for ex in extra_totali if any(p in ex for p in TERMINI_ANTICIPATI)]
     suffissi = [ex for ex in extra_totali if not any(p in ex for p in TERMINI_ANTICIPATI)]
     
@@ -383,7 +391,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
-    # --- E. Assemblaggio Stringa Finale ---
+    # --- E. Assemblaggio ---
     descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
     final_segments = [descrizione_centrale]
     if extra_str: final_segments.append(extra_str)
@@ -392,14 +400,12 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     temp_str = " - ".join(final_segments).upper().replace("  ", " ")
     temp_str = temp_str.replace("WITH WITH", "WITH")
     
-    # Pulizia doppie congiunzioni
     if temp_str.count("WITH") > 1:
         first_with_end = temp_str.find("WITH") + 4
         parte_iniziale = temp_str[:first_with_end]
         parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
         temp_str = parte_iniziale + parte_restante
 
-    # Prefissi speciali (Assembled / Normative)
     if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled", False):
         temp_str = f"ASSEMBLED - {temp_str}"
     
@@ -409,7 +415,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
 
 # =========================================================
-# 5. OUTPUT E VISUALIZZAZIONE RISULTATI
+# 5. OUTPUT
 # =========================================================
 
 if st.session_state['stringa_editabile']:
@@ -419,14 +425,12 @@ if st.session_state['stringa_editabile']:
     with st.expander("✏️ Modifica testo manualmente"):
         st.text_input("Modifica qui:", key='stringa_editabile', label_visibility="collapsed")
 
-    # Controllo lunghezza caratteri (Limite gestionale)
     lunghezza = len(st.session_state['stringa_editabile'])
     if lunghezza >= 99:
         st.error(f"⚠️ LIMITE SUPERATO ({lunghezza})")
     else:
         st.success(f"Lunghezza: {lunghezza} caratteri")
 
-    # Visualizzazione Tag per database
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
     
@@ -437,7 +441,7 @@ if st.session_state['stringa_editabile']:
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
 
 # =========================================================
-# 6. SISTEMA FEEDBACK PER BETA TEST 
+# 6. FEEDBACK
 # =========================================================
 
 st.sidebar.markdown("---")
@@ -467,7 +471,6 @@ with st.sidebar.expander("🆘 Segnala mancanza o errore", expanded=False):
         else:
             st.warning("Inserisci un messaggio prima di inviare.")
 
-# Area Download Feedback (Protetto da Password)
 st.sidebar.markdown("---")
 with st.sidebar.expander("🛠️ Area Admin (Download)"):
     pw = st.text_input("Password accesso dati", type="password")
