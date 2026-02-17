@@ -27,8 +27,7 @@ st.markdown("""
 GLOSSARIO_TECNICO = {
     "mensola": "BRACKET",
     "gondola": "GONDOLA",
-    "spalla": "FRAME",
-    "bulloneria": "HARDWARE"
+    "spalla": "FRAME"
 }
 
 # --- CONFIGURAZIONI SOTTOMENU ---
