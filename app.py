@@ -19,9 +19,19 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 1. DATI E CONFIGURAZIONI
+# 1. DIZIONARI E DATABASE (Configurazioni Tecniche)
 # =========================================================
 
+# --- GLOSSARIO ECCEZIONI (Per Note Libere) ---
+# Queste parole verranno sostituite PRIMA della traduzione di Google
+GLOSSARIO_TECNICO = {
+    "mensola": "BRACKET",
+    "gondola": "GONDOLA",
+    "spalla": "FRAME",
+    "bulloneria": "HARDWARE"
+}
+
+# --- CONFIGURAZIONI SOTTOMENU ---
 SUB_OPTIONS_CONFIG = {
     "VPA": {
         "Serie S": "S SERIES",
@@ -30,28 +40,23 @@ SUB_OPTIONS_CONFIG = {
         "Serie L": "L SERIES"
     },
     "Con distanziale": {
-        "L100": "L100",
-        "L150": "L150",
-        "L200": "L200",
-        "L250": "L250"
+        "L100": "L100", "L150": "L150", "L200": "L200", "L250": "L250"
     },
     "Numero diagonali": {
-        "2": "2 DIAGONALS",
-        "3": "3 DIAGONALS",
-        "4": "4 DIAGONALS"
+        "2": "2 DIAGONALS", "3": "3 DIAGONALS", "4": "4 DIAGONALS"
     },
-    
 }
 
+# --- CONFIGURAZIONI MATERIALI ---
 MATERIALI_CONFIG = {
     "METAL COMP": {"METAL": "METAL", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
     "WOOD COMP": {"LAMINATO": "LAMINATED", "NOBILITATO": "MELAMINE", "TRUCIOLARE": "OSB"},
     "PLASTIC COMP": {"POLICARBONATO": "POLYCARBONATE", "PVC": "PVC", "GOMMA": "RUBBER"},
     "GLASS COMP": {"VETRO TEMPRATO": "TEMPERED GLASS", "VETRO SATINATO": "SATIN GLASS"},
     "FASTENER": {"ZINCATO": "GALVANIZED", "BRUNITO": "BURNISHED", "NERO": "BLACK"}
-    # ASSEMBLY rimosso da qui perché gestito con checkbox
 }
 
+# --- DATABASE PRINCIPALE ---
 DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
@@ -142,6 +147,7 @@ DATABASE = {
     }
 }
 
+# --- ALTRE CONFIGURAZIONI ---
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F25 READY", "F50", "F50 BESPOKE", "F50 READY", "UNIVERSAL", "FORTISSIMO"]
 
 MAPPA_NORMATIVE_FASTENER = {
@@ -185,11 +191,12 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. FUNZIONI
+# 2. LOGICA FUNZIONALE (Reset e Utility)
 # =========================================================
+
 def reset_all():
+    """Ripristina tutti i campi di input allo stato iniziale"""
     keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags", "check_assembled"]
-    # Pulisci anche le chiavi dei sottomenù dinamici
     sub_keys = [k for k in st.session_state.keys() if k.startswith("sub_")]
     keys_to_reset.extend(sub_keys)
     
@@ -203,10 +210,12 @@ def reset_all():
                 st.session_state[k] = ""
 
 # =========================================================
-# 3. INTERFACCIA
+# 3. INTERFACCIA UTENTE (Layout Streamlit)
 # =========================================================
+
 st.title("⚙️ REG - Title Generator & Classification")
 
+# Header con tasto reset
 col_t, col_btn = st.columns([4, 1])
 with col_btn:
     st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
@@ -215,6 +224,7 @@ st.markdown("---")
 
 col_macro, col_workarea = st.columns([1, 3], gap="large")
 
+# --- SEZIONE SINISTRA: CATEGORIE ---
 with col_macro:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
@@ -233,10 +243,10 @@ with col_macro:
     else:
         comp_selezionate = []
 
+# --- SEZIONE DESTRA: DETTAGLI E DIMENSIONI ---
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Particolare")
     
-    # --- LOGICA DINAMICA PER ASSEMBLY (CHECKBOX INVECE DI RADIO) ---
     mat_en = ""
     if macro_it == "ASSEMBLY":
         st.checkbox("ASSEMBLATA", key="check_assembled")
@@ -269,6 +279,7 @@ with col_workarea:
         extra_selezionati = []
         st.info("Nessuna opzione extra disponibile per questo elemento.")
 
+    # Input Note Libere (Soggetto a Glossario Tecnico)
     extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
     st.subheader("📏 4. Dimensioni e Normative")
@@ -302,7 +313,7 @@ with col_workarea:
         dim_dia, normativa = "", ""
 
 # =========================================================
-# 4. GENERAZIONE
+# 4. LOGICA DI GENERAZIONE E TRADUZIONE
 # =========================================================
 
 st.divider()
@@ -311,8 +322,8 @@ if 'stringa_editabile' not in st.session_state:
     st.session_state['stringa_editabile'] = ""
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
+    # --- A. Gestione Dimensioni ---
     dim_final_parts = []
-    
     if macro_it == "FASTENER":
         d_val = dim_dia.strip().upper()
         l_val = dim_l.strip().upper()
@@ -335,6 +346,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         elif s_val: dim_final = f"S{s_val}"
         else: dim_final = ""
 
+    # --- B. Gestione Extra Selezionati (Pills) ---
     extra_totali = []
     for ex in extra_selezionati:
         if ex in SUB_OPTIONS_CONFIG:
@@ -345,13 +357,23 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         else:
             extra_totali.append(extra_dedicati_dict[ex])
 
+    # --- C. Gestione Note Libere (Con Glossario Tecnico) ---
     if extra_libero:
+        testo_pulito = extra_libero.lower()
+        
+        # Sostituzione forzata termini del glossario
+        for ita, eng in GLOSSARIO_TECNICO.items():
+            if ita in testo_pulito:
+                testo_pulito = testo_pulito.replace(ita, eng)
+        
         try:
-            extra_tradotto = GoogleTranslator(source='it', target='en').translate(extra_libero).upper()
+            # Traduzione di quello che rimane (Google manterrà i termini già tradotti in maiuscolo)
+            extra_tradotto = GoogleTranslator(source='it', target='en').translate(testo_pulito).upper()
             extra_totali.append(extra_tradotto)
         except:
             extra_totali.append(extra_libero.upper())
 
+    # --- D. Ordinamento Termini (Anticipati vs Posticipati) ---
     prefissi = [ex for ex in extra_totali if any(p in ex for p in TERMINI_ANTICIPATI)]
     suffissi = [ex for ex in extra_totali if not any(p in ex for p in TERMINI_ANTICIPATI)]
     
@@ -361,6 +383,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
+    # --- E. Assemblaggio Stringa Finale ---
     descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
     final_segments = [descrizione_centrale]
     if extra_str: final_segments.append(extra_str)
@@ -369,13 +392,14 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     temp_str = " - ".join(final_segments).upper().replace("  ", " ")
     temp_str = temp_str.replace("WITH WITH", "WITH")
     
+    # Pulizia doppie congiunzioni
     if temp_str.count("WITH") > 1:
         first_with_end = temp_str.find("WITH") + 4
         parte_iniziale = temp_str[:first_with_end]
         parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
         temp_str = parte_iniziale + parte_restante
 
-    # --- LOGICA PREFIX PER ASSEMBLY E CERTIFICAZIONI ---
+    # Prefissi speciali (Assembled / Normative)
     if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled", False):
         temp_str = f"ASSEMBLED - {temp_str}"
     
@@ -384,6 +408,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         
     st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
 
+# =========================================================
+# 5. OUTPUT E VISUALIZZAZIONE RISULTATI
+# =========================================================
+
 if st.session_state['stringa_editabile']:
     st.markdown("### 📋 Risultato Finale")
     st.code(st.session_state['stringa_editabile'], language=None)
@@ -391,12 +419,14 @@ if st.session_state['stringa_editabile']:
     with st.expander("✏️ Modifica testo manualmente"):
         st.text_input("Modifica qui:", key='stringa_editabile', label_visibility="collapsed")
 
+    # Controllo lunghezza caratteri (Limite gestionale)
     lunghezza = len(st.session_state['stringa_editabile'])
     if lunghezza >= 99:
         st.error(f"⚠️ LIMITE SUPERATO ({lunghezza})")
     else:
         st.success(f"Lunghezza: {lunghezza} caratteri")
 
+    # Visualizzazione Tag per database
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
     
@@ -407,7 +437,7 @@ if st.session_state['stringa_editabile']:
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
 
 # =========================================================
-# 5. SISTEMA FEEDBACK PER BETA TEST 
+# 6. SISTEMA FEEDBACK PER BETA TEST 
 # =========================================================
 
 st.sidebar.markdown("---")
@@ -437,6 +467,7 @@ with st.sidebar.expander("🆘 Segnala mancanza o errore", expanded=False):
         else:
             st.warning("Inserisci un messaggio prima di inviare.")
 
+# Area Download Feedback (Protetto da Password)
 st.sidebar.markdown("---")
 with st.sidebar.expander("🛠️ Area Admin (Download)"):
     pw = st.text_input("Password accesso dati", type="password")
