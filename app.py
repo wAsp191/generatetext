@@ -44,7 +44,6 @@ SUB_OPTIONS_CONFIG = {
     },
 }
 
-# Elenco delle opzioni che attivano una stringa di testo manuale
 EXTRA_CON_INPUT_MANUALE = ["Sezione circolare", "Sezione quadrata"]
 
 MATERIALI_CONFIG = {
@@ -263,18 +262,13 @@ with col_workarea:
         extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
         
         if extra_selezionati:
-            # Layout dinamico per input extra
             for ex in extra_selezionati:
-                # Caso A: Sottomenu predefiniti
                 if ex in SUB_OPTIONS_CONFIG:
                     st.info(f"Dettaglio richiesto per: **{ex}**")
                     opzioni_sub = SUB_OPTIONS_CONFIG[ex]
                     st.selectbox(f"Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}")
-                
-                # Caso B: Stringa manuale (Richiesta Utente)
                 elif ex in EXTRA_CON_INPUT_MANUALE:
                     st.text_input(f"Specifica valore per {ex} (es. 40x40 o D30):", key=f"manual_{ex}")
-
     else:
         extra_selezionati = []
         st.info("Nessuna opzione extra disponibile per questo elemento.")
@@ -287,12 +281,10 @@ with col_workarea:
         c1, c2, c3 = st.columns(3)
         with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
         with c2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
-        
         opzioni_filtrare = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
         with c3: 
             norma_scelta_estesa = st.selectbox(f"Normativa {scelta_part_it}", options=list(opzioni_filtrare.keys()))
             normativa = opzioni_filtrare[norma_scelta_estesa]
-            
         dim_p, dim_h, dim_s = "", "", "" 
     else:
         if macro_it == "ASSEMBLY":
@@ -345,56 +337,51 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         elif s_val: dim_final = f"S{s_val}"
         else: dim_final = ""
 
-    # --- B. Extra (Pills + Manuali + Sub) ---
-    extra_totali = []
+    # --- B. Extra da Bottoni (Pills + Manuali + Sub) ---
+    extra_pills_list = []
     for ex in extra_selezionati:
         base_trans = extra_dedicati_dict.get(ex, ex.upper())
-        
-        # 1. Se ha un sottomenu
         if ex in SUB_OPTIONS_CONFIG:
             sub_key = f"sub_{ex}"
             valore_sub_it = st.session_state.get(sub_key, "")
             traduzione_sub = SUB_OPTIONS_CONFIG[ex].get(valore_sub_it, "")
-            extra_totali.append(f"{base_trans} {traduzione_sub}".strip())
-        
-        # 2. Se ha un input manuale (Modifica richiesta)
+            extra_pills_list.append(f"{base_trans} {traduzione_sub}".strip())
         elif ex in EXTRA_CON_INPUT_MANUALE:
             manual_val = st.session_state.get(f"manual_{ex}", "").strip().upper()
-            if manual_val:
-                extra_totali.append(f"{base_trans} {manual_val}")
-            else:
-                extra_totali.append(base_trans)
-        
-        # 3. Extra standard
+            if manual_val: extra_pills_list.append(f"{base_trans} {manual_val}")
+            else: extra_pills_list.append(base_trans)
         else:
-            extra_totali.append(base_trans)
+            extra_pills_list.append(base_trans)
 
-    # --- C. Note Libere ---
+    # --- C. Note Libere (Logica Separata) ---
+    note_libere_tradotte = ""
     if extra_libero:
         testo_pulito = extra_libero.lower()
         for ita, eng in GLOSSARIO_TECNICO.items():
             if ita in testo_pulito:
                 testo_pulito = testo_pulito.replace(ita, eng)
         try:
-            extra_tradotto = GoogleTranslator(source='it', target='en').translate(testo_pulito).upper()
-            extra_totali.append(extra_tradotto)
+            note_libere_tradotte = GoogleTranslator(source='it', target='en').translate(testo_pulito).upper()
         except:
-            extra_totali.append(extra_libero.upper())
+            note_libere_tradotte = extra_libero.upper()
 
-    # --- D. Ordinamento ---
-    prefissi = [ex for ex in extra_totali if any(p in ex for p in TERMINI_ANTICIPATI)]
-    suffissi = [ex for ex in extra_totali if not any(p in ex for p in TERMINI_ANTICIPATI)]
+    # --- D. Ordinamento Extra Bottoni ---
+    prefissi = [ex for ex in extra_pills_list if any(p in ex for p in TERMINI_ANTICIPATI)]
+    suffissi = [ex for ex in extra_pills_list if not any(p in ex for p in TERMINI_ANTICIPATI)]
     
     prefix_str = " ".join(prefissi) if prefissi else ""
-    extra_str = ", ".join(suffissi) if suffissi else ""
+    extra_suffissi_str = ", ".join(suffissi) if suffissi else ""
     
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
-    # --- E. Assemblaggio ---
+    # --- E. Assemblaggio per Segmenti ---
+    # Struttura: DESCRIZIONE CENTRALE - SUFFISSI - NOTE LIBERE - COMPATIBILITÀ
     descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
+    
     final_segments = [descrizione_centrale]
-    if extra_str: final_segments.append(extra_str)
+    if extra_suffissi_str: final_segments.append(extra_suffissi_str)
+    if note_libere_tradotte: final_segments.append(note_libere_tradotte) # Sempre in coda agli extra
     if comp_str: final_segments.append(comp_str)
     
     temp_str = " - ".join(final_segments).upper().replace("  ", " ")
