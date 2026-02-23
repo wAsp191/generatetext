@@ -183,6 +183,7 @@ MAPPA_NORMATIVE_FASTENER = {
 OPZIONI_SPESSORE_STD = ["", "0.5", "0.6", "0.75", "0.8", "1", "1.2", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"]
 OPZIONI_SPESSORE_WOOD = ["", "10mm", "15mm", "18mm", "19mm", "20mm", "22mm", "24mm", "25mm", "30mm", "35mm"]
 
+# Modificata la lista per gestire meglio UPRIGHT GRAFT senza interferire con FOR UPRIGHT
 TERMINI_ANTICIPATI = [
     "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "STATIC", "ADJUSTABLE", "SEISMIC",
     "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "CONNECTING", "SHUTTER", "COUPLING",
@@ -298,7 +299,7 @@ with col_workarea:
     st.markdown("---")
     st.subheader("📏 4. Dimensioni e Normative")
     
-    # MODIFICA: Implementazione Immagine a fianco alle stringhe dimensionamento
+    # Layout con Immagine tecnica a fianco alle dimensioni
     col_input, col_img = st.columns([2, 1])
     
     with col_input:
@@ -321,7 +322,6 @@ with col_workarea:
             else: dim_s = ""
             
     with col_img:
-        # Immagine compressa in scala per affiancarsi ai menu
         st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", caption="Schema Riferimento", use_container_width=True)
 
 # =========================================================
@@ -390,9 +390,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         except:
             note_libere_tradotte = extra_libero.upper()
 
-    # --- D. Ordinamento ---
-    prefissi = [ex for ex in extra_pills_list if any(p in ex for p in TERMINI_ANTICIPATI)]
-    suffissi = [ex for ex in extra_pills_list if not any(p in ex for p in TERMINI_ANTICIPATI)]
+    # --- D. Ordinamento (MODIFICA LOGICA FOR) ---
+    # Se il termine contiene "FOR", viene rimosso dai prefissi e forzato nei suffissi
+    prefissi = [ex for ex in extra_pills_list if any(p in ex for p in TERMINI_ANTICIPATI) and "FOR" not in ex]
+    suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
     
     prefix_str = " ".join(prefissi) if prefissi else ""
     extra_suffissi_str = ", ".join(suffissi) if suffissi else ""
