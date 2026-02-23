@@ -15,6 +15,7 @@ st.markdown("""
         h3 { font-size: 2.0rem !important; margin-top: 25px !important; margin-bottom: 20px !important; }
         [data-testid="column"] { padding: 15px !important; }
         .stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }
+        .dim-box { border: 1px solid #ddd; padding: 15px; border-radius: 10px; background-color: #f9f9f9; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -45,7 +46,7 @@ SUB_OPTIONS_CONFIG = {
     "Sezione": {
         "L55": "L55", "L80": "L80", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", "L120 Z/M": "L120 Z/M"
     }
- }
+}
 
 EXTRA_CON_INPUT_MANUALE = ["Sezione circolare", "Sezione quadrata"]
 
@@ -280,6 +281,25 @@ with col_workarea:
 
     extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
+    # --- NUOVA SEZIONE AUTOCOMPILAZIONE ---
+    if scelta_part_it == "Montante" or scelta_part_it == "Spalla":
+        st.markdown("---")
+        st.subheader("🤖 Smart Fill - Dimensionamento Rapido")
+        c_auto1, c_auto2 = st.columns([1, 2])
+        with c_auto1:
+            tipo_montante = st.selectbox("Seleziona Sezione Montante:", ["", "L55", "L80", "L100", "L120"])
+            if tipo_montante == "L55":
+                st.session_state.dim_l, st.session_state.dim_p = "55", "30"
+            elif tipo_montante == "L80":
+                st.session_state.dim_l, st.session_state.dim_p = "80", "30"
+            elif tipo_montante == "L100":
+                st.session_state.dim_l, st.session_state.dim_p = "100", "30"
+            elif tipo_montante == "L120":
+                st.session_state.dim_l, st.session_state.dim_p = "120", "30"
+        with c_auto2:
+            st.info(f"Valori impostati automaticamente per {tipo_montante}: L={st.session_state.get('dim_l')}, P={st.session_state.get('dim_p')}")
+
+    st.markdown("---")
     st.subheader("📏 4. Dimensioni e Normative")
     
     if macro_it == "FASTENER":
@@ -292,19 +312,27 @@ with col_workarea:
             normativa = opzioni_filtrare[norma_scelta_estesa]
         dim_p, dim_h, dim_s = "", "", "" 
     else:
-        if macro_it == "ASSEMBLY":
-            c1, c2, c3 = st.columns(3)
-            dim_s = "" 
-        else:
-            c1, c2, c3, c4 = st.columns(4)
+        col_inputs, col_img = st.columns([1.5, 2.5], gap="medium")
         
-        with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-        with c2: dim_p = st.text_input("Profondità (P)", key="dim_p")
-        with c3: dim_h = st.text_input("Altezza (H)", key="dim_h")
+        with col_inputs:
+            dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+            dim_p = st.text_input("Profondità (P)", key="dim_p")
+            dim_h = st.text_input("Altezza (H)", key="dim_h")
+            
+            if macro_it != "ASSEMBLY":
+                lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
+                dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
+            else:
+                dim_s = ""
         
-        if macro_it != "ASSEMBLY":
-            lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
-            with c4: dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
+        with col_img:
+            # Selezione dell'immagine basata sul tipo di componente
+            if scelta_part_it in ["Montante", "Spalla"]:
+                st.image("https://raw.githubusercontent.com/username/repo/main/vertical_column.png", caption="Riferimento: Montante / Spalla", use_container_width=True)
+            elif scelta_part_it in ["Ripiano", "Pannello rivestimento"]:
+                st.image("https://raw.githubusercontent.com/username/repo/main/flat_rectangle.png", caption="Riferimento: Ripiano / Pannello", use_container_width=True)
+            else:
+                st.image("https://raw.githubusercontent.com/username/repo/main/box_3d.png", caption="Riferimento Dimensioni", use_container_width=True)
         
         dim_dia, normativa = "", ""
 
@@ -381,12 +409,11 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     comp_str = ", ".join(comp_list) if comp_list else ""
 
     # --- E. Assemblaggio per Segmenti ---
-    # Struttura: DESCRIZIONE CENTRALE - SUFFISSI - NOTE LIBERE - COMPATIBILITÀ
     descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
     
     final_segments = [descrizione_centrale]
     if extra_suffissi_str: final_segments.append(extra_suffissi_str)
-    if note_libere_tradotte: final_segments.append(note_libere_tradotte) # Sempre in coda agli extra
+    if note_libere_tradotte: final_segments.append(note_libere_tradotte) 
     if comp_str: final_segments.append(comp_str)
     
     temp_str = " - ".join(final_segments).upper().replace("  ", " ")
