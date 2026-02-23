@@ -15,6 +15,7 @@ st.markdown("""
         h3 { font-size: 2.0rem !important; margin-top: 25px !important; margin-bottom: 20px !important; }
         [data-testid="column"] { padding: 15px !important; }
         .stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }
+        .stButton button { border-radius: 20px; font-weight: bold; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -183,7 +184,6 @@ MAPPA_NORMATIVE_FASTENER = {
 OPZIONI_SPESSORE_STD = ["", "0.5", "0.6", "0.75", "0.8", "1", "1.2", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"]
 OPZIONI_SPESSORE_WOOD = ["", "10mm", "15mm", "18mm", "19mm", "20mm", "22mm", "24mm", "25mm", "30mm", "35mm"]
 
-# Modificata la lista per gestire meglio UPRIGHT GRAFT senza interferire con FOR UPRIGHT
 TERMINI_ANTICIPATI = [
     "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "STATIC", "ADJUSTABLE", "SEISMIC",
     "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "CONNECTING", "SHUTTER", "COUPLING",
@@ -192,22 +192,14 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. LOGICA FUNZIONALE
+# 2. LOGICA FUNZIONALE E RESET DISTRUTTIVO
 # =========================================================
 
 def reset_all():
-    keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags", "check_assembled"]
-    sub_keys = [k for k in st.session_state.keys() if k.startswith("sub_") or k.startswith("manual_")]
-    keys_to_reset.extend(sub_keys)
-    
-    for k in keys_to_reset:
-        if k in st.session_state:
-            if "tags" in k:
-                st.session_state[k] = []
-            elif "check" in k:
-                st.session_state[k] = False
-            else:
-                st.session_state[k] = ""
+    """Rimuove ogni variabile dalla memoria e ricarica pulendo la pagina"""
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
 
 def update_dims_from_section():
     sez = st.session_state.get("sub_Sezione", "")
@@ -230,9 +222,10 @@ def update_dims_from_section():
 
 st.title("⚙️ REG - Title Generator & Classification")
 
-col_t, col_btn = st.columns([4, 1])
-with col_btn:
-    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
+# --- 1. TASTO AZZERA SUPERIORE CENTRATO ---
+c1, c2, c3 = st.columns([2, 1, 2])
+with c2:
+    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True, key="btn_top")
 
 st.markdown("---")
 
@@ -250,7 +243,7 @@ with col_macro:
         pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
         comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
         
-        if "FORTISSIMO" in comp_selezionate:
+        if "FORTISSIMO" in (comp_selezionate or []):
             st.warning("⚡ Configurazione Strutturale")
             uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", value=False)
     else:
@@ -299,7 +292,6 @@ with col_workarea:
     st.markdown("---")
     st.subheader("📏 4. Dimensioni e Normative")
     
-    # Layout con Immagine tecnica a fianco alle dimensioni
     col_input, col_img = st.columns([2, 1])
     
     with col_input:
@@ -347,9 +339,9 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         dim_final = "X".join(dim_final_parts)
         if 'normativa' in locals() and normativa: dim_final += f" {normativa}"
     else:
-        l_val_s = st.session_state.dim_l.strip().upper()
-        p_val_s = st.session_state.dim_p.strip().upper()
-        h_val_s = st.session_state.dim_h.strip().upper()
+        l_val_s = st.session_state.get("dim_l", "").strip().upper()
+        p_val_s = st.session_state.get("dim_p", "").strip().upper()
+        h_val_s = st.session_state.get("dim_h", "").strip().upper()
         
         if l_val_s: dim_final_parts.append(f"L{l_val_s}")
         if p_val_s: dim_final_parts.append(f"P{p_val_s}")
@@ -364,7 +356,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
 
     # --- B. Extra da Bottoni ---
     extra_pills_list = []
-    for ex in extra_selezionati:
+    for ex in (extra_selezionati or []):
         base_trans = extra_dedicati_dict.get(ex, ex.upper())
         if ex in SUB_OPTIONS_CONFIG:
             sub_key = f"sub_{ex}"
@@ -390,8 +382,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         except:
             note_libere_tradotte = extra_libero.upper()
 
-    # --- D. Ordinamento (MODIFICA LOGICA FOR) ---
-    # Se il termine contiene "FOR", viene rimosso dai prefissi e forzato nei suffissi
+    # --- D. Ordinamento ---
     prefissi = [ex for ex in extra_pills_list if any(p in ex for p in TERMINI_ANTICIPATI) and "FOR" not in ex]
     suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
     
@@ -452,6 +443,12 @@ if st.session_state['stringa_editabile']:
     if 'normativa' in locals() and normativa:
         all_tags.append(normativa.upper())
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
+
+# --- 2. TASTO AZZERA INFERIORE CENTRATO ---
+st.markdown("<br>", unsafe_allow_html=True)
+cb1, cb2, cb3 = st.columns([2, 1, 2])
+with cb2:
+    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True, key="btn_bottom")
 
 # =========================================================
 # 6. FEEDBACK
