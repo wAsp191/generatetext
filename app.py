@@ -44,7 +44,8 @@ SUB_OPTIONS_CONFIG = {
     },
     "Sezione": {
         "L55": "L55", "L80": "L80", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", "L120 Z/M": "L120 Z/M"
-}
+    }
+ }
 
 EXTRA_CON_INPUT_MANUALE = ["Sezione circolare", "Sezione quadrata"]
 
