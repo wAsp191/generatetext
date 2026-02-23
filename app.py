@@ -15,6 +15,8 @@ st.markdown("""
         h3 { font-size: 2.0rem !important; margin-top: 25px !important; margin-bottom: 20px !important; }
         [data-testid="column"] { padding: 15px !important; }
         .stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }
+        /* Stile bottone azzera */
+        .stButton button { border-radius: 20px; font-weight: bold; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -196,18 +198,10 @@ TERMINI_ANTICIPATI = [
 # =========================================================
 
 def reset_all():
-    keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags", "check_assembled"]
-    sub_keys = [k for k in st.session_state.keys() if k.startswith("sub_") or k.startswith("manual_")]
-    keys_to_reset.extend(sub_keys)
-    
-    for k in keys_to_reset:
-        if k in st.session_state:
-            if "tags" in k:
-                st.session_state[k] = []
-            elif "check" in k:
-                st.session_state[k] = False
-            else:
-                st.session_state[k] = ""
+    """Cancella tutta la memoria della sessione e ricarica la pagina"""
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
 
 def update_dims_from_section():
     sez = st.session_state.get("sub_Sezione", "")
@@ -230,9 +224,10 @@ def update_dims_from_section():
 
 st.title("⚙️ REG - Title Generator & Classification")
 
-col_t, col_btn = st.columns([4, 1])
-with col_btn:
-    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
+# --- TASTO AZZERA SUPERIORE CENTRATO ---
+c1, c2, c3 = st.columns([2, 1, 2])
+with c2:
+    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True, key="reset_top")
 
 st.markdown("---")
 
@@ -250,7 +245,7 @@ with col_macro:
         pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
         comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
         
-        if "FORTISSIMO" in comp_selezionate:
+        if "FORTISSIMO" in (comp_selezionate or []):
             st.warning("⚡ Configurazione Strutturale")
             uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", value=False)
     else:
@@ -289,17 +284,15 @@ with col_workarea:
                     st.selectbox(f"↳ Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}", label_visibility="collapsed", on_change=update_dims_from_section if ex=="Sezione" else None)
                 elif ex in EXTRA_CON_INPUT_MANUALE:
                     st.caption(f"↳ Inserimento manuale per: **{ex}**")
-                    st.text_input(f"Specifica valore per {ex} (es. 40x40 o D30):", key=f"manual_{ex}", label_visibility="collapsed")
+                    st.text_input(f"Specifica valore per {ex}:", key=f"manual_{ex}", label_visibility="collapsed")
     else:
         extra_selezionati = []
-        st.info("Nessuna opzione extra disponibile per questo elemento.")
 
     extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
     st.markdown("---")
     st.subheader("📏 4. Dimensioni e Normative")
     
-    # Layout con Immagine tecnica a fianco alle dimensioni
     col_input, col_img = st.columns([2, 1])
     
     with col_input:
@@ -311,15 +304,12 @@ with col_workarea:
             with c3: 
                 norma_scelta_estesa = st.selectbox(f"Normativa {scelta_part_it}", options=list(opzioni_filtrare.keys()))
                 normativa = opzioni_filtrare[norma_scelta_estesa]
-            dim_p, dim_h, dim_s = "", "", "" 
         else:
             dim_l = st.text_input("Lunghezza (L)", key="dim_l")
             dim_p = st.text_input("Profondità (P)", key="dim_p")
             dim_h = st.text_input("Altezza (H)", key="dim_h")
-            if macro_it != "ASSEMBLY":
-                lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
-                dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
-            else: dim_s = ""
+            lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
+            dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
             
     with col_img:
         st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", caption="Schema Riferimento", use_container_width=True)
@@ -347,9 +337,9 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         dim_final = "X".join(dim_final_parts)
         if 'normativa' in locals() and normativa: dim_final += f" {normativa}"
     else:
-        l_val_s = st.session_state.dim_l.strip().upper()
-        p_val_s = st.session_state.dim_p.strip().upper()
-        h_val_s = st.session_state.dim_h.strip().upper()
+        l_val_s = st.session_state.get("dim_l", "").strip().upper()
+        p_val_s = st.session_state.get("dim_p", "").strip().upper()
+        h_val_s = st.session_state.get("dim_h", "").strip().upper()
         
         if l_val_s: dim_final_parts.append(f"L{l_val_s}")
         if p_val_s: dim_final_parts.append(f"P{p_val_s}")
@@ -364,7 +354,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
 
     # --- B. Extra da Bottoni ---
     extra_pills_list = []
-    for ex in extra_selezionati:
+    for ex in (extra_selezionati or []):
         base_trans = extra_dedicati_dict.get(ex, ex.upper())
         if ex in SUB_OPTIONS_CONFIG:
             sub_key = f"sub_{ex}"
@@ -390,14 +380,12 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         except:
             note_libere_tradotte = extra_libero.upper()
 
-    # --- D. Ordinamento (MODIFICA LOGICA FOR) ---
-    # Se il termine contiene "FOR", viene rimosso dai prefissi e forzato nei suffissi
+    # --- D. Ordinamento ---
     prefissi = [ex for ex in extra_pills_list if any(p in ex for p in TERMINI_ANTICIPATI) and "FOR" not in ex]
     suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
     
     prefix_str = " ".join(prefissi) if prefissi else ""
     extra_suffissi_str = ", ".join(suffissi) if suffissi else ""
-    
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
@@ -413,11 +401,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     temp_str = temp_str.replace("WITH WITH", "WITH")
     
     if temp_str.count("WITH") > 1:
-        first_with_idx = temp_str.find("WITH")
-        first_with_end = first_with_idx + 4
-        parte_iniziale = temp_str[:first_with_end]
-        parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
-        temp_str = parte_iniziale + parte_restante
+        idx = temp_str.find("WITH") + 4
+        temp_str = temp_str[:idx] + temp_str[idx:].replace("WITH", "AND")
 
     if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled", False):
         temp_str = f"ASSEMBLED - {temp_str}"
@@ -425,34 +410,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     if uni_en_1090_active:
         temp_str = f"UNI EN-1090 - {temp_str}"
         
-    st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
-
-# =========================================================
-# 5. OUTPUT
-# =========================================================
-
-if st.session_state['stringa_editabile']:
-    st.markdown("### 📋 Risultato Finale")
-    st.code(st.session_state['stringa_editabile'], language=None)
+    st.session_state['stringa_editabile'] = temp_str.strip()
     
-    with st.expander("✏️ Modifica testo manualmente"):
-        st.text_input("Modifica qui:", key='stringa_editabile', label_visibility="collapsed")
-
-    lunghezza = len(st.session_state['stringa_editabile'])
-    if lunghezza >= 99:
-        st.error(f"⚠️ LIMITE SUPERATO ({lunghezza})")
-    else:
-        st.success(f"Lunghezza: {lunghezza} caratteri")
-
-    comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
-    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
-    
-    if uni_en_1090_active:
-        all_tags.append("UNI EN-1090-1")
-    if 'normativa' in locals() and normativa:
-        all_tags.append(normativa.upper())
-    st.info(f"**TAGS:** {' | '.join(all_tags)}")
-
 # =========================================================
 # 6. FEEDBACK
 # =========================================================
