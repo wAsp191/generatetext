@@ -286,7 +286,6 @@ with col_workarea:
                 if ex in SUB_OPTIONS_CONFIG:
                     st.caption(f"↳ Specifiche per: **{ex}**")
                     opzioni_sub = SUB_OPTIONS_CONFIG[ex]
-                    # AGGIUNTO CALLBACK: Quando cambia la sezione, aggiorna le dimensioni
                     st.selectbox(f"↳ Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}", label_visibility="collapsed", on_change=update_dims_from_section if ex=="Sezione" else None)
                 elif ex in EXTRA_CON_INPUT_MANUALE:
                     st.caption(f"↳ Inserimento manuale per: **{ex}**")
@@ -321,13 +320,39 @@ with col_workarea:
             else: dim_s = ""
             
         with c_img:
-            # Immagini dinamiche caricate via URL (così funzionano subito)
-            if scelta_part_it in ["Montante", "Spalla"]:
-                st.image("https://img.icons8.com/ios/250/column.png", width=150, caption="Riferimento: Montante (L x P x H)")
-            elif "Ripiano" in scelta_part_it or "Pannello" in scelta_part_it:
-                st.image("https://img.icons8.com/ios/250/rectangle.png", width=150, caption="Riferimento: Piano (L x P)")
-            else:
-                st.image("https://img.icons8.com/ios/250/box--v1.png", width=150, caption="Riferimento: Ingombro (L x P x H)")
+            # --- MODIFICA: SCHEMA SVG INTEGRATO ---
+            svg_schema = """
+            <svg viewBox="0 0 550 180" xmlns="http://www.w3.org/2000/svg">
+                <rect x="10" y="50" width="100" height="70" fill="none" stroke="#444" stroke-width="2"/>
+                <line x1="10" y1="130" x2="110" y2="130" stroke="#007bff" stroke-width="1.5"/>
+                <line x1="120" y1="50" x2="120" y2="120" stroke="#007bff" stroke-width="1.5"/>
+                <text x="60" y="145" text-anchor="middle" font-size="14" fill="#007bff">L</text>
+                <text x="135" y="90" text-anchor="middle" font-size="14" fill="#007bff">P</text>
+                <text x="60" y="35" text-anchor="middle" font-weight="bold" font-size="11" fill="#666">PIANTA (Pannelli)</text>
+
+                <path d="M180 90 l100 0 l30 -25 l-100 0 Z" fill="none" stroke="#444" stroke-width="2"/>
+                <path d="M180 90 l0 12 l100 0 l0 -12 M280 90 l30 -25 l0 12" fill="none" stroke="#444" stroke-width="2"/>
+                <line x1="180" y1="115" x2="280" y2="115" stroke="#007bff" stroke-width="1.5"/>
+                <line x1="295" y1="105" x2="325" y2="80" stroke="#007bff" stroke-width="1.5"/>
+                <line x1="325" y1="65" x2="325" y2="77" stroke="#007bff" stroke-width="1.5"/>
+                <text x="230" y="130" text-anchor="middle" font-size="14" fill="#007bff">L</text>
+                <text x="325" y="100" text-anchor="middle" font-size="14" fill="#007bff">P</text>
+                <text x="335" y="75" text-anchor="middle" font-size="14" fill="#007bff">H</text>
+                <text x="245" y="35" text-anchor="middle" font-weight="bold" font-size="11" fill="#666">RETTANGOLO (Ripiani)</text>
+
+                <rect x="420" y="40" width="35" height="110" fill="none" stroke="#444" stroke-width="2"/>
+                <path d="M455 40 l15 -10 l0 110 l-15 10 M420 40 l15 -10 l35 0" fill="none" stroke="#444" stroke-width="2"/>
+                <line x1="420" y1="160" x2="455" y2="160" stroke="#007bff" stroke-width="1.5"/>
+                <line x1="465" y1="155" x2="480" y2="145" stroke="#007bff" stroke-width="1.5"/>
+                <line x1="490" y1="30" x2="490" y2="140" stroke="#007bff" stroke-width="1.5"/>
+                <text x="437" y="175" text-anchor="middle" font-size="14" fill="#007bff">L</text>
+                <text x="485" y="160" text-anchor="middle" font-size="14" fill="#007bff">P</text>
+                <text x="505" y="90" text-anchor="middle" font-size="14" fill="#007bff">H</text>
+                <text x="450" y="20" text-anchor="middle" font-weight="bold" font-size="11" fill="#666">VERTICALE (Montanti)</text>
+            </svg>
+            """
+            st.write(f'<div style="background: white; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">{svg_schema}</div>', unsafe_allow_html=True)
+            st.caption("Legenda dimensioni per il dimensionamento")
         
         dim_dia, normativa = "", ""
 
@@ -432,32 +457,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         temp_str = f"UNI EN-1090 - {temp_str}"
         
     st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
-
-# =========================================================
-# 5. OUTPUT
-# =========================================================
-
-if st.session_state['stringa_editabile']:
-    st.markdown("### 📋 Risultato Finale")
-    st.code(st.session_state['stringa_editabile'], language=None)
-    
-    with st.expander("✏️ Modifica testo manualmente"):
-        st.text_input("Modifica qui:", key='stringa_editabile', label_visibility="collapsed")
-
-    lunghezza = len(st.session_state['stringa_editabile'])
-    if lunghezza >= 99:
-        st.error(f"⚠️ LIMITE SUPERATO ({lunghezza})")
-    else:
-        st.success(f"Lunghezza: {lunghezza} caratteri")
-
-    comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
-    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
-    
-    if uni_en_1090_active:
-        all_tags.append("UNI EN-1090-1")
-    if normativa:
-        all_tags.append(normativa.upper())
-    st.info(f"**TAGS:** {' | '.join(all_tags)}")
 
 # =========================================================
 # 5. OUTPUT
