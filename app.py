@@ -229,9 +229,6 @@ def update_dims_from_section():
 
 st.title("⚙️ REG - Title Generator & Classification")
 
-# IMPLEMENTAZIONE IMMAGINE DA LINK RAW GITHUB
-st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png")
-
 col_t, col_btn = st.columns([4, 1])
 with col_btn:
     st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
@@ -301,23 +298,31 @@ with col_workarea:
     st.markdown("---")
     st.subheader("📏 4. Dimensioni e Normative")
     
-    if macro_it == "FASTENER":
-        c1, c2, c3 = st.columns(3)
-        with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-        with c2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
-        opzioni_filtrare = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-        with c3: 
-            norma_scelta_estesa = st.selectbox(f"Normativa {scelta_part_it}", options=list(opzioni_filtrare.keys()))
-            normativa = opzioni_filtrare[norma_scelta_estesa]
-        dim_p, dim_h, dim_s = "", "", "" 
-    else:
-        dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-        dim_p = st.text_input("Profondità (P)", key="dim_p")
-        dim_h = st.text_input("Altezza (H)", key="dim_h")
-        if macro_it != "ASSEMBLY":
-            lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
-            dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
-        else: dim_s = ""
+    # MODIFICA: Implementazione Immagine a fianco alle stringhe dimensionamento
+    col_input, col_img = st.columns([2, 1])
+    
+    with col_input:
+        if macro_it == "FASTENER":
+            c1, c2, c3 = st.columns(3)
+            with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+            with c2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
+            opzioni_filtrare = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
+            with c3: 
+                norma_scelta_estesa = st.selectbox(f"Normativa {scelta_part_it}", options=list(opzioni_filtrare.keys()))
+                normativa = opzioni_filtrare[norma_scelta_estesa]
+            dim_p, dim_h, dim_s = "", "", "" 
+        else:
+            dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+            dim_p = st.text_input("Profondità (P)", key="dim_p")
+            dim_h = st.text_input("Altezza (H)", key="dim_h")
+            if macro_it != "ASSEMBLY":
+                lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
+                dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
+            else: dim_s = ""
+            
+    with col_img:
+        # Immagine compressa in scala per affiancarsi ai menu
+        st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", caption="Schema Riferimento", use_container_width=True)
 
 # =========================================================
 # 4. LOGICA DI GENERAZIONE E TRADUZIONE
