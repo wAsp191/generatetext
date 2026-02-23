@@ -264,11 +264,12 @@ with col_workarea:
         if extra_selezionati:
             for ex in extra_selezionati:
                 if ex in SUB_OPTIONS_CONFIG:
-                    st.info(f"Dettaglio richiesto per: **{ex}**")
+                    st.caption(f"↳ Specifiche per: **{ex}**")
                     opzioni_sub = SUB_OPTIONS_CONFIG[ex]
-                    st.selectbox(f"Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}")
+                    st.selectbox(f"↳ Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}", label_visibility="collapsed")
                 elif ex in EXTRA_CON_INPUT_MANUALE:
-                    st.text_input(f"Specifica valore per {ex} (es. 40x40 o D30):", key=f"manual_{ex}")
+                    st.caption(f"↳ Inserimento manuale per: **{ex}**")
+                    st.text_input(f"Specifica valore per {ex} (es. 40x40 o D30):", key=f"manual_{ex}", label_visibility="collapsed")
     else:
         extra_selezionati = []
         st.info("Nessuna opzione extra disponibile per questo elemento.")
