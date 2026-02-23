@@ -15,7 +15,6 @@ st.markdown("""
         h3 { font-size: 2.0rem !important; margin-top: 25px !important; margin-bottom: 20px !important; }
         [data-testid="column"] { padding: 15px !important; }
         .stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }
-        .dim-box { border: 1px solid #ddd; padding: 15px; border-radius: 10px; background-color: #f9f9f9; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -209,6 +208,18 @@ def reset_all():
             else:
                 st.session_state[k] = ""
 
+# Funzione per autocompilare basandosi sulla sezione
+def update_dims_from_section():
+    sez = st.session_state.get("sub_Sezione", "")
+    if "L55" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "55", "30"
+    elif "L80" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "80", "30"
+    elif "L100" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "100", "30"
+    elif "L120" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "120", "30"
+
 # =========================================================
 # 3. INTERFACCIA UTENTE
 # =========================================================
@@ -271,7 +282,8 @@ with col_workarea:
                 if ex in SUB_OPTIONS_CONFIG:
                     st.caption(f"↳ Specifiche per: **{ex}**")
                     opzioni_sub = SUB_OPTIONS_CONFIG[ex]
-                    st.selectbox(f"↳ Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}", label_visibility="collapsed")
+                    # AGGIUNTO CALLBACK: Quando cambia la sezione, aggiorna le dimensioni
+                    st.selectbox(f"↳ Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}", label_visibility="collapsed", on_change=update_dims_from_section if ex=="Sezione" else None)
                 elif ex in EXTRA_CON_INPUT_MANUALE:
                     st.caption(f"↳ Inserimento manuale per: **{ex}**")
                     st.text_input(f"Specifica valore per {ex} (es. 40x40 o D30):", key=f"manual_{ex}", label_visibility="collapsed")
@@ -280,24 +292,6 @@ with col_workarea:
         st.info("Nessuna opzione extra disponibile per questo elemento.")
 
     extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
-
-    # --- NUOVA SEZIONE AUTOCOMPILAZIONE ---
-    if scelta_part_it == "Montante" or scelta_part_it == "Spalla":
-        st.markdown("---")
-        st.subheader("🤖 Smart Fill - Dimensionamento Rapido")
-        c_auto1, c_auto2 = st.columns([1, 2])
-        with c_auto1:
-            tipo_montante = st.selectbox("Seleziona Sezione Montante:", ["", "L55", "L80", "L100", "L120"])
-            if tipo_montante == "L55":
-                st.session_state.dim_l, st.session_state.dim_p = "55", "30"
-            elif tipo_montante == "L80":
-                st.session_state.dim_l, st.session_state.dim_p = "80", "30"
-            elif tipo_montante == "L100":
-                st.session_state.dim_l, st.session_state.dim_p = "100", "30"
-            elif tipo_montante == "L120":
-                st.session_state.dim_l, st.session_state.dim_p = "120", "30"
-        with c_auto2:
-            st.info(f"Valori impostati automaticamente per {tipo_montante}: L={st.session_state.get('dim_l')}, P={st.session_state.get('dim_p')}")
 
     st.markdown("---")
     st.subheader("📏 4. Dimensioni e Normative")
@@ -312,27 +306,24 @@ with col_workarea:
             normativa = opzioni_filtrare[norma_scelta_estesa]
         dim_p, dim_h, dim_s = "", "", "" 
     else:
-        col_inputs, col_img = st.columns([1.5, 2.5], gap="medium")
-        
-        with col_inputs:
+        c_in, c_img = st.columns([1, 2], gap="large")
+        with c_in:
             dim_l = st.text_input("Lunghezza (L)", key="dim_l")
             dim_p = st.text_input("Profondità (P)", key="dim_p")
             dim_h = st.text_input("Altezza (H)", key="dim_h")
-            
             if macro_it != "ASSEMBLY":
                 lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
                 dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
-            else:
-                dim_s = ""
-        
-        with col_img:
-            # Selezione dell'immagine basata sul tipo di componente
+            else: dim_s = ""
+            
+        with c_img:
+            # Immagini dinamiche caricate via URL (così funzionano subito)
             if scelta_part_it in ["Montante", "Spalla"]:
-                st.image("https://raw.githubusercontent.com/username/repo/main/vertical_column.png", caption="Riferimento: Montante / Spalla", use_container_width=True)
-            elif scelta_part_it in ["Ripiano", "Pannello rivestimento"]:
-                st.image("https://raw.githubusercontent.com/username/repo/main/flat_rectangle.png", caption="Riferimento: Ripiano / Pannello", use_container_width=True)
+                st.image("https://img.icons8.com/ios/250/column.png", width=150, caption="Riferimento: Montante (L x P x H)")
+            elif "Ripiano" in scelta_part_it or "Pannello" in scelta_part_it:
+                st.image("https://img.icons8.com/ios/250/rectangle.png", width=150, caption="Riferimento: Piano (L x P)")
             else:
-                st.image("https://raw.githubusercontent.com/username/repo/main/box_3d.png", caption="Riferimento Dimensioni", use_container_width=True)
+                st.image("https://img.icons8.com/ios/250/box--v1.png", width=150, caption="Riferimento: Ingombro (L x P x H)")
         
         dim_dia, normativa = "", ""
 
@@ -359,9 +350,14 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         dim_final = "X".join(dim_final_parts)
         if normativa: dim_final += f" {normativa}"
     else:
-        if dim_l.strip(): dim_final_parts.append(f"L{dim_l.strip().upper()}")
-        if dim_p.strip(): dim_final_parts.append(f"P{dim_p.strip().upper()}")
-        if dim_h.strip(): dim_final_parts.append(f"H{dim_h.strip().upper()}")
+        # Recupera valori aggiornati dallo state
+        l_val_s = st.session_state.dim_l.strip().upper()
+        p_val_s = st.session_state.dim_p.strip().upper()
+        h_val_s = st.session_state.dim_h.strip().upper()
+        
+        if l_val_s: dim_final_parts.append(f"L{l_val_s}")
+        if p_val_s: dim_final_parts.append(f"P{p_val_s}")
+        if h_val_s: dim_final_parts.append(f"H{h_val_s}")
         lph_str = "X".join(dim_final_parts)
         
         s_val = dim_s.strip()
@@ -432,6 +428,32 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         temp_str = f"UNI EN-1090 - {temp_str}"
         
     st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
+
+# =========================================================
+# 5. OUTPUT
+# =========================================================
+
+if st.session_state['stringa_editabile']:
+    st.markdown("### 📋 Risultato Finale")
+    st.code(st.session_state['stringa_editabile'], language=None)
+    
+    with st.expander("✏️ Modifica testo manualmente"):
+        st.text_input("Modifica qui:", key='stringa_editabile', label_visibility="collapsed")
+
+    lunghezza = len(st.session_state['stringa_editabile'])
+    if lunghezza >= 99:
+        st.error(f"⚠️ LIMITE SUPERATO ({lunghezza})")
+    else:
+        st.success(f"Lunghezza: {lunghezza} caratteri")
+
+    comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
+    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
+    
+    if uni_en_1090_active:
+        all_tags.append("UNI EN-1090-1")
+    if normativa:
+        all_tags.append(normativa.upper())
+    st.info(f"**TAGS:** {' | '.join(all_tags)}")
 
 # =========================================================
 # 5. OUTPUT
