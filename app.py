@@ -229,6 +229,9 @@ def update_dims_from_section():
 
 st.title("⚙️ REG - Title Generator & Classification")
 
+# IMPLEMENTAZIONE IMMAGINE DA LINK RAW GITHUB
+st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png")
+
 col_t, col_btn = st.columns([4, 1])
 with col_btn:
     st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
