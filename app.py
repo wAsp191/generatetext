@@ -43,7 +43,7 @@ SUB_OPTIONS_CONFIG = {
         "2": "2 DIAGONALS", "3": "3 DIAGONALS", "4": "4 DIAGONALS"
     },
     "Sezione": {
-        "L55": "L55", "L80": "L80", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", "L120 Z/M": "L120 Z/M"
+        "L55": "L55", "L80 Z/S": "L80 Z/S", "L80 Z/M": "L80 Z/M", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", "70X30": "70X30", "90X30": "90X30"
     }
 }
 
@@ -212,13 +212,17 @@ def reset_all():
 def update_dims_from_section():
     sez = st.session_state.get("sub_Sezione", "")
     if "L55" in sez:
-        st.session_state.dim_l, st.session_state.dim_p = "55", "30"
+        st.session_state.dim_l, st.session_state.dim_p = "55", "63"
     elif "L80" in sez:
-        st.session_state.dim_l, st.session_state.dim_p = "80", "30"
+        st.session_state.dim_l, st.session_state.dim_p = "80", "69"
     elif "L100" in sez:
-        st.session_state.dim_l, st.session_state.dim_p = "100", "30"
+        st.session_state.dim_l, st.session_state.dim_p = "100", "75"
     elif "L120" in sez:
-        st.session_state.dim_l, st.session_state.dim_p = "120", "30"
+        st.session_state.dim_l, st.session_state.dim_p = "120", "75"
+    elif "70X30" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "70", "30"
+    elif "90X30" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "90", "30"
 
 # =========================================================
 # 3. INTERFACCIA UTENTE
