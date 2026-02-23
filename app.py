@@ -208,7 +208,6 @@ def reset_all():
             else:
                 st.session_state[k] = ""
 
-# Funzione per autocompilare basandosi sulla sezione
 def update_dims_from_section():
     sez = st.session_state.get("sub_Sezione", "")
     if "L55" in sez:
@@ -309,51 +308,13 @@ with col_workarea:
             normativa = opzioni_filtrare[norma_scelta_estesa]
         dim_p, dim_h, dim_s = "", "", "" 
     else:
-        c_in, c_img = st.columns([1, 2], gap="large")
-        with c_in:
-            dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-            dim_p = st.text_input("Profondità (P)", key="dim_p")
-            dim_h = st.text_input("Altezza (H)", key="dim_h")
-            if macro_it != "ASSEMBLY":
-                lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
-                dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
-            else: dim_s = ""
-            
-        with c_img:
-            # --- SCHEMA SVG INTEGRATO E CORRETTO ---
-            svg_schema = """
-            <svg viewBox="0 0 580 180" xmlns="http://www.w3.org/2000/svg">
-                <rect x="10" y="50" width="100" height="70" fill="none" stroke="#444" stroke-width="2"/>
-                <line x1="10" y1="130" x2="110" y2="130" stroke="#007bff" stroke-width="1.5"/>
-                <line x1="120" y1="50" x2="120" y2="120" stroke="#007bff" stroke-width="1.5"/>
-                <text x="60" y="145" text-anchor="middle" font-size="14" fill="#007bff">L</text>
-                <text x="135" y="90" text-anchor="middle" font-size="14" fill="#007bff">P</text>
-                <text x="60" y="35" text-anchor="middle" font-weight="bold" font-size="11" fill="#666">PIANTA (Pannelli)</text>
-
-                <path d="M180 90 l100 0 l30 -25 l-100 0 Z" fill="none" stroke="#444" stroke-width="2"/>
-                <path d="M180 90 l0 12 l100 0 l0 -12 M280 90 l30 -25 l0 12" fill="none" stroke="#444" stroke-width="2"/>
-                <line x1="180" y1="115" x2="280" y2="115" stroke="#007bff" stroke-width="1.5"/>
-                <line x1="295" y1="115" x2="325" y2="90" stroke="#007bff" stroke-width="1.5"/>
-                <line x1="335" y1="65" x2="335" y2="77" stroke="#007bff" stroke-width="1.5"/>
-                <text x="230" y="130" text-anchor="middle" font-size="14" fill="#007bff">L</text>
-                <text x="325" y="115" text-anchor="middle" font-size="14" fill="#007bff">P</text>
-                <text x="345" y="75" text-anchor="middle" font-size="14" fill="#007bff">H</text>
-                <text x="245" y="35" text-anchor="middle" font-weight="bold" font-size="11" fill="#666">RIPΙΑΝΟ (Ingombri)</text>
-
-                <rect x="420" y="40" width="35" height="110" fill="none" stroke="#444" stroke-width="2"/>
-                <path d="M455 40 l15 -10 l0 110 l-15 10 M420 40 l15 -10 l35 0" fill="none" stroke="#444" stroke-width="2"/>
-                <line x1="420" y1="160" x2="455" y2="160" stroke="#007bff" stroke-width="1.5"/>
-                <line x1="465" y1="155" x2="480" y2="145" stroke="#007bff" stroke-width="1.5"/>
-                <line x1="500" y1="30" x2="500" y2="140" stroke="#007bff" stroke-width="1.5"/>
-                <text x="437" y="175" text-anchor="middle" font-size="14" fill="#007bff">L</text>
-                <text x="485" y="165" text-anchor="middle" font-size="14" fill="#007bff">P</text>
-                <text x="515" y="90" text-anchor="middle" font-size="14" fill="#007bff">H</text>
-                <text x="450" y="20" text-anchor="middle" font-weight="bold" font-size="11" fill="#666">VERTICALE (Montanti)</text>
-            </svg>
-            """
-            st.write(f'<div style="background: white; padding: 10px; border-radius: 8px; border: 1px solid #ddd; overflow-x: auto;">{svg_schema}</div>', unsafe_allow_html=True)
-            st.caption("Legenda dimensioni per il dimensionamento")
-
+        dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+        dim_p = st.text_input("Profondità (P)", key="dim_p")
+        dim_h = st.text_input("Altezza (H)", key="dim_h")
+        if macro_it != "ASSEMBLY":
+            lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
+            dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
+        else: dim_s = ""
 
 # =========================================================
 # 4. LOGICA DI GENERAZIONE E TRADUZIONE
@@ -368,17 +329,16 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     # --- A. Dimensioni ---
     dim_final_parts = []
     if macro_it == "FASTENER":
-        d_val = dim_dia.strip().upper()
-        l_val = dim_l.strip().upper()
+        d_val = st.session_state.get("dim_dia", "").strip().upper()
+        l_val = st.session_state.get("dim_l", "").strip().upper()
         if d_val:
             prefix_d = "" if d_val.startswith('M') else "D"
             dim_final_parts.append(f"{prefix_d}{d_val}")
         if l_val:
             dim_final_parts.append(f"L{l_val}")
         dim_final = "X".join(dim_final_parts)
-        if normativa: dim_final += f" {normativa}"
+        if 'normativa' in locals() and normativa: dim_final += f" {normativa}"
     else:
-        # Recupera valori aggiornati dallo state
         l_val_s = st.session_state.dim_l.strip().upper()
         p_val_s = st.session_state.dim_p.strip().upper()
         h_val_s = st.session_state.dim_h.strip().upper()
@@ -388,13 +348,13 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         if h_val_s: dim_final_parts.append(f"H{h_val_s}")
         lph_str = "X".join(dim_final_parts)
         
-        s_val = dim_s.strip()
+        s_val = st.session_state.get("dim_s", "").strip()
         if lph_str and s_val: dim_final = f"{lph_str} S{s_val}"
         elif lph_str: dim_final = lph_str
         elif s_val: dim_final = f"S{s_val}"
         else: dim_final = ""
 
-    # --- B. Extra da Bottoni (Pills + Manuali + Sub) ---
+    # --- B. Extra da Bottoni ---
     extra_pills_list = []
     for ex in extra_selezionati:
         base_trans = extra_dedicati_dict.get(ex, ex.upper())
@@ -410,7 +370,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         else:
             extra_pills_list.append(base_trans)
 
-    # --- C. Note Libere (Logica Separata) ---
+    # --- C. Note Libere ---
     note_libere_tradotte = ""
     if extra_libero:
         testo_pulito = extra_libero.lower()
@@ -422,7 +382,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         except:
             note_libere_tradotte = extra_libero.upper()
 
-    # --- D. Ordinamento Extra Bottoni ---
+    # --- D. Ordinamento ---
     prefissi = [ex for ex in extra_pills_list if any(p in ex for p in TERMINI_ANTICIPATI)]
     suffissi = [ex for ex in extra_pills_list if not any(p in ex for p in TERMINI_ANTICIPATI)]
     
@@ -432,7 +392,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     comp_list = [c for c in (comp_selezionate or []) if c.strip()]
     comp_str = ", ".join(comp_list) if comp_list else ""
 
-    # --- E. Assemblaggio per Segmenti ---
+    # --- E. Assemblaggio ---
     descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
     
     final_segments = [descrizione_centrale]
@@ -444,7 +404,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     temp_str = temp_str.replace("WITH WITH", "WITH")
     
     if temp_str.count("WITH") > 1:
-        first_with_end = temp_str.find("WITH") + 4
+        first_with_idx = temp_str.find("WITH")
+        first_with_end = first_with_idx + 4
         parte_iniziale = temp_str[:first_with_end]
         parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
         temp_str = parte_iniziale + parte_restante
@@ -479,7 +440,7 @@ if st.session_state['stringa_editabile']:
     
     if uni_en_1090_active:
         all_tags.append("UNI EN-1090-1")
-    if normativa:
+    if 'normativa' in locals() and normativa:
         all_tags.append(normativa.upper())
     st.info(f"**TAGS:** {' | '.join(all_tags)}")
 
