@@ -3,46 +3,51 @@ from deep_translator import GoogleTranslator
 import datetime
 
 # =========================================================
-# 0. CONFIGURAZIONE E STILE
+# 0. CONFIGURAZIONE PAGINA
 # =========================================================
-st.set_page_config(page_title="Technical Generator v7.8", layout="wide")
+st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
 
 st.markdown("""
     <style>
         div[data-testid="stWidgetLabel"] { margin-bottom: 5px !important; }
         .stRadio div[role="radiogroup"] { gap: 5px !important; }
         .stRadio label p, .stPills label p { font-size: 1.0rem !important; font-weight: 450 !important; }
-        h3 { font-size: 2.0rem !important; margin-top: 25px !important; }
-        [data-testid="column"] { padding: 10px !important; }
-        .stButton button { border-radius: 20px; font-weight: bold; background-color: #f0f2f6; }
+        h3 { font-size: 2.0rem !important; margin-top: 25px !important; margin-bottom: 20px !important; }
+        [data-testid="column"] { padding: 15px !important; }
+        .stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
 # =========================================================
-# 1. FUNZIONE DI RESET UNIVERSALE
+# 1. DIZIONARI E DATABASE
 # =========================================================
-def reset_all():
-    """Cancella assolutamente ogni traccia nel session_state"""
-    for key in list(st.session_state.keys()):
-        if isinstance(st.session_state[key], list):
-            st.session_state[key] = []
-        elif isinstance(st.session_state[key], bool):
-            st.session_state[key] = False
-        else:
-            st.session_state[key] = ""
-    st.rerun()
 
-# =========================================================
-# 2. DATABASE E CONFIGURAZIONI (Versione Integrale)
-# =========================================================
-GLOSSARIO_TECNICO = {"mensola": "BRACKET", "gondola": "GONDOLA", "spalla": "FRAME", "innesto": "COUPLING"}
+GLOSSARIO_TECNICO = {
+    "mensola": "BRACKET",
+    "gondola": "GONDOLA",
+    "spalla": "FRAME",
+    "innesto": "COUPLING"
+}
 
 SUB_OPTIONS_CONFIG = {
-    "VPA": {"Serie S": "S SERIES", "Serie SS": "SS SERIES", "Serie M": "M SERIES", "Serie L": "L SERIES"},
-    "Con distanziale": {"L100": "L100", "L150": "L150", "L200": "L200", "L250": "L250"},
-    "Numero diagonali": {"2": "2 DIAGONALS", "3": "3 DIAGONALS", "4": "4 DIAGONALS"},
-    "Sezione": {"L55": "L55", "L80 Z/S": "L80 Z/S", "L80 Z/M": "L80 Z/M", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", "70X30": "70X30", "90X30": "90X30"}
+    "VPA": {
+        "Serie S": "S SERIES",
+        "Serie SS": "SS SERIES",
+        "Serie M": "M SERIES",
+        "Serie L": "L SERIES"
+    },
+    "Con distanziale": {
+        "L100": "L100", "L150": "L150", "L200": "L200", "L250": "L250"
+    },
+    "Numero diagonali": {
+        "2": "2 DIAGONALS", "3": "3 DIAGONALS", "4": "4 DIAGONALS"
+    },
+    "Sezione": {
+        "L55": "L55", "L80 Z/S": "L80 Z/S", "L80 Z/M": "L80 Z/M", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", "70X30": "70X30", "90X30": "90X30"
+    }
 }
+
+EXTRA_CON_INPUT_MANUALE = ["Sezione circolare", "Sezione quadrata"]
 
 MATERIALI_CONFIG = {
     "METAL COMP": {"METAL": "METAL", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
@@ -54,6 +59,7 @@ MATERIALI_CONFIG = {
 
 DATABASE = {
     "METAL COMP": {
+        "macro_en": "METAL COMPONENT",
         "Particolari": {
             "Piede di base": ["BASE FOOT", {"H90": "H90", "H100": "H100", "H150": "H150", "Antisismico": "SEISMIC", "Statico": "STATIC", "Regolabile": "ADJUSTABLE", "Prolunga": "- EXTENSION", "Per montante L80": "FOR L80 UPRIGHT", "Per montante L100/120": "FOR L100/L120 UPRIGHT"}, "FOOT"],
             "Zoccolatura": ["PLINTH", {"H90": "FOR H90 BASE FOOT", "H100": "FOR BASE FOOT H100", "H150": "FOR BASE FOOT H150", "Liscia": "PLAIN", "Angolo aperto": "EXTERNAL CORNER", "Angolo chiuso": "INNER CORNER", "Inclinata": "INCLINATED", "Forata": "PERFORATED", "Stondata": "ROUNDED", "Completa di paracolpo ABS": "WITH ABS BUFFER"}, "PLINTH"],
@@ -63,43 +69,160 @@ DATABASE = {
             "Fiancata laterale": ["SIDE PANEL", {"Portante": "LOAD-BEARING", "Non portante": "NON LOAD-BEARING", "Stondata": "ROUNDED", "Trapezoidale": "SLOPING", "Sagomata": "SHAPED"}, "SIDE-PANEL"],
             "Mensola": ["BRACKET", {"SX": "LEFT", "DX": "RIGHT", "Rinforzata": "REINFORCED", "Nervata": "RIBBED", "Per ripiano in vetro": "FOR GLASS SHELF", "Per ripiano in legno": "FOR WOODEN SHELF", "A pinza": "GRIPPED", "Minirack": "FOR MINIRACK", "1 Posizione": "ONE POSIION", "2 Posizioni": "TWO POSITION"}, "BRACKET"],
             "Ripiano": ["SHELF", {"Liscio": "PLAIN", "Forato": "PERFORATED", "Stondato": "ROUNDED", "In filo": "WIRE", "Semicircolare": "SEMICIRCULAR", "Con rinforzo": "REINFORCED", "Con inserti filettati": "WITH RIVET", "Con portaprezzo": "WITH TICKET-HOLDER", "Scantonato": "NOTCHED"}, "SHELF"],
-            "Montante": ["UPRIGHT", {"Sezione": "SECTION", "Statico": "STATIC", "Antisismico": "ANTI-SEISMIC", "Regolabile": "ADJUSTABLE"}, "UPRIGHT"]
+            "Cesto in filo": ["WIRE-BASKET", {"Per attacco montante": "HOOK ONTO UPRIGHT", "Per attacco fiancata": "HOOK ONTO SIDE-PANEL", "Impilabile": "STACKABLE", "Con mensole saldate": "WITH WELDED BRACKET"}, "BASKET"],
+            "Cielino": ["CANOPY", {"Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Frontale in lamiera": "SHEET METAL FASCIA", "Con illuminazione": "WITH LIGHTING"}, "CANOPY"],
+            "Corrente": ["BEAM", {"A seggiola": "L-SHAPED PROFILE", "VPA": "VPA"}, "BEAM"],
+            "Diagonale": ["DIAGONAL", {"Forata": "PERFORATED", "Per crociera verticale": "FOR VERTICAL CROSS-WALL"}, "DIAGONAL"],
+            "Distanziale": ["SPACER", {"Per controventatura": "FOR CROSS-WALL"}, "SPACER"],
+            "Gancio": ["HOOK", {"Singolo": "SINGLE", "Predisposto per portaprezzo": "ACCEPTS TICKET-HOLDER", "Doppio": "DOUBLE", "Rovescio": "REVERSE", "Attacco barra": "HOOK FOR BAR", "Attacco multilame": "HOOK FOR MULTISTRIP", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"}, "HOOK"],
+            "Profilo": ["PROFILE", {"Profilo a L": "L-SHAPED", "Profilo a U": "U-SHAPED"}, "PROFILE"],
+            "Rinforzo": ["STIFFENER", {"Asolato": "SLOTTED", "Per ripiano di base": "FOR BASE SHELF", "Per fiancata": "FOR SIDE PANEL"}, "STIFFENER"],
+            "Staffa": ["PLATE", {"Con viteria": "WITH SCREWS", "Di collegamento": "CONNECTING"}, "PLATE"],
+            "Anta/sportello": ["DOOR", {"Scorrevoli": "SLIDING", "Con foro serratura": "WITH LOCK HOLE", "A saracinesca": "SHUTTER", "Forata": "PERFORATED"}, "DOOR"],
+            "Piastra di fissaggio": ["FIXING PLATE", {"Con viti": "COMPLETE WITH SCREW"}, "PLATE"],
+            "Cassetto estraibile": ["PULL-OUT DRAWER", {"Su ruote": "ON WHEELS", "Per piede H100": "FOR BASE FOOT H100", "Per piede H150": "FOR BASE FOOT H150", "Con serratura": "WITH LOCK", "Senza serratura": "WITHOUT LOCK"}, "DRAWER"],
+            "Coprimontante": ["UPRIGHT-COVER", {"Per montante H70": "FOR H70 UPRIGHT", "Per montante H90": "FOR H90 UPRIGHT"}, "COVER"],
+            "Pedana di base": ["BASE PLATFORM", {"Con rinforzi": "WITH REINFORCEMENT"}, "BASE"],
+            "Divisorio": ["DIVIDER", {"In filo": "WIRE", "Trapezoidale": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
+            "Frontalino": ["RISER", {"In filo": "WIRE", "Per ripiano": "FOR SHELF", "Cromato": "CHROMED", "Verniciato": "PAINTED"}, "RISER"],
+            "Compensazione": ["FILLER PIECE", {"Per piede di base": "FOR BASE FOOT", "Per spalle L100/L120": "FOR L100/L120 FRAME"}, "SPACER"],
+            "Controventatura": ["BRACING", {"Per montante": "FOR UPRIGHT", "Con mensole saldate": "WITH WELDING BRACKET", "Passo 25": "PITCH 25", "Passo 50": "PITCH 50"}, "BRACING"],
+            "Traversino": ["CROSS BAR", {"Forato": "PERFORATED", "Con mensole saldate": "WITH WELDING BRACKET", "Con viteria": "WITH SCREWS"}, "CROSS BAR"],
+            "Tubolare": ["TUBULAR", {"Con componente saldato": "WITH WELDED ELEMENT", "Sezione quadrata": "SQUARE SECTION", "Sezione circolare": "CIRCULAR SECTION", "Piegato-saldato": "BENT AND WELDED", "Con mensole saldate": "WITH WELDING BRACKET", "Con viteria": "WITH SCREWS"}, "BAR"],
+            "Filo": ["WIRE", {"Piegato": "BENT", "Piegato-saldato": "BENT AND WELDED", "Con viteria saldata": "WITH WELDING SCREWS"}, "WIRE"],
+            "Montante": ["UPRIGHT", {"Sezione": "", "Statico": "STATIC", "Antisismico": "ANTI-SEISMIC", "Regolabile": "ADJUSTABLE"}, "UPRIGHT"]
         }
     },
     "WOOD COMP": {
+        "macro_en": "WOOD COMPONENT",
         "Particolari": {
             "Ripiano Legno": ["WOODEN SHELF", {"Con mensole": "WITH BRACKET", "Con lati bordati": "WITH EDGED SIDES", "Con zoccolatura": "WITH PLINTH", "Con viteria": "WITH SCREWS", "Fresata": "MILLING"}, "SHELF"],
-            "Fiancata": ["WOODEN SIDE PANEL", {"Con mensole": "WITH BRACKET", "Sagomata": "SHAPED", "Con lati bordati": "WITH EDGED SIDES"}, "SIDE PANEL"]
+            "Schienale Legno": ["WOODEN BACK", {"Con mensole": "WITH BRACKET", "Con viteria": "WITH SCREWS", "Con lati bordati": "WITH EDGED SIDES"}, "PANEL"],
+            "Cielino": ["WOODEN CANOPY", {"Con mensole": "WITH BRACKET", "Con viteria": "WITH SCREWS", "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con lati bordati": "WITH EDGED SIDES"}, "CANOPY"],
+            "Zoccolatura": ["WOODEN PLINTH", {"H100": "H100", "H150": "H150", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "PLINTH"],
+            "Fiancata": ["WOODEN SIDE PANEL", {"Con mensole": "WITH BRACKET", "Sagomata": "SHAPED", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS", "Fresata": "MILLING"}, "SIDE PANEL"],
+            "Copripiede": ["WOODEN FOOT-COVER", {"H100": "FOR H100 BASE FOOT", "H150": "FOR H150 BASE FOOT", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "COVER"],
+            "Coprimontante": ["WOODEN UPRIGHT-COVER", {"Minirack": "MINIRACK", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "COVER"],
+            "Compensazione": ["WOODEN FILLER PIECE", {"Per Top legno": "FOR TOP SHELF"}, "SPACER"]
         }
     },
     "PLASTIC COMP": {
+        "macro_en": "PLASTIC COMPONENT",
         "Particolari": {
-            "Portaprezzo": ["TICKET-HOLDER", {"Trasparente": "TRASPARENT", "Colorato": "COLOURED", "Adesivo": "ADHESIVE"}, "TICKET-HOLDER"],
-            "Tappo": ["PLASTIC CAP", {}, "CAP"]
+            "Tappo": ["PLASTIC CAP", {}, "CAP"],
+            "Guarnizione": ["GASKET", {}, "ACCESSORY"],
+            "Divisorio": ["DIVIDER", {"Sloping": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
+            "Frontalino": ["RISER", {"Per ripiano": "FOR SHELF", "Trasparente": "TRASPARENT"}, "RISER"],
+            "Portaprezzo": ["TICKET-HOLDER", {"Trasparente": "TRASPARENT", "Colorato": "COLOURED", "Con tasca oscillante": "WITH LIFT-UP POCKET", "Adesivo": "ADHESIVE", "Con asola centrale": "WITH CENTRAL SLOT"}, "TICKET-HOLDER"]
         }
     },
     "GLASS COMP": {
+        "macro_en": "GLASS COMPONENT",
         "Particolari": {
             "Ripiano": ["GLASS SHELF", {}, "SHELF"],
-            "Anta": ["GLASS DOOR", {"SX": "LEFT", "DX": "RIGHT", "Scorrevole": "SLIDING"}, "DOOR"]
+            "Anta": ["GLASS DOOR", {"SX": "LEFT", "DX": "RIGHT", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"}, "DOOR"],
+            "Cancelletto": ["GLASS ARM", {"SX": "LEFT", "DX": "RIGHT", "Illuminato": "ILLUMINATED"}, "ARM"],
         }
     },
     "FASTENER": {
+        "macro_en": "FASTENER",
         "Particolari": {
-            "Vite": ["SCREW", {"Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUCK HEAD", "Testa esagonale": "HEX HEAD"}, "SCREW"],
-            "Dado": ["NUT", {"Autobloccante": "SELF-LOCKING", "Flangiato": "FLANGED"}, "NUT"]
+            "Vite": ["SCREW", {"Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUCK HEAD", "Testa esagonale": "HEX HEAD", "Testa a croce": "CROSS HEAD", "Testa esagono incassato": "HEXAGON SOCKET HEAD", "Testa Bombata": "T-BOM"}, "SCREW"],
+            "Bullone": ["BOLT", {}, "FASTENER"],
+            "Rondella": ["WASHER", {"Dentellata": "SERRATED LOCK", "Fascia Larga": "WIDE BEND", "Elastica": "GROWER"}, "WASHER"],
+            "Dado": ["NUT", {"Autobloccante": "SELF-LOCKING", "Flangiato": "FLANGED"}, "NUT"],
+            "Inserti filettati": ["RIVET", {"Con testa": "WITH HEAD", "Senza testa": "WITHOUT HEAD"}, "RIVET"]
         }
     },
     "ASSEMBLY": {
+        "macro_en": "ASSEMBLY",
         "Particolari": {
-            "Vetrina": ["SHOWCASE", {"Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING"}, "SHOWCASE"],
-            "Spalla": ["FRAME", {"Antisismico": "SEISMIC-RESISTANT", "L100 Z/M": "L100 Z/M", "ZINCATO": "GALVANIZED"}, "FRAME"]
+            "Vetrina": ["SHOWCASE", {"Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con ante scorrevoli": "WITH SLIDING DOOR"}, "SHOWCASE"],
+            "Espositore": ["DISPLAY", {"Mobile": "MOBILE", "Per alimenti": "FOR FOOD"}, "DISPLAY"],
+            "Totem": ["TOTEM", {"Mobile": "MOBILE", "Girevole": "SWIVEL", "Per casse automatiche": "FOR SELF PAY"}, "DISPLAY"],
+            "Spalla": ["FRAME", {"Antisismico": "SEISMIC-RESISTANT", "L100 Z/M": "L100 Z/M", "L100 Z/S": "L100 Z/S", "L120 Z/M": "L120 Z/M", "L120 Z/S": "L120 Z/S", "L80 Z/M": "L80 Z/M", "L80 Z/S": "L80 Z/S", "L55": "L55", "ZINCATO": "GALVANIZED"}, "FRAME"],
+            "Controventatura": ["CROSS-BRACING", {"Gondola": "GONDOLA", "Sezione L120": "L120", "Sezione L100": "L100", "Sezione L80": "L80", "Su due livelli": "TWO LEVELS", "Numero diagonali": "WITH", "Con distanziale": "WITH SPACER"}, "CROSS-BRACING"],
+            "Banco espositore di legno": ["WOODEN DESK", {"Con cassetto": "WITH DRAWER", "Con ruote": "WITH WHEELS"}, "DESK"],
+            "Avancassa": ["IMPULSE UNIT", {"Con ripiani": "WITH SHELF", "Con ripiani inclinati": "WITH INCLINATED SHELF", "Con rete divisoria": "WITH DIVIDING NET", "Con ruote": "WITH WHEELS", "Con ganci": "WITH HOOKS", "Con batticarrello": "WITH TROLLEY BEATER"}, "DISPLAY"],
         }
     }
 }
 
-TERMINI_ANTICIPATI = ["CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "STATIC", "ADJUSTABLE", "SEISMIC", "TOP", "ROUNDED", "SLOPING", "SHAPED", "WIRE", "SLIDING", "CURVED", "STRAIGHT"]
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F25 READY", "F50", "F50 BESPOKE", "F50 READY", "UNIVERSAL", "FORTISSIMO"]
+
+MAPPA_NORMATIVE_FASTENER = {
+    "Vite": {
+        "": "",
+        "DIN 912 - Brugola testa cilindrica": "DIN 912",
+        "DIN 933 - Esagonale filetto totale": "DIN 933",
+        "DIN 931 - Esagonale filetto parziale": "DIN 931",
+        "DIN 7991 - Testa svasata esagono incassato": "DIN 7991",
+        "ISO 7380 - Testa bombata esagono incassato": "ISO 7380",
+        "DIN 571 - Tirafondo per legno": "DIN 571",
+        "DIN 7504-K - Autoperforante Esagonale": "DIN 7504-K",
+        "DIN 7504-N - Autoperforante Bombata": "DIN 7504-N",
+        "DIN 7504-P - Autoperforante Svasata": "DIN 7504-P"
+    },
+    "Dado": {
+        "": "",
+        "DIN 934 - Esagonale standard": "DIN 934",
+        "DIN 985 - Autobloccante nylon": "DIN 985",
+        "DIN 6923 - Flangiato zigrinato": "DIN 6923"
+    },
+    "Rondella": {
+        "": "",
+        "DIN 125 - Piana standard": "DIN 125",
+        "DIN 9021 - Fascia larga": "DIN 9021",
+        "DIN 6798 - Dentellata": "DIN 6798",
+        "DIN 127 - Grower (elastica)": "DIN 127"
+    },
+    "Bullone": { "": "" },
+    "Inserti filettati": { "": "" }
+}
+
+OPZIONI_SPESSORE_STD = ["", "0.5", "0.6", "0.75", "0.8", "1", "1.2", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5"]
+OPZIONI_SPESSORE_WOOD = ["", "10mm", "15mm", "18mm", "19mm", "20mm", "22mm", "24mm", "25mm", "30mm", "35mm"]
+
+# Modificata la lista per gestire meglio UPRIGHT GRAFT senza interferire con FOR UPRIGHT
+TERMINI_ANTICIPATI = [
+    "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "UPPER", "LOWER", "STATIC", "ADJUSTABLE", "SEISMIC",
+    "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "CONNECTING", "SHUTTER", "COUPLING",
+    "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING", "WIRE-BASKET",
+    "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "UPRIGHT GRAFT"
+]
+
+# =========================================================
+# 2. LOGICA FUNZIONALE
+# =========================================================
+
+def reset_all():
+    keys_to_reset = ["dim_l", "dim_p", "dim_h", "dim_s", "dim_dia", "extra_text", "extra_tags", "comp_tags", "check_assembled"]
+    sub_keys = [k for k in st.session_state.keys() if k.startswith("sub_") or k.startswith("manual_")]
+    keys_to_reset.extend(sub_keys)
+    
+    for k in keys_to_reset:
+        if k in st.session_state:
+            if "tags" in k:
+                st.session_state[k] = []
+            elif "check" in k:
+                st.session_state[k] = False
+            else:
+                st.session_state[k] = ""
+
+def update_dims_from_section():
+    sez = st.session_state.get("sub_Sezione", "")
+    if "L55" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "55", "63"
+    elif "L80" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "80", "69"
+    elif "L100" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "100", "75"
+    elif "L120" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "120", "75"
+    elif "70X30" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "70", "30"
+    elif "90X30" in sez:
+        st.session_state.dim_l, st.session_state.dim_p = "90", "30"
 
 # =========================================================
 # 3. INTERFACCIA UTENTE
@@ -107,10 +230,9 @@ OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F25 READY", "F50", "F50 BESP
 
 st.title("⚙️ REG - Title Generator & Classification")
 
-# --- BOTTONE AZZERA SUPERIORE ---
-c1, c2, c3 = st.columns([2, 1, 2])
-with c2:
-    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True, key="btn_top")
+col_t, col_btn = st.columns([4, 1])
+with col_btn:
+    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True)
 
 st.markdown("---")
 
@@ -118,104 +240,264 @@ col_macro, col_workarea = st.columns([1, 3], gap="large")
 
 with col_macro:
     st.subheader("📂 1. Categoria")
-    macro_it = st.radio("Scegli categoria:", options=list(DATABASE.keys()), key="macro_sel")
+    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
     
-    st.markdown("---")
-    st.subheader("🔗 Compatibilità")
-    pills_comp = [o for o in OPZIONI_COMPATIBILITA if o]
-    comp_sel = st.pills("Modelli:", options=pills_comp, selection_mode="multi", key="comp_tags")
+    uni_en_1090_active = False 
+    
+    if macro_it != "FASTENER":
+        st.markdown("---")
+        st.subheader("🔗 Compatibilità")
+        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+        comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
+        
+        if "FORTISSIMO" in comp_selezionate:
+            st.warning("⚡ Configurazione Strutturale")
+            uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", value=False)
+    else:
+        comp_selezionate = []
 
 with col_workarea:
-    st.subheader("🛠️ 2. Dettagli Elemento")
+    st.subheader("🛠️ 2. Materiale e Particolare")
     
-    # Materiale
     mat_en = ""
-    if macro_it != "ASSEMBLY":
-        mats = MATERIALI_CONFIG.get(macro_it, {})
-        if mats:
-            mat_it = st.radio("Materiale:", options=list(mats.keys()), horizontal=True, key="mat_sel")
-            mat_en = mats[mat_it]
-    else:
+    if macro_it == "ASSEMBLY":
         st.checkbox("ASSEMBLATA", key="check_assembled")
-
-    # Particolare
-    part_dict = DATABASE[macro_it]["Particolari"]
-    scelta_it = st.radio("Dettaglio:", options=sorted(list(part_dict.keys())), horizontal=True, key="part_sel")
-    part_en, extra_dict, tag_suggerito = part_dict[scelta_it]
-
-    st.markdown("---")
-    st.subheader("✨ 3. Opzioni Extra")
-    extra_tags = st.pills("Opzioni:", options=list(extra_dict.keys()), selection_mode="multi", key="extra_tags")
+    else:
+        materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
+        if materiali_disponibili:
+            mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
+            mat_en = materiali_disponibili[mat_it]
     
-    # Gestione varianti dinamiche (Sub-options)
-    for ex in (extra_tags or []):
-        if ex in SUB_OPTIONS_CONFIG:
-            st.selectbox(f"↳ Variante per {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
-
-    extra_libero = st.text_input("Note libere (IT):", key="extra_text")
+    part_dict = DATABASE[macro_it]["Particolari"]
+    scelta_part_it = st.radio("Seleziona dettaglio:", options=sorted(list(part_dict.keys())), horizontal=True)
+    
+    dati_part = part_dict[scelta_part_it]
+    part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
 
     st.markdown("---")
-    st.subheader("📏 4. Dimensioni")
-    d_col1, d_col2 = st.columns([2, 1])
-    with d_col1:
-        c_l, c_p, c_h = st.columns(3)
-        with c_l: st.text_input("L (mm)", key="dim_l")
-        with c_p: st.text_input("P (mm)", key="dim_p")
-        with c_h: st.text_input("H (mm)", key="dim_h")
-        st.selectbox("Spessore (S)", options=["", "0.6", "0.8", "1", "1.2", "1.5", "2", "3"], key="dim_s")
-    with d_col2:
-        st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", width=150)
+    st.subheader(f"✨ 3. Extra per {scelta_part_it}")
+    
+    extra_options = list(extra_dedicati_dict.keys())
+    if extra_options:
+        extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
+        
+        if extra_selezionati:
+            for ex in extra_selezionati:
+                if ex in SUB_OPTIONS_CONFIG:
+                    st.caption(f"↳ Specifiche per: **{ex}**")
+                    opzioni_sub = SUB_OPTIONS_CONFIG[ex]
+                    st.selectbox(f"↳ Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}", label_visibility="collapsed", on_change=update_dims_from_section if ex=="Sezione" else None)
+                elif ex in EXTRA_CON_INPUT_MANUALE:
+                    st.caption(f"↳ Inserimento manuale per: **{ex}**")
+                    st.text_input(f"Specifica valore per {ex} (es. 40x40 o D30):", key=f"manual_{ex}", label_visibility="collapsed")
+    else:
+        extra_selezionati = []
+        st.info("Nessuna opzione extra disponibile per questo elemento.")
+
+    extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
+
+    st.markdown("---")
+    st.subheader("📏 4. Dimensioni e Normative")
+    
+    # Layout con Immagine tecnica a fianco alle dimensioni
+    col_input, col_img = st.columns([2, 1])
+    
+    with col_input:
+        if macro_it == "FASTENER":
+            c1, c2, c3 = st.columns(3)
+            with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+            with c2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
+            opzioni_filtrare = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
+            with c3: 
+                norma_scelta_estesa = st.selectbox(f"Normativa {scelta_part_it}", options=list(opzioni_filtrare.keys()))
+                normativa = opzioni_filtrare[norma_scelta_estesa]
+            dim_p, dim_h, dim_s = "", "", "" 
+        else:
+            dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+            dim_p = st.text_input("Profondità (P)", key="dim_p")
+            dim_h = st.text_input("Altezza (H)", key="dim_h")
+            if macro_it != "ASSEMBLY":
+                lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
+                dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
+            else: dim_s = ""
+            
+    with col_img:
+        st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", caption="Schema Riferimento", use_container_width=True)
 
 # =========================================================
-# 4. GENERAZIONE E OUTPUT
+# 4. LOGICA DI GENERAZIONE E TRADUZIONE
 # =========================================================
+
 st.divider()
 
+if 'stringa_editabile' not in st.session_state:
+    st.session_state['stringa_editabile'] = ""
+
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # Logica dimensioni
-    dims = [f"{k}{st.session_state[f'dim_{k.lower()}']}" for k in ["L", "P", "H"] if st.session_state.get(f"dim_{k.lower()}")]
-    dim_str = "X".join(dims)
-    if st.session_state.get("dim_s"): dim_str += f" S{st.session_state['dim_s']}"
+    # --- A. Dimensioni ---
+    dim_final_parts = []
+    if macro_it == "FASTENER":
+        d_val = st.session_state.get("dim_dia", "").strip().upper()
+        l_val = st.session_state.get("dim_l", "").strip().upper()
+        if d_val:
+            prefix_d = "" if d_val.startswith('M') else "D"
+            dim_final_parts.append(f"{prefix_d}{d_val}")
+        if l_val:
+            dim_final_parts.append(f"L{l_val}")
+        dim_final = "X".join(dim_final_parts)
+        if 'normativa' in locals() and normativa: dim_final += f" {normativa}"
+    else:
+        l_val_s = st.session_state.dim_l.strip().upper()
+        p_val_s = st.session_state.dim_p.strip().upper()
+        h_val_s = st.session_state.dim_h.strip().upper()
+        
+        if l_val_s: dim_final_parts.append(f"L{l_val_s}")
+        if p_val_s: dim_final_parts.append(f"P{p_val_s}")
+        if h_val_s: dim_final_parts.append(f"H{h_val_s}")
+        lph_str = "X".join(dim_final_parts)
+        
+        s_val = st.session_state.get("dim_s", "").strip()
+        if lph_str and s_val: dim_final = f"{lph_str} S{s_val}"
+        elif lph_str: dim_final = lph_str
+        elif s_val: dim_final = f"S{s_val}"
+        else: dim_final = ""
 
-    # Logica Extra
-    extra_list = []
-    for ex in (extra_tags or []):
-        base = extra_dict.get(ex, ex.upper())
-        sub = st.session_state.get(f"sub_{ex}", "")
-        if sub: extra_list.append(f"{base} {SUB_OPTIONS_CONFIG[ex].get(sub, sub)}")
-        else: extra_list.append(base)
+    # --- B. Extra da Bottoni ---
+    extra_pills_list = []
+    for ex in extra_selezionati:
+        base_trans = extra_dedicati_dict.get(ex, ex.upper())
+        if ex in SUB_OPTIONS_CONFIG:
+            sub_key = f"sub_{ex}"
+            valore_sub_it = st.session_state.get(sub_key, "")
+            traduzione_sub = SUB_OPTIONS_CONFIG[ex].get(valore_sub_it, "")
+            extra_pills_list.append(f"{base_trans} {traduzione_sub}".strip())
+        elif ex in EXTRA_CON_INPUT_MANUALE:
+            manual_val = st.session_state.get(f"manual_{ex}", "").strip().upper()
+            if manual_val: extra_pills_list.append(f"{base_trans} {manual_val}")
+            else: extra_pills_list.append(base_trans)
+        else:
+            extra_pills_list.append(base_trans)
 
-    # Traduzione note veloci
-    note_en = ""
+    # --- C. Note Libere ---
+    note_libere_tradotte = ""
     if extra_libero:
-        try: note_en = GoogleTranslator(source='it', target='en').translate(extra_libero).upper()
-        except: note_en = extra_libero.upper()
+        testo_pulito = extra_libero.lower()
+        for ita, eng in GLOSSARIO_TECNICO.items():
+            if ita in testo_pulito:
+                testo_pulito = testo_pulito.replace(ita, eng)
+        try:
+            note_libere_tradotte = GoogleTranslator(source='it', target='en').translate(testo_pulito).upper()
+        except:
+            note_libere_tradotte = extra_libero.upper()
 
-    # Ordinamento Prefissi/Suffissi
-    pref = [e for e in extra_list if any(p in e for p in TERMINI_ANTICIPATI) and "FOR" not in e]
-    suff = [e for e in extra_list if e not in pref]
-
-    # Costruzione stringa
-    core = f"{mat_en} {' '.join(pref)} {part_en} {dim_str}".strip().upper()
-    parts = [core]
-    if suff: parts.append(", ".join(suff).upper())
-    if note_en: parts.append(note_en)
-    if comp_sel: parts.append(", ".join(comp_sel))
+    # --- D. Ordinamento (MODIFICA LOGICA FOR) ---
+    # Se il termine contiene "FOR", viene rimosso dai prefissi e forzato nei suffissi
+    prefissi = [ex for ex in extra_pills_list if any(p in ex for p in TERMINI_ANTICIPATI) and "FOR" not in ex]
+    suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
     
-    res = " - ".join(parts).replace("  ", " ")
-    if st.session_state.get("check_assembled"): res = f"ASSEMBLED - {res}"
+    prefix_str = " ".join(prefissi) if prefissi else ""
+    extra_suffissi_str = ", ".join(suffissi) if suffissi else ""
     
-    st.session_state["final_res"] = res
+    comp_list = [c for c in (comp_selezionate or []) if c.strip()]
+    comp_str = ", ".join(comp_list) if comp_list else ""
 
-if st.session_state.get("final_res"):
-    st.subheader("📋 Risultato")
-    st.code(st.session_state["final_res"])
-    lunghezza = len(st.session_state["final_res"])
-    if lunghezza > 99: st.error(f"Caratteri: {lunghezza} (LIMITE SUPERATO!)")
-    else: st.success(f"Caratteri: {lunghezza} (OK)")
+    # --- E. Assemblaggio ---
+    descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
+    
+    final_segments = [descrizione_centrale]
+    if extra_suffissi_str: final_segments.append(extra_suffissi_str)
+    if note_libere_tradotte: final_segments.append(note_libere_tradotte) 
+    if comp_str: final_segments.append(comp_str)
+    
+    temp_str = " - ".join(final_segments).upper().replace("  ", " ")
+    temp_str = temp_str.replace("WITH WITH", "WITH")
+    
+    if temp_str.count("WITH") > 1:
+        first_with_idx = temp_str.find("WITH")
+        first_with_end = first_with_idx + 4
+        parte_iniziale = temp_str[:first_with_end]
+        parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
+        temp_str = parte_iniziale + parte_restante
 
-# --- BOTTONE AZZERA INFERIORE ---
-st.markdown("<br>", unsafe_allow_html=True)
-b_left, b_mid, b_right = st.columns([2, 1, 2])
-with b_mid:
-    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True, key="btn_bottom")
+    if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled", False):
+        temp_str = f"ASSEMBLED - {temp_str}"
+    
+    if uni_en_1090_active:
+        temp_str = f"UNI EN-1090 - {temp_str}"
+        
+    st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
+
+# =========================================================
+# 5. OUTPUT
+# =========================================================
+
+if st.session_state['stringa_editabile']:
+    st.markdown("### 📋 Risultato Finale")
+    st.code(st.session_state['stringa_editabile'], language=None)
+    
+    with st.expander("✏️ Modifica testo manualmente"):
+        st.text_input("Modifica qui:", key='stringa_editabile', label_visibility="collapsed")
+
+    lunghezza = len(st.session_state['stringa_editabile'])
+    if lunghezza >= 99:
+        st.error(f"⚠️ LIMITE SUPERATO ({lunghezza})")
+    else:
+        st.success(f"Lunghezza: {lunghezza} caratteri")
+
+    comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
+    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
+    
+    if uni_en_1090_active:
+        all_tags.append("UNI EN-1090-1")
+    if 'normativa' in locals() and normativa:
+        all_tags.append(normativa.upper())
+    st.info(f"**TAGS:** {' | '.join(all_tags)}")
+
+# =========================================================
+# 6. FEEDBACK
+# =========================================================
+
+st.sidebar.markdown("---")
+st.sidebar.header("📢 Beta Test Feedback")
+
+with st.sidebar.expander("🆘 Segnala mancanza o errore", expanded=False):
+    st.write("Usa questo spazio per suggerire nuovi materiali, particolari o correzioni.")
+    tipo_segnalazione = st.selectbox(
+        "Cosa vorresti aggiungere?", 
+        ["Particolare Mancante", "Materiale", "Aggiungi/rimuovi Extra", "Normativa", "Errore Traduzione", "Altro"],
+        key="tipo_fb"
+    )
+    nota_feedback = st.text_area("Descrivi la modifica:", placeholder="Es: Manca la vite testa cilindrica DIN 912...", key="nota_fb")
+    
+    if st.button("Invia Segnalazione", use_container_width=True):
+        if nota_feedback:
+            ora = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+            nota_pulita = nota_feedback.replace(";", ",").replace("\n", " ")
+            nuova_riga = f"{ora};{tipo_segnalazione};{nota_pulita}\n"
+            
+            try:
+                with open("feedback.csv", "a", encoding="utf-8") as f:
+                    f.write(nuova_riga)
+                st.success("✅ Ricevuto! Grazie per l'aiuto.")
+            except Exception as e:
+                st.error(f"Errore nel salvataggio: {e}")
+        else:
+            st.warning("Inserisci un messaggio prima di inviare.")
+
+st.sidebar.markdown("---")
+with st.sidebar.expander("🛠️ Area Admin (Download)"):
+    pw = st.text_input("Password accesso dati", type="password")
+    if pw == "admin2024": 
+        try:
+            with open("feedback.csv", "rb") as file:
+                st.download_button(
+                    label="📥 SCARICA TUTTI I FEEDBACK",
+                    data=file,
+                    file_name="feedback_colleghi.csv",
+                    mime="text/csv",
+                    use_container_width=True
+                )
+        except FileNotFoundError:
+            st.info("Nessun feedback presente al momento.")
+    elif pw != "":
+        st.error("Password errata")
