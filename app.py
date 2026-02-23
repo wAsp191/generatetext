@@ -42,6 +42,8 @@ SUB_OPTIONS_CONFIG = {
     "Numero diagonali": {
         "2": "2 DIAGONALS", "3": "3 DIAGONALS", "4": "4 DIAGONALS"
     },
+    "Sezione": {
+        "L55": "L55", "L80": "L80", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", "L120 Z/M": "L120 Z/M"
 }
 
 EXTRA_CON_INPUT_MANUALE = ["Sezione circolare", "Sezione quadrata"]
@@ -87,6 +89,7 @@ DATABASE = {
             "Traversino": ["CROSS BAR", {"Forato": "PERFORATED", "Con mensole saldate": "WITH WELDING BRACKET", "Con viteria": "WITH SCREWS"}, "CROSS BAR"],
             "Tubolare": ["TUBULAR", {"Con componente saldato": "WITH WELDED ELEMENT", "Sezione quadrata": "SQUARE SECTION", "Sezione circolare": "CIRCULAR SECTION", "Piegato-saldato": "BENT AND WELDED", "Con mensole saldate": "WITH WELDING BRACKET", "Con viteria": "WITH SCREWS"}, "BAR"],
             "Filo": ["WIRE", {"Piegato": "BENT", "Piegato-saldato": "BENT AND WELDED", "Con viteria saldata": "WITH WELDING SCREWS"}, "WIRE"],
+            "Montante": ["UPRIGHT", {"Sezione": "SEZIONE", "Statico": "STATIC", "Antisismico": "ANTI-SEISMIC", "Regolabile": "ADJUSTABLE"}, "UPRIGHT"]
         }
     },
     "WOOD COMP": {
