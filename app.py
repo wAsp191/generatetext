@@ -3,9 +3,18 @@ from deep_translator import GoogleTranslator
 import datetime
 
 # =========================================================
-# 0. CONFIGURAZIONE PAGINA
+# 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
 st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
+
+# Logica di Reset corretta (fuori dal callback)
+if "trigger_reset" in st.session_state and st.session_state.trigger_reset:
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
+
+def activate_reset():
+    st.session_state.trigger_reset = True
 
 st.markdown("""
     <style>
@@ -192,14 +201,8 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. LOGICA FUNZIONALE E RESET DISTRUTTIVO
+# 2. LOGICA FUNZIONALE
 # =========================================================
-
-def reset_all():
-    """Rimuove ogni variabile dalla memoria e ricarica pulendo la pagina"""
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.rerun()
 
 def update_dims_from_section():
     sez = st.session_state.get("sub_Sezione", "")
@@ -225,7 +228,7 @@ st.title("⚙️ REG - Title Generator & Classification")
 # --- 1. TASTO AZZERA SUPERIORE CENTRATO ---
 c1, c2, c3 = st.columns([2, 1, 2])
 with c2:
-    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True, key="btn_top")
+    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_top")
 
 st.markdown("---")
 
@@ -296,11 +299,11 @@ with col_workarea:
     
     with col_input:
         if macro_it == "FASTENER":
-            c1, c2, c3 = st.columns(3)
-            with c1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-            with c2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
+            c_f1, c_f2, c_f3 = st.columns(3)
+            with c_f1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+            with c_f2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
             opzioni_filtrare = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-            with c3: 
+            with c_f3: 
                 norma_scelta_estesa = st.selectbox(f"Normativa {scelta_part_it}", options=list(opzioni_filtrare.keys()))
                 normativa = opzioni_filtrare[norma_scelta_estesa]
             dim_p, dim_h, dim_s = "", "", "" 
@@ -448,7 +451,7 @@ if st.session_state['stringa_editabile']:
 st.markdown("<br>", unsafe_allow_html=True)
 cb1, cb2, cb3 = st.columns([2, 1, 2])
 with cb2:
-    st.button("🔄 AZZERA TUTTO", on_click=reset_all, use_container_width=True, key="btn_bottom")
+    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_bottom")
 
 # =========================================================
 # 6. FEEDBACK
