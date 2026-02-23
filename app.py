@@ -320,9 +320,9 @@ with col_workarea:
             else: dim_s = ""
             
         with c_img:
-            # --- MODIFICA: SCHEMA SVG INTEGRATO ---
+            # --- SCHEMA SVG INTEGRATO E CORRETTO ---
             svg_schema = """
-            <svg viewBox="0 0 550 180" xmlns="http://www.w3.org/2000/svg">
+            <svg viewBox="0 0 580 180" xmlns="http://www.w3.org/2000/svg">
                 <rect x="10" y="50" width="100" height="70" fill="none" stroke="#444" stroke-width="2"/>
                 <line x1="10" y1="130" x2="110" y2="130" stroke="#007bff" stroke-width="1.5"/>
                 <line x1="120" y1="50" x2="120" y2="120" stroke="#007bff" stroke-width="1.5"/>
@@ -333,28 +333,27 @@ with col_workarea:
                 <path d="M180 90 l100 0 l30 -25 l-100 0 Z" fill="none" stroke="#444" stroke-width="2"/>
                 <path d="M180 90 l0 12 l100 0 l0 -12 M280 90 l30 -25 l0 12" fill="none" stroke="#444" stroke-width="2"/>
                 <line x1="180" y1="115" x2="280" y2="115" stroke="#007bff" stroke-width="1.5"/>
-                <line x1="295" y1="105" x2="325" y2="80" stroke="#007bff" stroke-width="1.5"/>
-                <line x1="325" y1="65" x2="325" y2="77" stroke="#007bff" stroke-width="1.5"/>
+                <line x1="295" y1="115" x2="325" y2="90" stroke="#007bff" stroke-width="1.5"/>
+                <line x1="335" y1="65" x2="335" y2="77" stroke="#007bff" stroke-width="1.5"/>
                 <text x="230" y="130" text-anchor="middle" font-size="14" fill="#007bff">L</text>
-                <text x="325" y="100" text-anchor="middle" font-size="14" fill="#007bff">P</text>
-                <text x="335" y="75" text-anchor="middle" font-size="14" fill="#007bff">H</text>
-                <text x="245" y="35" text-anchor="middle" font-weight="bold" font-size="11" fill="#666">RETTANGOLO (Ripiani)</text>
+                <text x="325" y="115" text-anchor="middle" font-size="14" fill="#007bff">P</text>
+                <text x="345" y="75" text-anchor="middle" font-size="14" fill="#007bff">H</text>
+                <text x="245" y="35" text-anchor="middle" font-weight="bold" font-size="11" fill="#666">RIPΙΑΝΟ (Ingombri)</text>
 
                 <rect x="420" y="40" width="35" height="110" fill="none" stroke="#444" stroke-width="2"/>
                 <path d="M455 40 l15 -10 l0 110 l-15 10 M420 40 l15 -10 l35 0" fill="none" stroke="#444" stroke-width="2"/>
                 <line x1="420" y1="160" x2="455" y2="160" stroke="#007bff" stroke-width="1.5"/>
                 <line x1="465" y1="155" x2="480" y2="145" stroke="#007bff" stroke-width="1.5"/>
-                <line x1="490" y1="30" x2="490" y2="140" stroke="#007bff" stroke-width="1.5"/>
+                <line x1="500" y1="30" x2="500" y2="140" stroke="#007bff" stroke-width="1.5"/>
                 <text x="437" y="175" text-anchor="middle" font-size="14" fill="#007bff">L</text>
-                <text x="485" y="160" text-anchor="middle" font-size="14" fill="#007bff">P</text>
-                <text x="505" y="90" text-anchor="middle" font-size="14" fill="#007bff">H</text>
+                <text x="485" y="165" text-anchor="middle" font-size="14" fill="#007bff">P</text>
+                <text x="515" y="90" text-anchor="middle" font-size="14" fill="#007bff">H</text>
                 <text x="450" y="20" text-anchor="middle" font-weight="bold" font-size="11" fill="#666">VERTICALE (Montanti)</text>
             </svg>
             """
-            st.write(f'<div style="background: white; padding: 10px; border-radius: 8px; border: 1px solid #ddd;">{svg_schema}</div>', unsafe_allow_html=True)
+            st.write(f'<div style="background: white; padding: 10px; border-radius: 8px; border: 1px solid #ddd; overflow-x: auto;">{svg_schema}</div>', unsafe_allow_html=True)
             st.caption("Legenda dimensioni per il dimensionamento")
-        
-        dim_dia, normativa = "", ""
+
 
 # =========================================================
 # 4. LOGICA DI GENERAZIONE E TRADUZIONE
