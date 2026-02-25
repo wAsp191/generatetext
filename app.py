@@ -265,8 +265,19 @@ with col_workarea:
             mat_en = materiali_disponibili[mat_it]
     
     part_dict = DATABASE[macro_it]["Particolari"]
-    scelta_part_it = st.radio("Seleziona dettaglio:", options=sorted(list(part_dict.keys())), horizontal=True)
     
+    # --- MODIFICA AGGIUNTA QUI: Tendina con ricerca testuale e formattazione ---
+    def format_part_label(nome_it):
+        nome_en = part_dict[nome_it][0]
+        return f"🔧 {nome_it} ({nome_en})"
+        
+    scelta_part_it = st.selectbox(
+        "Cerca o seleziona dettaglio:", 
+        options=sorted(list(part_dict.keys())), 
+        format_func=format_part_label
+    )
+    # -------------------------------------------------------------------------
+
     dati_part = part_dict[scelta_part_it]
     part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
 
