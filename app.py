@@ -101,7 +101,7 @@ DATABASE = {
             "Tubolare": ["TUBULAR", {"Con componente saldato": "WITH WELDED ELEMENT", "Sezione quadrata": "SQUARE SECTION", "Sezione circolare": "CIRCULAR SECTION", "Piegato-saldato": "BENT AND WELDED", "Con mensole saldate": "WITH WELDING BRACKET", "Con viteria": "WITH SCREWS"}, "BAR"],
             "Filo": ["WIRE", {"Piegato": "BENT", "Piegato-saldato": "BENT AND WELDED", "Con viteria saldata": "WITH WELDING SCREWS"}, "WIRE"],
             "Montante": ["UPRIGHT", {"Sezione": "", "Statico": "STATIC", "Antisismico": "ANTI-SEISMIC", "Regolabile": "ADJUSTABLE"}, "UPRIGHT"],
-            "Lamiera generica": ["SHEET METAL", {"Forata": "PERFORATED", "Piegata": "BENDING", "Saldata": "WELDED"}, "GENERIC SHEET METAL"]
+            "Lamiera generica": ["SHEET METAL", {"Forata": "PERFORATED", "Piegata": "BENT", "Saldata": "WELDED"}, "GENERIC SHEET METAL"]
         }
     },
     "WOOD COMP": {
@@ -440,7 +440,15 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         comp_str = ", ".join(comp_list) if comp_list else ""
 
         # --- E. Assemblaggio ---
-        descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
+        # CONTROLLO RIDONDANZA: Se il materiale è METAL e il nome parte contiene già METAL (es. SHEET METAL)
+        # evitiamo di scrivere METAL SHEET METAL.
+        
+        if mat_en == "METAL" and "METAL" in part_en.upper():
+            # In questo caso usiamo solo part_en senza aggiungere mat_en davanti
+            descrizione_centrale = f"{prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
+        else:
+            # Caso standard (es. METAL BRACKET)
+            descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
         
         final_segments = [descrizione_centrale]
         if extra_suffissi_str: final_segments.append(extra_suffissi_str)
