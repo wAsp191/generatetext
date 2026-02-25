@@ -55,7 +55,7 @@ SUB_OPTIONS_CONFIG = {
     "Sezione": {
         "L55": "L55", "L80 Z/S": "L80 Z/S", "L80 Z/M": "L80 Z/M", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", "70X30": "70X30", "90X30": "90X30"
     },
-    "Tipologia di mensole": {
+    "Tipologia di mensola": {
         "Mensola saldata a filo superiore": "TOP BRACKET", "Mensola saldata a filo inferiore": "LOWER BRACKET"
     }
 }
