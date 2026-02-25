@@ -5,7 +5,7 @@ import datetime
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
-st.set_page_config(page_title="Technical Generator v7.7", layout="wide")
+st.set_page_config(page_title="Technical Generator v7.8", layout="wide")
 
 # Logica di Reset corretta (fuori dal callback)
 if "trigger_reset" in st.session_state and st.session_state.trigger_reset:
@@ -266,40 +266,52 @@ with col_workarea:
     
     part_dict = DATABASE[macro_it]["Particolari"]
     
-    # --- MODIFICA AGGIUNTA QUI: Tendina con ricerca testuale e formattazione ---
+    # --- Modifica: Gestione Placeholder (index=None) ---
     def format_part_label(nome_it):
+        if nome_it is None:
+            return "Seleziona o digita il particolare..."
         nome_en = part_dict[nome_it][0]
         return f"🔧 {nome_it} ({nome_en})"
         
     scelta_part_it = st.selectbox(
         "Cerca o seleziona dettaglio:", 
         options=sorted(list(part_dict.keys())), 
-        format_func=format_part_label
+        index=None,
+        placeholder="Seleziona o digita il particolare...",
+        format_func=format_part_label,
+        key="selectbox_part"
     )
-    # -------------------------------------------------------------------------
-
-    dati_part = part_dict[scelta_part_it]
-    part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
 
     st.markdown("---")
-    st.subheader(f"✨ 3. Extra per {scelta_part_it}")
+    st.subheader("✨ 3. Extra e Note")
     
-    extra_options = list(extra_dedicati_dict.keys())
-    if extra_options:
-        extra_selezionati = st.pills("Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
+    # Variabili predefinite in caso di selezione nulla
+    part_en = ""
+    extra_dedicati_dict = {}
+    tag_suggerimento = ""
+    extra_selezionati = []
+    
+    if scelta_part_it:
+        dati_part = part_dict[scelta_part_it]
+        part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
         
-        if extra_selezionati:
-            for ex in extra_selezionati:
-                if ex in SUB_OPTIONS_CONFIG:
-                    st.caption(f"↳ Specifiche per: **{ex}**")
-                    opzioni_sub = SUB_OPTIONS_CONFIG[ex]
-                    st.selectbox(f"↳ Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}", label_visibility="collapsed", on_change=update_dims_from_section if ex=="Sezione" else None)
-                elif ex in EXTRA_CON_INPUT_MANUALE:
-                    st.caption(f"↳ Inserimento manuale per: **{ex}**")
-                    st.text_input(f"Specifica valore per {ex} (es. 40x40 o D30):", key=f"manual_{ex}", label_visibility="collapsed")
+        extra_options = list(extra_dedicati_dict.keys())
+        if extra_options:
+            extra_selezionati = st.pills(f"Opzioni per {scelta_part_it}:", options=extra_options, selection_mode="multi", key="extra_tags")
+            
+            if extra_selezionati:
+                for ex in extra_selezionati:
+                    if ex in SUB_OPTIONS_CONFIG:
+                        st.caption(f"↳ Specifiche per: **{ex}**")
+                        opzioni_sub = SUB_OPTIONS_CONFIG[ex]
+                        st.selectbox(f"↳ Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}", label_visibility="collapsed", on_change=update_dims_from_section if ex=="Sezione" else None)
+                    elif ex in EXTRA_CON_INPUT_MANUALE:
+                        st.caption(f"↳ Inserimento manuale per: **{ex}**")
+                        st.text_input(f"Specifica valore per {ex} (es. 40x40 o D30):", key=f"manual_{ex}", label_visibility="collapsed")
+        else:
+            st.info("Nessuna opzione extra disponibile per questo elemento.")
     else:
-        extra_selezionati = []
-        st.info("Nessuna opzione extra disponibile per questo elemento.")
+        st.info("⚠️ Seleziona prima un particolare nel punto 2 per vedere le opzioni extra.")
 
     extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
@@ -312,20 +324,32 @@ with col_workarea:
         if macro_it == "FASTENER":
             c_f1, c_f2, c_f3 = st.columns(3)
             with c_f1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-            with c_f2: dim_dia = st.text_input("Diametro (D)", key="dim_dia")
-            opzioni_filtrare = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
+            with c_f2: dim_dia = st.text_input("Diametro (D/M)", key="dim_dia")
+            
+            opzioni_filtrare = {"": ""}
+            if scelta_part_it and scelta_part_it in MAPPA_NORMATIVE_FASTENER:
+                opzioni_filtrare = MAPPA_NORMATIVE_FASTENER[scelta_part_it]
+            
             with c_f3: 
-                norma_scelta_estesa = st.selectbox(f"Normativa {scelta_part_it}", options=list(opzioni_filtrare.keys()))
-                normativa = opzioni_filtrare[norma_scelta_estesa]
-            dim_p, dim_h, dim_s = "", "", "" 
+                norma_scelta_estesa = st.selectbox(f"Normativa", options=list(opzioni_filtrare.keys()))
+                normativa = opzioni_filtrare[norma_scelta_estesa] if norma_scelta_estesa else ""
+            
+            dim_p, dim_h, dim_s, dim_dia_gen = "", "", "", ""
         else:
-            dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-            dim_p = st.text_input("Profondità (P)", key="dim_p")
-            dim_h = st.text_input("Altezza (H)", key="dim_h")
+            # --- Modifica: Aggiunto campo Diametro separato ---
+            c_g1, c_g2 = st.columns(2)
+            with c_g1:
+                dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+                dim_h = st.text_input("Altezza (H)", key="dim_h")
+            with c_g2:
+                dim_p = st.text_input("Profondità (P)", key="dim_p")
+                dim_dia_gen = st.text_input("Diametro (Ø)", key="dim_dia_gen")
+                
             if macro_it != "ASSEMBLY":
                 lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
                 dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
-            else: dim_s = ""
+            else: 
+                dim_s = ""
             
     with col_img:
         st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", caption="Schema Riferimento", use_container_width=True)
@@ -340,97 +364,105 @@ if 'stringa_editabile' not in st.session_state:
     st.session_state['stringa_editabile'] = ""
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
-    # --- A. Dimensioni ---
-    dim_final_parts = []
-    if macro_it == "FASTENER":
-        d_val = st.session_state.get("dim_dia", "").strip().upper()
-        l_val = st.session_state.get("dim_l", "").strip().upper()
-        if d_val:
-            prefix_d = "" if d_val.startswith('M') else "D"
-            dim_final_parts.append(f"{prefix_d}{d_val}")
-        if l_val:
-            dim_final_parts.append(f"L{l_val}")
-        dim_final = "X".join(dim_final_parts)
-        if 'normativa' in locals() and normativa: dim_final += f" {normativa}"
+    if not scelta_part_it:
+        st.error("⚠️ Seleziona un particolare prima di generare la stringa!")
     else:
-        l_val_s = st.session_state.get("dim_l", "").strip().upper()
-        p_val_s = st.session_state.get("dim_p", "").strip().upper()
-        h_val_s = st.session_state.get("dim_h", "").strip().upper()
-        
-        if l_val_s: dim_final_parts.append(f"L{l_val_s}")
-        if p_val_s: dim_final_parts.append(f"P{p_val_s}")
-        if h_val_s: dim_final_parts.append(f"H{h_val_s}")
-        lph_str = "X".join(dim_final_parts)
-        
-        s_val = st.session_state.get("dim_s", "").strip()
-        if lph_str and s_val: dim_final = f"{lph_str} S{s_val}"
-        elif lph_str: dim_final = lph_str
-        elif s_val: dim_final = f"S{s_val}"
-        else: dim_final = ""
-
-    # --- B. Extra da Bottoni ---
-    extra_pills_list = []
-    for ex in (extra_selezionati or []):
-        base_trans = extra_dedicati_dict.get(ex, ex.upper())
-        if ex in SUB_OPTIONS_CONFIG:
-            sub_key = f"sub_{ex}"
-            valore_sub_it = st.session_state.get(sub_key, "")
-            traduzione_sub = SUB_OPTIONS_CONFIG[ex].get(valore_sub_it, "")
-            extra_pills_list.append(f"{base_trans} {traduzione_sub}".strip())
-        elif ex in EXTRA_CON_INPUT_MANUALE:
-            manual_val = st.session_state.get(f"manual_{ex}", "").strip().upper()
-            if manual_val: extra_pills_list.append(f"{base_trans} {manual_val}")
-            else: extra_pills_list.append(base_trans)
+        # --- A. Dimensioni ---
+        dim_final_parts = []
+        if macro_it == "FASTENER":
+            d_val = st.session_state.get("dim_dia", "").strip().upper()
+            l_val = st.session_state.get("dim_l", "").strip().upper()
+            if d_val:
+                prefix_d = "" if d_val.startswith('M') else "D"
+                dim_final_parts.append(f"{prefix_d}{d_val}")
+            if l_val:
+                dim_final_parts.append(f"L{l_val}")
+            dim_final = "X".join(dim_final_parts)
+            if 'normativa' in locals() and normativa: dim_final += f" {normativa}"
         else:
-            extra_pills_list.append(base_trans)
+            l_val_s = st.session_state.get("dim_l", "").strip().upper()
+            p_val_s = st.session_state.get("dim_p", "").strip().upper()
+            h_val_s = st.session_state.get("dim_h", "").strip().upper()
+            dia_val_s = st.session_state.get("dim_dia_gen", "").strip().upper()
+            s_val = st.session_state.get("dim_s", "").strip()
+            
+            if l_val_s: dim_final_parts.append(f"L{l_val_s}")
+            if p_val_s: dim_final_parts.append(f"P{p_val_s}")
+            if h_val_s: dim_final_parts.append(f"H{h_val_s}")
+            
+            lph_str = "X".join(dim_final_parts)
+            
+            # --- Modifica: Assemblaggio LPH + Ø + S ---
+            dim_final_comps = []
+            if lph_str: dim_final_comps.append(lph_str)
+            if dia_val_s: dim_final_comps.append(f"Ø{dia_val_s}")
+            if s_val: dim_final_comps.append(f"S{s_val}")
+            
+            dim_final = " ".join(dim_final_comps)
 
-    # --- C. Note Libere ---
-    note_libere_tradotte = ""
-    if extra_libero:
-        testo_pulito = extra_libero.lower()
-        for ita, eng in GLOSSARIO_TECNICO.items():
-            if ita in testo_pulito:
-                testo_pulito = testo_pulito.replace(ita, eng)
-        try:
-            note_libere_tradotte = GoogleTranslator(source='it', target='en').translate(testo_pulito).upper()
-        except:
-            note_libere_tradotte = extra_libero.upper()
+        # --- B. Extra da Bottoni ---
+        extra_pills_list = []
+        for ex in (extra_selezionati or []):
+            base_trans = extra_dedicati_dict.get(ex, ex.upper())
+            if ex in SUB_OPTIONS_CONFIG:
+                sub_key = f"sub_{ex}"
+                valore_sub_it = st.session_state.get(sub_key, "")
+                traduzione_sub = SUB_OPTIONS_CONFIG[ex].get(valore_sub_it, "")
+                extra_pills_list.append(f"{base_trans} {traduzione_sub}".strip())
+            elif ex in EXTRA_CON_INPUT_MANUALE:
+                manual_val = st.session_state.get(f"manual_{ex}", "").strip().upper()
+                if manual_val: extra_pills_list.append(f"{base_trans} {manual_val}")
+                else: extra_pills_list.append(base_trans)
+            else:
+                extra_pills_list.append(base_trans)
 
-    # --- D. Ordinamento ---
-    prefissi = [ex for ex in extra_pills_list if any(p in ex for p in TERMINI_ANTICIPATI) and "FOR" not in ex]
-    suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
-    
-    prefix_str = " ".join(prefissi) if prefissi else ""
-    extra_suffissi_str = ", ".join(suffissi) if suffissi else ""
-    
-    comp_list = [c for c in (comp_selezionate or []) if c.strip()]
-    comp_str = ", ".join(comp_list) if comp_list else ""
+        # --- C. Note Libere ---
+        note_libere_tradotte = ""
+        if extra_libero:
+            testo_pulito = extra_libero.lower()
+            for ita, eng in GLOSSARIO_TECNICO.items():
+                if ita in testo_pulito:
+                    testo_pulito = testo_pulito.replace(ita, eng)
+            try:
+                note_libere_tradotte = GoogleTranslator(source='it', target='en').translate(testo_pulito).upper()
+            except:
+                note_libere_tradotte = extra_libero.upper()
 
-    # --- E. Assemblaggio ---
-    descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
-    
-    final_segments = [descrizione_centrale]
-    if extra_suffissi_str: final_segments.append(extra_suffissi_str)
-    if note_libere_tradotte: final_segments.append(note_libere_tradotte) 
-    if comp_str: final_segments.append(comp_str)
-    
-    temp_str = " - ".join(final_segments).upper().replace("  ", " ")
-    temp_str = temp_str.replace("WITH WITH", "WITH")
-    
-    if temp_str.count("WITH") > 1:
-        first_with_idx = temp_str.find("WITH")
-        first_with_end = first_with_idx + 4
-        parte_iniziale = temp_str[:first_with_end]
-        parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
-        temp_str = parte_iniziale + parte_restante
-
-    if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled", False):
-        temp_str = f"ASSEMBLED - {temp_str}"
-    
-    if uni_en_1090_active:
-        temp_str = f"UNI EN-1090 - {temp_str}"
+        # --- D. Ordinamento ---
+        prefissi = [ex for ex in extra_pills_list if any(p in ex for p in TERMINI_ANTICIPATI) and "FOR" not in ex]
+        suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
         
-    st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
+        prefix_str = " ".join(prefissi) if prefissi else ""
+        extra_suffissi_str = ", ".join(suffissi) if suffissi else ""
+        
+        comp_list = [c for c in (comp_selezionate or []) if c.strip()]
+        comp_str = ", ".join(comp_list) if comp_list else ""
+
+        # --- E. Assemblaggio ---
+        descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
+        
+        final_segments = [descrizione_centrale]
+        if extra_suffissi_str: final_segments.append(extra_suffissi_str)
+        if note_libere_tradotte: final_segments.append(note_libere_tradotte) 
+        if comp_str: final_segments.append(comp_str)
+        
+        temp_str = " - ".join(final_segments).upper().replace("  ", " ")
+        temp_str = temp_str.replace("WITH WITH", "WITH")
+        
+        if temp_str.count("WITH") > 1:
+            first_with_idx = temp_str.find("WITH")
+            first_with_end = first_with_idx + 4
+            parte_iniziale = temp_str[:first_with_end]
+            parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
+            temp_str = parte_iniziale + parte_restante
+
+        if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled", False):
+            temp_str = f"ASSEMBLED - {temp_str}"
+        
+        if uni_en_1090_active:
+            temp_str = f"UNI EN-1090 - {temp_str}"
+            
+        st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
 
 # =========================================================
 # 5. OUTPUT
@@ -450,13 +482,20 @@ if st.session_state['stringa_editabile']:
         st.success(f"Lunghezza: {lunghezza} caratteri")
 
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
-    all_tags = [tag_suggerimento.upper()] + [c.upper() for c in comp_list_tags]
+    
+    # Tag suggerimento gestito in modo sicuro
+    all_tags = []
+    if 'tag_suggerimento' in locals() and tag_suggerimento:
+        all_tags.append(tag_suggerimento.upper())
+    all_tags.extend([c.upper() for c in comp_list_tags])
     
     if uni_en_1090_active:
         all_tags.append("UNI EN-1090-1")
     if 'normativa' in locals() and normativa:
         all_tags.append(normativa.upper())
-    st.info(f"**TAGS:** {' | '.join(all_tags)}")
+    
+    if all_tags:
+        st.info(f"**TAGS:** {' | '.join(all_tags)}")
 
 # --- 2. TASTO AZZERA INFERIORE CENTRATO ---
 st.markdown("<br>", unsafe_allow_html=True)
