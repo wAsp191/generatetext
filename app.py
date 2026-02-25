@@ -245,12 +245,16 @@ with col_macro:
         st.markdown("---")
         st.subheader("🔗 Compatibilità")
         pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-        comp_selezionate = st.pills("Modelli:", options=pills_compatibilita, selection_mode="multi", key="comp_tags")
         
-        # --- LOGICA UNIFICATA PER FORTISSIMO E MINIRACK ---
+        # CAMBIO DA "multi" A "single"
+        comp_selezionata = st.pills("Modelli:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
+        
+        # Trasformiamo in lista per non rompere la logica successiva del codice
+        comp_selezionate = [comp_selezionata] if comp_selezionata else []
+        
+        # Logica strutturale (rimane valida)
         modelli_strutturali = ["FORTISSIMO", "MINIRACK"]
-        # Se almeno uno dei modelli selezionati è nella lista 'modelli_strutturali'
-        if any(modello in (comp_selezionate or []) for modello in modelli_strutturali):
+        if any(m in comp_selezionate for m in modelli_strutturali):
             st.warning("⚡ Configurazione Strutturale")
             uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", value=False, key="check_1090")
     else:
