@@ -317,32 +317,37 @@ with c_main:
         dim_dia_gen = g4.text_input("Ø", key="dim_dia_gen")
         dim_s = g5.selectbox("S", options=OPZIONI_SPESSORE_STD if macro_it != "WOOD COMP" else OPZIONI_SPESSORE_WOOD, key="dim_s")
 
-    # Inserimento immagine rimpicciolita e centrata
+    # --- IMMAGINE SCHEMA (Ingrandita e centrata nel flusso) ---
     st.markdown("---")
-    _, img_center, _ = st.columns([1, 2, 1])
-    with img_center:
-        st.image(
-            "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
-            caption="Schema Riferimento Dimensioni", 
-            width=280 
-        )
+    st.image(
+        "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
+        caption="Schema Riferimento Dimensioni", 
+        width=450  # Ingrandita per una migliore leggibilità
+    )
 
-# --- NUOVA SEZIONE MODO D'USO NELLA COLONNA DESTRA ---
+# --- NUOVA SEZIONE MODO D'USO (TEMA CHIARO) ---
 with c_right:
     st.subheader("📖 Modo d'uso")
+    
+    # Box chiaro con bordo sottile (Light Mode)
     st.markdown(f"""
-    <div style="background-color: #1a1c24; padding: 15px; border-radius: 10px; border-left: 5px solid #00d4ff;">
-        <p style="font-size: 0.9rem; color: #e0e0e0;">
-        <b>1. SELEZIONE:</b> Scegli la categoria e il modello (F25, F50, ecc.). La scelta è singola per garantire coerenza.<br><br>
-        <b>2. CONFIGURAZIONE:</b> Trova il particolare tramite la ricerca rapida. Se il pezzo è strutturale, apparirà il flag UNI EN-1090.<br><br>
-        <b>3. MISURE:</b> Inserisci solo i valori numerici. Il sistema gestirà i prefissi (L, P, H) automaticamente.<br><br>
-        <b>4. GENERAZIONE:</b> Clicca il tasto in basso per ottenere la stringa tecnica tradotta e formattata.
+    <div style="background-color: #ffffff; padding: 15px; border-radius: 10px; border: 1px solid #d1d5db; color: #1f2937;">
+        <p style="font-size: 0.9rem; line-height: 1.6;">
+        <b style="color: #007bff;">1. SELEZIONE:</b> Scegli la categoria e il modello. La scelta è singola per evitare errori.<br><br>
+        <b style="color: #007bff;">2. CONFIGURAZIONE:</b> Cerca il particolare. Se strutturale (Fortissimo/Minirack), apparirà il flag UNI EN-1090.<br><br>
+        <b style="color: #007bff;">3. MISURE:</b> Inserisci i valori in mm. I prefissi L, P, H sono automatici.<br><br>
+        <b style="color: #007bff;">4. GENERAZIONE:</b> Clicca il tasto rosso in basso per creare la stringa.
         </p>
     </div>
     """, unsafe_allow_html=True)
     
-    # Spazio per eventuali altri widget o note tecniche
-    st.info("💡 Le note aggiuntive vengono tradotte in tempo reale tramite Google Translate.")
+    st.markdown("<br>", unsafe_allow_html=True)
+    
+    # Nota tecnica modificabile (usando st.info che è chiaro di default)
+    st.info("💡 Nota: Le note aggiuntive vengono tradotte in tempo reale.")
+    
+    # Bottone di reset spostato qui per comodità
+    st.button("🔄 RESET TOTALE", on_click=hard_reset, use_container_width=True)
 
 # Fine dei blocchi "with"
 st.divider()
