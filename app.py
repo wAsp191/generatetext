@@ -241,7 +241,7 @@ def update_dims_from_section():
         st.session_state.dim_l, st.session_state.dim_p = "90", "30"
 
 # =========================================================
-# 4. INTERFACCIA UTENTE (LAYOUT 3 COLONNE)
+# 3. INTERFACCIA UTENTE (LAYOUT 3 COLONNE)
 # =========================================================
 
 # Distribuzione spazi: Sinistra (Filtri), Centro (Input), Destra (Istruzioni)
@@ -318,6 +318,10 @@ with c_main:
         dim_h = g3.text_input("H", key="dim_h")
         dim_dia_gen = g4.text_input("Ø", key="dim_dia_gen")
         dim_s = g5.selectbox("S", options=OPZIONI_SPESSORE_STD if macro_it != "WOOD COMP" else OPZIONI_SPESSORE_WOOD, key="dim_s")
+
+ with col_img:
+        st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", caption="Schema Riferimento", use_container_width=True)
+
 # =========================================================
 # 4. LOGICA DI GENERAZIONE E TRADUZIONE
 # =========================================================
