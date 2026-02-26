@@ -241,8 +241,17 @@ def update_dims_from_section():
         st.session_state.dim_l, st.session_state.dim_p = "90", "30"
 
 # =========================================================
-# 3. INTERFACCIA UTENTE (Layout Verticale Dimensioni v8.1)
+# 3. INTERFACCIA UTENTE (Layout Verticale - Fix NameError)
 # =========================================================
+
+# --- INIZIALIZZAZIONE VARIABILI DI STATO (Per evitare NameError) ---
+uni_en_1090_active = False 
+mat_en = ""
+part_en = ""
+extra_dedicati_dict = {}
+tag_suggerimento = ""
+extra_selezionati = []
+normativa = ""
 
 # Variabili di configurazione rapida
 LARGHEZZA_IMMAGINE = 600 
@@ -257,7 +266,7 @@ TESTO_MANUALE = """
 ---
 **NOTE TECNICHE:**
 * I prefissi L-P-H sono automatici.
-* Le note libere vengono tradotte in inglese in formato stampatello
+* Le note libere vengono tradotte in inglese.
 * Lunghezza max stringa: 100 caratteri.
 """
 
@@ -288,7 +297,6 @@ with col_workarea:
     c_mat, c_comp = st.columns([1, 1.5])
     
     with c_mat:
-        mat_en = ""
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBILATO", key="check_assembled")
         else:
@@ -304,6 +312,7 @@ with col_workarea:
             comp_selezionata = st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
             comp_selezionate = [comp_selezionata] if comp_selezionata else []
             
+            # Qui la variabile viene sovrascritta solo se il checkbox appare
             if any(m in comp_selezionate for m in ["FORTISSIMO", "MINIRACK"]):
                 st.warning("⚡ Strutturale")
                 uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
@@ -350,7 +359,6 @@ with col_workarea:
     st.markdown("---")
     st.subheader("📏 4. Dimensionamento e Normative")
     
-    # --- NUOVO LAYOUT: CAMPI INCOLONNATI A SINISTRA, IMMAGINE A DESTRA ---
     col_campi, col_immagine = st.columns([1, 1.5], gap="medium")
 
     with col_campi:
