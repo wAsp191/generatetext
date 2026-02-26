@@ -218,7 +218,7 @@ TERMINI_ANTICIPATI = [
     "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "STATIC", "ADJUSTABLE", "SEISMIC",
     "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "CONNECTING", "SHUTTER", "COUPLING",
     "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING", "WIRE-BASKET",
-    "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "ROTATING", "CTR"
+    "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "ROTATING", "CTR", "UPRIGHT-GRAFT"
 ]
 
 # =========================================================
@@ -481,10 +481,24 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
             descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
         
         final_segments = [descrizione_centrale]
-        if extra_suffissi_str: final_segments.append(extra_suffissi_str)
-        if note_libere_tradotte: final_segments.append(note_libere_tradotte) 
-        if comp_str: final_segments.append(comp_str)
+        # --- UNIONE SUFFISSI E NOTE (Con la virgola) ---
+        # Creiamo un blocco unico che contiene sia i suffissi flaggati che le note libere
+        blocco_dettagli = []
+        if extra_suffissi_str:
+            blocco_dettagli.append(extra_suffissi_str)
+        if note_libere_tradotte:
+            blocco_dettagli.append(note_libere_tradotte)
         
+        # Uniamo i suffissi e le note con ", "
+        dettagli_finali_str = ", ".join(blocco_dettagli)
+
+        # --- ASSEMBLAGGIO FINALE SEGMENTI ---
+        final_segments = [descrizione_centrale]
+        if dettagli_finali_str:
+            final_segments.append(dettagli_finali_str) # Questo aggiungerà il " - " solo prima del blocco
+        if comp_str:
+            final_segments.append(comp_str)
+            
         temp_str = " - ".join(final_segments).upper().replace("  ", " ")
         temp_str = temp_str.replace("WITH WITH", "WITH")
         
