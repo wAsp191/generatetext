@@ -325,7 +325,7 @@ with c_main:
     st.image(
         "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
         caption="Schema Riferimento Dimensioni", 
-        width=300  # Regola questo numero finché non raggiungi la dimensione desiderata
+        width=350  # Regola questo numero finché non raggiungi la dimensione desiderata
     )
 
 # Ora usciamo dal blocco "with" e torniamo al margine sinistro
