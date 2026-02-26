@@ -12,40 +12,8 @@ if "trigger_reset" in st.session_state and st.session_state.trigger_reset:
         del st.session_state[key]
     st.rerun()
 
-# =========================================================
-# 1. CONFIGURAZIONI E FUNZIONI DI SUPPORTO
-# =========================================================
-
 def activate_reset():
-    """Pulisce tutti i dati nel session_state, inclusi i campi manuali dinamici"""
-    
-    # 1. Lista chiavi standard da resettare
-    keys_to_reset = [
-        'dim_l', 'dim_p', 'dim_h', 'dim_dia', 'dim_dia_gen', 'dim_s',
-        'extra_text', 'selectbox_part', 'comp_tags', 'extra_tags',
-        'stringa_editabile', 'check_1090', 'check_assembled'
-    ]
-    
-    # 2. Reset chiavi fisse
-    for key in keys_to_reset:
-        if key in st.session_state:
-            # Reset specifico per tipo di widget
-            if key in ['extra_tags', 'comp_tags']:
-                st.session_state[key] = []  # Le Pills vogliono una lista vuota
-            elif key in ['check_1090', 'check_assembled']:
-                st.session_state[key] = False # I Toggle/Checkbox vogliono False
-            elif key == 'selectbox_part':
-                st.session_state[key] = None  # La Selectbox vuole None per tornare al placeholder
-            else:
-                st.session_state[key] = ""    # I testi vogliono stringa vuota
-    
-    # 3. Reset dinamico per campi generati nel loop (manual_... e sub_...)
-    # Questo è il "potenziamento" che pulisce i campi che appaiono solo con certi particolari
-    for key in list(st.session_state.keys()):
-        if key.startswith("manual_") or key.startswith("sub_"):
-            st.session_state[key] = ""
-
-# ... qui solitamente seguono le altre funzioni come translate_to_en o i dizionari ...
+    st.session_state.trigger_reset = True
 
 st.markdown("""
     <style>
