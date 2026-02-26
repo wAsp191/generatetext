@@ -245,7 +245,7 @@ def update_dims_from_section():
 # =========================================================
 
 # Variabili di configurazione rapida
-LARGHEZZA_IMMAGINE = 400 
+LARGHEZZA_IMMAGINE = 500 
 TESTO_MANUALE = """
 **PROCEDURA STANDARD:**
 1. **CATEGORIA**: Seleziona il gruppo a sinistra.
