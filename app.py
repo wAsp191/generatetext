@@ -7,47 +7,41 @@ from deep_translator import GoogleTranslator
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
 def activate_reset():
-    """Reset mirato di tutti i campi di input"""
-    # 1. Lista delle chiavi fisse da pulire
+    """Reset mirato dei campi di input senza mandare in crash i componenti"""
+    
+    # 1. Definizione delle chiavi
     keys_to_reset = [
         'dim_l', 'dim_p', 'dim_h', 'dim_dia', 'dim_dia_gen', 'dim_s',
         'extra_text', 'selectbox_part', 'comp_tags', 'extra_tags',
         'stringa_editabile', 'check_1090', 'check_assembled'
     ]
     
-    # 2. Reset delle chiavi fisse esistenti
     for key in keys_to_reset:
         if key in st.session_state:
-            if key in ['extra_tags', 'comp_tags']:
-                st.session_state[key] = []  # Le Pills vogliono una lista vuota
+            # --- CORREZIONE CRASH PILLS ---
+            if key == 'comp_tags':
+                # Essendo selection_mode="single", resettiamo a None, non []
+                st.session_state[key] = None 
+            
+            elif key == 'extra_tags':
+                # Essendo multi-selezione, qui la lista [] va bene
+                st.session_state[key] = []
+                
             elif key in ['check_1090', 'check_assembled']:
-                st.session_state[key] = False # I Toggle vogliono False
+                st.session_state[key] = False
+                
             elif key == 'selectbox_part':
-                st.session_state[key] = None  # La Selectbox vuole None per il placeholder
+                st.session_state[key] = None
+                
             else:
-                st.session_state[key] = ""    # I testi vogliono stringa vuota
+                st.session_state[key] = ""
     
-    # 3. Reset dinamico per campi manual_ e sub_ (i campi extra)
+    # 2. Reset dinamico per campi manual_ e sub_
     for key in list(st.session_state.keys()):
         if key.startswith("manual_") or key.startswith("sub_"):
             st.session_state[key] = ""
             
-    # Messaggio di conferma temporaneo (opzionale)
-    st.toast("Campi resettati con successo!", icon="🔄")
-
-# CSS personalizzato (il tuo originale con qualche piccolo ritocco)
-st.markdown("""
-    <style>
-        div[data-testid="stWidgetLabel"] { margin-bottom: 5px !important; }
-        .stRadio div[role="radiogroup"] { gap: 5px !important; }
-        .stRadio label p, .stPills label p { font-size: 1.0rem !important; font-weight: 450 !important; }
-        h3 { font-size: 2.0rem !important; margin-top: 25px !important; margin-bottom: 20px !important; }
-        [data-testid="column"] { padding: 15px !important; }
-        .stRadio > div { flex-wrap: wrap; display: flex; gap: 10px; }
-        .stButton button { border-radius: 20px; font-weight: bold; }
-    </style>
-""", unsafe_allow_html=True)
-
+    st.toast("Interfaccia pulita!", icon="✨")
 # =========================================================
 # 1. DIZIONARI E DATABASE
 # =========================================================
