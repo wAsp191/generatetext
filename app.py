@@ -255,9 +255,8 @@ with c_left:
     st.subheader("🔗 Modello")
     pills_compat = [opt for opt in OPZIONI_COMPATIBILITA if opt]
     
-    # SELEZIONE SINGOLA (Selection Mode: Single)
+    # SELEZIONE SINGOLA
     comp_singola = st.pills("Compatibilità:", options=pills_compat, selection_mode="single", key="comp_tags")
-    # Convertiamo in lista per mantenere compatibilità con la logica di generazione pre-esistente
     comp_selezionate = [comp_singola] if comp_singola else []
 
     # Logica Strutturale Unificata
@@ -279,7 +278,7 @@ with c_main:
             mat_it = st.radio("Materiale:", options=list(mats.keys()), horizontal=True)
             mat_en = mats[mat_it]
 
-    # Selezione Particolare con Placeholder
+    # Selezione Particolare
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.selectbox(
         "Dettaglio:", 
@@ -303,14 +302,13 @@ with c_main:
     
     extra_libero = st.text_input("Note aggiuntive (IT):", key="extra_text", placeholder="Traduzione automatica integrata...")
 
-    # Dimensioni compatte in griglia
+    # Dimensioni compatte
     st.markdown("---")
     st.write("📏 **DIMENSIONI (mm)**")
     if macro_it == "FASTENER":
         f1, f2 = st.columns(2)
         dim_l = f1.text_input("Lunghezza (L)", key="dim_l")
         dim_dia = f2.text_input("Diametro (M/D)", key="dim_dia")
-        dim_p, dim_h, dim_dia_gen, dim_s = "", "", "", ""
     else:
         g1, g2, g3, g4, g5 = st.columns(5)
         dim_l = g1.text_input("L", key="dim_l")
@@ -319,18 +317,34 @@ with c_main:
         dim_dia_gen = g4.text_input("Ø", key="dim_dia_gen")
         dim_s = g5.selectbox("S", options=OPZIONI_SPESSORE_STD if macro_it != "WOOD COMP" else OPZIONI_SPESSORE_WOOD, key="dim_s")
 
-    # Inserimento immagine all'interno della colonna centrale
-    st.markdown("---") # Una linea sottile per separare
-    # Crea 3 mini-spazi dentro la colonna centrale per centrare l'immagine
-    sub_col_1, sub_col_img, sub_col_2 = st.columns([1, 2, 1])
-    
-    with sub_col_img:
+    # Inserimento immagine rimpicciolita e centrata
+    st.markdown("---")
+    _, img_center, _ = st.columns([1, 2, 1])
+    with img_center:
         st.image(
             "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
-            caption="Schema Riferimento Dimensioni",
-            use_container_width=True # Qui lo riattiviamo perché la larghezza è limitata dalla mini-colonna
+            caption="Schema Riferimento Dimensioni", 
+            width=280 
         )
-# Ora usciamo dal blocco "with" e torniamo al margine sinistro
+
+# --- NUOVA SEZIONE MODO D'USO NELLA COLONNA DESTRA ---
+with c_right:
+    st.subheader("📖 Modo d'uso")
+    st.markdown(f"""
+    <div style="background-color: #1a1c24; padding: 15px; border-radius: 10px; border-left: 5px solid #00d4ff;">
+        <p style="font-size: 0.9rem; color: #e0e0e0;">
+        <b>1. SELEZIONE:</b> Scegli la categoria e il modello (F25, F50, ecc.). La scelta è singola per garantire coerenza.<br><br>
+        <b>2. CONFIGURAZIONE:</b> Trova il particolare tramite la ricerca rapida. Se il pezzo è strutturale, apparirà il flag UNI EN-1090.<br><br>
+        <b>3. MISURE:</b> Inserisci solo i valori numerici. Il sistema gestirà i prefissi (L, P, H) automaticamente.<br><br>
+        <b>4. GENERAZIONE:</b> Clicca il tasto in basso per ottenere la stringa tecnica tradotta e formattata.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+    
+    # Spazio per eventuali altri widget o note tecniche
+    st.info("💡 Le note aggiuntive vengono tradotte in tempo reale tramite Google Translate.")
+
+# Fine dei blocchi "with"
 st.divider()
 
 if 'stringa_editabile' not in st.session_state:
