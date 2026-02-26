@@ -241,126 +241,146 @@ def update_dims_from_section():
         st.session_state.dim_l, st.session_state.dim_p = "90", "30"
 
 # =========================================================
-# 3. INTERFACCIA UTENTE (LAYOUT 3 COLONNE)
+# 3. INTERFACCIA UTENTE
 # =========================================================
 
-# --- IMPOSTAZIONE DIMENSIONE IMMAGINE (Modifica questo valore per ridimensionare) ---
-LARGHEZZA_IMMAGINE = 450 
+st.title("⚙️ REG - Title Generator & Classification")
 
-# Distribuzione spazi: Sinistra (Filtri), Centro (Input), Destra (Istruzioni/Appunti)
-c_left, c_main, c_right = st.columns([1, 2.5, 1.2], gap="large")
+# --- 1. TASTO AZZERA SUPERIORE CENTRATO ---
+c1, c2, c3 = st.columns([2, 1, 2])
+with c2:
+    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_top")
 
-with c_left:
+st.markdown("---")
+
+col_macro, col_workarea = st.columns([1, 3], gap="large")
+
+with col_macro:
     st.subheader("📂 1. Categoria")
-    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), label_visibility="collapsed")
+    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()))
     
-    st.markdown("---")
-    st.subheader("🔗 Modelli")
-    pills_compat = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+    uni_en_1090_active = False 
     
-    # Selezione singola
-    comp_singola = st.pills("Compatibilità:", options=pills_compat, selection_mode="single", key="comp_tags")
-    comp_selezionate = [comp_singola] if comp_singola else []
+    if macro_it != "FASTENER":
+        st.markdown("---")
+        st.subheader("🔗 Compatibilità")
+        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+        
+        # CAMBIO DA "multi" A "single"
+        comp_selezionata = st.pills("Modelli:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
+        
+        # Trasformiamo in lista per non rompere la logica successiva del codice
+        comp_selezionate = [comp_selezionata] if comp_selezionata else []
+        
+        # Logica strutturale (rimane valida)
+        modelli_strutturali = ["FORTISSIMO", "MINIRACK"]
+        if any(m in comp_selezionate for m in modelli_strutturali):
+            st.warning("⚡ Configurazione Strutturale")
+            uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", value=False, key="check_1090")
+    else:
+        comp_selezionate = []
 
-    # Logica Strutturale
-    uni_en_1090_active = False
-    if any(m in comp_selezionate for m in ["FORTISSIMO", "MINIRACK"]):
-        st.warning("⚡ Configurazione Strutturale")
-        uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
-
-with c_main:
-    st.subheader("🛠️ 2. Configurazione Particolare")
+with col_workarea:
+    st.subheader("🛠️ 2. Materiale e Particolare")
     
-    # Gestione Materiale
     mat_en = ""
     if macro_it == "ASSEMBLY":
-        st.toggle("STATO ASSEMBILATO", key="check_assembled")
+        st.checkbox("ASSEMBLATA", key="check_assembled")
     else:
-        mats = MATERIALI_CONFIG.get(macro_it, {})
-        if mats:
-            mat_it = st.radio("Materiale:", options=list(mats.keys()), horizontal=True)
-            mat_en = mats[mat_it]
-
-    # Selezione Particolare
+        materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
+        if materiali_disponibili:
+            mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
+            mat_en = materiali_disponibili[mat_it]
+    
     part_dict = DATABASE[macro_it]["Particolari"]
+    
+    # --- Modifica: Gestione Placeholder (index=None) ---
+    def format_part_label(nome_it):
+        if nome_it is None:
+            return "Seleziona o digita il particolare..."
+        nome_en = part_dict[nome_it][0]
+        return f"🔧 {nome_it} ({nome_en})"
+        
     scelta_part_it = st.selectbox(
-        "Dettaglio:", 
+        "Cerca o seleziona dettaglio:", 
         options=sorted(list(part_dict.keys())), 
-        index=None, 
-        placeholder="Cerca particolare...",
+        index=None,
+        placeholder="Seleziona o digita il particolare...",
+        format_func=format_part_label,
         key="selectbox_part"
     )
 
     st.markdown("---")
+    st.subheader("✨ 3. Extra e Note")
     
-    # Extra e Note
+    # Variabili predefinite in caso di selezione nulla
+    part_en = ""
+    extra_dedicati_dict = {}
+    tag_suggerimento = ""
     extra_selezionati = []
+    
     if scelta_part_it:
-        dati = part_dict[scelta_part_it]
-        part_en, extra_dedicati_dict, tag_suggerimento = dati[0], dati[1], dati[2]
-        if extra_dedicati_dict:
-            extra_selezionati = st.pills("Opzioni:", options=list(extra_dedicati_dict.keys()), selection_mode="multi", key="extra_tags")
+        dati_part = part_dict[scelta_part_it]
+        part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
+        
+        extra_options = list(extra_dedicati_dict.keys())
+        if extra_options:
+            extra_selezionati = st.pills(f"Opzioni per {scelta_part_it}:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-            # Sub-opzioni dinamiche
-            for ex in (extra_selezionati or []):
-                if ex in SUB_OPTIONS_CONFIG:
-                    st.selectbox(f"↳ Specifica {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
-                elif ex in EXTRA_CON_INPUT_MANUALE:
-                    st.text_input(f"↳ Inserimento manuale {ex}:", key=f"manual_{ex}")
-    
-    extra_libero = st.text_input("Note aggiuntive (IT):", key="extra_text", placeholder="Es: mensola con asola...")
-
-    # Sezione Dimensionamento
-    st.markdown("---")
-    st.subheader("📏 3. Dimensionamento (mm)")
-    
-    if macro_it == "FASTENER":
-        f1, f2, f3 = st.columns(3)
-        with f1: dim_l = st.text_input("L", key="dim_l")
-        with f2: dim_dia = st.text_input("D/M", key="dim_dia")
-        with f3:
-            norm_map = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"":""})
-            norm_sel = st.selectbox("Norma", options=list(norm_map.keys()))
-            normativa = norm_map[norm_sel]
+            if extra_selezionati:
+                for ex in extra_selezionati:
+                    if ex in SUB_OPTIONS_CONFIG:
+                        st.caption(f"↳ Specifiche per: **{ex}**")
+                        opzioni_sub = SUB_OPTIONS_CONFIG[ex]
+                        st.selectbox(f"↳ Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}", label_visibility="collapsed", on_change=update_dims_from_section if ex=="Sezione" else None)
+                    elif ex in EXTRA_CON_INPUT_MANUALE:
+                        st.caption(f"↳ Inserimento manuale per: **{ex}**")
+                        st.text_input(f"Specifica valore per {ex} (es. 40x40 o D30):", key=f"manual_{ex}", label_visibility="collapsed")
+        else:
+            st.info("Nessuna opzione extra disponibile per questo elemento.")
     else:
-        g1, g2, g3, g4, g5 = st.columns(5)
-        with g1: dim_l = st.text_input("L", key="dim_l")
-        with g2: dim_p = st.text_input("P", key="dim_p")
-        with g3: dim_h = st.text_input("H", key="dim_h")
-        with g4: dim_dia_gen = st.text_input("Ø", key="dim_dia_gen")
-        with g5: 
-            spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
-            dim_s = st.selectbox("S", options=spessori, key="dim_s")
+        st.info("⚠️ Seleziona prima un particolare nel punto 2 per vedere le opzioni extra.")
 
-    # --- IMMAGINE SOTTO IL DIMENSIONAMENTO ---
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.image(
-        "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
-        caption="Schema Riferimento Misure", 
-        width=LARGHEZZA_IMMAGINE
-    )
+    extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
-with c_right:
-    st.subheader("📖 Modo d'uso")
-    
-    # Istruzioni chiare e modificabili
-    testo_istruzioni = (
-        "MANUALE RAPIDO:\n"
-        "1. Seleziona la Categoria a sinistra.\n"
-        "2. Scegli un Modello (Pills).\n"
-        "3. Seleziona il Dettaglio tecnico.\n"
-        "4. Inserisci le quote in millimetri.\n"
-        "5. Genera la stringa finale.\n\n"
-        "TIPS:\n"
-        "- Usa le 'Note libere' per varianti.\n"
-        "- Le dimensioni L, P, H vengono\n"
-        "  formattate automaticamente."
-    )
-    
-    st.text_area("Note e Istruzioni:", value=testo_istruzioni, height=350, key="manual_area")
-    
     st.markdown("---")
-    st.button("🔄 RESET TOTALE", on_click=activate_reset, use_container_width=True)
+    st.subheader("📏 4. Dimensioni e Normative")
+    
+    col_input, col_img = st.columns([2, 1])
+    
+    with col_input:
+        if macro_it == "FASTENER":
+            c_f1, c_f2, c_f3 = st.columns(3)
+            with c_f1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+            with c_f2: dim_dia = st.text_input("Diametro (D/M)", key="dim_dia")
+            
+            opzioni_filtrare = {"": ""}
+            if scelta_part_it and scelta_part_it in MAPPA_NORMATIVE_FASTENER:
+                opzioni_filtrare = MAPPA_NORMATIVE_FASTENER[scelta_part_it]
+            
+            with c_f3: 
+                norma_scelta_estesa = st.selectbox(f"Normativa", options=list(opzioni_filtrare.keys()))
+                normativa = opzioni_filtrare[norma_scelta_estesa] if norma_scelta_estesa else ""
+            
+            dim_p, dim_h, dim_s, dim_dia_gen = "", "", "", ""
+        else:
+            # --- Modifica: Aggiunto campo Diametro separato ---
+            c_g1, c_g2 = st.columns(2)
+            with c_g1:
+                dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+                dim_h = st.text_input("Altezza (H)", key="dim_h")
+            with c_g2:
+                dim_p = st.text_input("Profondità (P)", key="dim_p")
+                dim_dia_gen = st.text_input("Diametro (Ø)", key="dim_dia_gen")
+                
+            if macro_it != "ASSEMBLY":
+                lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
+                dim_s = st.selectbox("Spessore (S)", options=lista_spessori, key="dim_s")
+            else: 
+                dim_s = ""
+            
+    with col_img:
+        st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", caption="Schema Riferimento", use_container_width=True)
 
 # =========================================================
 # 4. LOGICA DI GENERAZIONE E TRADUZIONE
@@ -481,37 +501,40 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
 
 # =========================================================
-# 5. OUTPUT E VALIDAZIONE
+# 5. OUTPUT
 # =========================================================
 
 if st.session_state['stringa_editabile']:
-    st.markdown("---")
-    st.subheader("📋 Risultato Finale")
-    
-    # Codice generato
+    st.markdown("### 📋 Risultato Finale")
     st.code(st.session_state['stringa_editabile'], language=None)
     
-    # Campo di modifica manuale immediata
-    st.text_input("✏️ Modifica rapida:", key='stringa_editabile', label_visibility="visible")
+    with st.expander("✏️ Modifica testo manualmente"):
+        st.text_input("Modifica qui:", key='stringa_editabile', label_visibility="collapsed")
 
-    # Validazione Lunghezza
     lunghezza = len(st.session_state['stringa_editabile'])
     if lunghezza >= 99:
-        st.error(f"❌ LIMITE CRITICO: {lunghezza}/100 caratteri")
-    elif lunghezza >= 85:
-        st.warning(f"⚠️ ATTENZIONE: {lunghezza}/100 caratteri")
+        st.error(f"⚠️ LIMITE SUPERATO ({lunghezza})")
     else:
-        st.success(f"✅ LUNGHEZZA OK: {lunghezza} caratteri")
+        st.success(f"Lunghezza: {lunghezza} caratteri")
 
-    # Visualizzazione Tag tecnici
-    tags = []
-    if 'tag_suggerimento' in locals() and tag_suggerimento: tags.append(tag_suggerimento.upper())
-    if uni_en_1090_active: tags.append("UNI EN-1090")
-    if 'normativa' in locals() and normativa: tags.append(normativa.upper())
+    comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     
-    if tags:
-        st.info(f"**TAGS TECNICI:** {' | '.join(tags)}")
+    # Tag suggerimento gestito in modo sicuro
+    all_tags = []
+    if 'tag_suggerimento' in locals() and tag_suggerimento:
+        all_tags.append(tag_suggerimento.upper())
+    all_tags.extend([c.upper() for c in comp_list_tags])
+    
+    if uni_en_1090_active:
+        all_tags.append("UNI EN-1090-1")
+    if 'normativa' in locals() and normativa:
+        all_tags.append(normativa.upper())
+    
+    if all_tags:
+        st.info(f"**TAGS:** {' | '.join(all_tags)}")
 
-# Tasto di reset finale a fondo pagina
+# --- 2. TASTO AZZERA INFERIORE CENTRATO ---
 st.markdown("<br>", unsafe_allow_html=True)
-st.button("🔄 RESET GENERATORE", on_click=activate_reset, use_container_width=True, key="final_reset")
+cb1, cb2, cb3 = st.columns([2, 1, 2])
+with cb2:
+    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_bottom")
