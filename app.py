@@ -244,7 +244,10 @@ def update_dims_from_section():
 # 3. INTERFACCIA UTENTE (LAYOUT 3 COLONNE)
 # =========================================================
 
-# Layout bilanciato: Sinistra (Filtri), Centro (Input principale), Destra (Note/Uso)
+# --- IMPOSTAZIONE DIMENSIONE IMMAGINE (Modifica questo valore per ridimensionare) ---
+LARGHEZZA_IMMAGINE = 450 
+
+# Distribuzione spazi: Sinistra (Filtri), Centro (Input), Destra (Istruzioni/Appunti)
 c_left, c_main, c_right = st.columns([1, 2.5, 1.2], gap="large")
 
 with c_left:
@@ -255,23 +258,23 @@ with c_left:
     st.subheader("🔗 Modelli")
     pills_compat = [opt for opt in OPZIONI_COMPATIBILITA if opt]
     
-    # Selezione singola (Richiesta v7.8)
+    # Selezione singola
     comp_singola = st.pills("Compatibilità:", options=pills_compat, selection_mode="single", key="comp_tags")
     comp_selezionate = [comp_singola] if comp_singola else []
 
-    # Logica strutturale
+    # Logica Strutturale
     uni_en_1090_active = False
     if any(m in comp_selezionate for m in ["FORTISSIMO", "MINIRACK"]):
-        st.warning("⚡ Strutturale")
-        uni_en_1090_active = st.checkbox("Certificazione 1090", key="check_1090")
+        st.warning("⚡ Configurazione Strutturale")
+        uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
 
 with c_main:
-    st.subheader("🛠️ 2. Configurazione")
+    st.subheader("🛠️ 2. Configurazione Particolare")
     
-    # Materiale
+    # Gestione Materiale
     mat_en = ""
     if macro_it == "ASSEMBLY":
-        st.checkbox("ASSEMBLATA", key="check_assembled")
+        st.toggle("STATO ASSEMBILATO", key="check_assembled")
     else:
         mats = MATERIALI_CONFIG.get(macro_it, {})
         if mats:
@@ -281,47 +284,44 @@ with c_main:
     # Selezione Particolare
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.selectbox(
-        "Cerca o seleziona dettaglio:", 
+        "Dettaglio:", 
         options=sorted(list(part_dict.keys())), 
         index=None, 
-        placeholder="Digita il particolare...",
+        placeholder="Cerca particolare...",
         key="selectbox_part"
     )
 
     st.markdown("---")
     
     # Extra e Note
+    extra_selezionati = []
     if scelta_part_it:
-        dati_part = part_dict[scelta_part_it]
-        part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
-        
-        extra_options = list(extra_dedicati_dict.keys())
-        if extra_options:
-            extra_selezionati = st.pills(f"Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
+        dati = part_dict[scelta_part_it]
+        part_en, extra_dedicati_dict, tag_suggerimento = dati[0], dati[1], dati[2]
+        if extra_dedicati_dict:
+            extra_selezionati = st.pills("Opzioni:", options=list(extra_dedicati_dict.keys()), selection_mode="multi", key="extra_tags")
             
             # Sub-opzioni dinamiche
-            if extra_selezionati:
-                for ex in extra_selezionati:
-                    if ex in SUB_OPTIONS_CONFIG:
-                        opzioni_sub = SUB_OPTIONS_CONFIG[ex]
-                        st.selectbox(f"↳ {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}")
-                    elif ex in EXTRA_CON_INPUT_MANUALE:
-                        st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
-
-    extra_libero = st.text_input("Note libere (IT):", key="extra_text", placeholder="Traduzione automatica...").strip()
-
-    st.markdown("---")
-    st.subheader("📏 3. Dimensionamento")
+            for ex in (extra_selezionati or []):
+                if ex in SUB_OPTIONS_CONFIG:
+                    st.selectbox(f"↳ Specifica {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
+                elif ex in EXTRA_CON_INPUT_MANUALE:
+                    st.text_input(f"↳ Inserimento manuale {ex}:", key=f"manual_{ex}")
     
-    # Griglia Dimensioni
+    extra_libero = st.text_input("Note aggiuntive (IT):", key="extra_text", placeholder="Es: mensola con asola...")
+
+    # Sezione Dimensionamento
+    st.markdown("---")
+    st.subheader("📏 3. Dimensionamento (mm)")
+    
     if macro_it == "FASTENER":
         f1, f2, f3 = st.columns(3)
         with f1: dim_l = st.text_input("L", key="dim_l")
         with f2: dim_dia = st.text_input("D/M", key="dim_dia")
-        with f3: 
-            opz_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"":""})
-            norma_estesa = st.selectbox("Normativa", options=list(opz_norm.keys()))
-            normativa = opz_norm[norma_estesa]
+        with f3:
+            norm_map = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"":""})
+            norm_sel = st.selectbox("Norma", options=list(norm_map.keys()))
+            normativa = norm_map[norm_sel]
     else:
         g1, g2, g3, g4, g5 = st.columns(5)
         with g1: dim_l = st.text_input("L", key="dim_l")
@@ -329,36 +329,38 @@ with c_main:
         with g3: dim_h = st.text_input("H", key="dim_h")
         with g4: dim_dia_gen = st.text_input("Ø", key="dim_dia_gen")
         with g5: 
-            lista_s = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
-            dim_s = st.selectbox("S", options=lista_s, key="dim_s")
+            spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
+            dim_s = st.selectbox("S", options=spessori, key="dim_s")
 
-    # --- IMMAGINE DINAMICA ---
+    # --- IMMAGINE SOTTO IL DIMENSIONAMENTO ---
     st.markdown("<br>", unsafe_allow_html=True)
-    img_w = st.slider("📐 Ridimensiona schema (px):", 200, 600, 400) # Input manuale per ridimensionare
-    
     st.image(
         "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
-        caption="Riferimento Misure", 
-        width=img_w
+        caption="Schema Riferimento Misure", 
+        width=LARGHEZZA_IMMAGINE
     )
 
 with c_right:
     st.subheader("📖 Modo d'uso")
     
-    # Area di testo chiara e modificabile (No Dark Mode CSS)
-    istruzioni_default = (
-        "1. Seleziona Categoria\n"
-        "2. Scegli Modello (Pills)\n"
-        "3. Seleziona Particolare\n"
-        "4. Inserisci Misure (Solo numeri)\n"
-        "5. Clicca 'Genera Stringa'\n\n"
-        "Nota: Il sistema traduce i termini tecnici automaticamente."
+    # Istruzioni chiare e modificabili
+    testo_istruzioni = (
+        "MANUALE RAPIDO:\n"
+        "1. Seleziona la Categoria a sinistra.\n"
+        "2. Scegli un Modello (Pills).\n"
+        "3. Seleziona il Dettaglio tecnico.\n"
+        "4. Inserisci le quote in millimetri.\n"
+        "5. Genera la stringa finale.\n\n"
+        "TIPS:\n"
+        "- Usa le 'Note libere' per varianti.\n"
+        "- Le dimensioni L, P, H vengono\n"
+        "  formattate automaticamente."
     )
     
-    st.text_area("Appunti / Istruzioni:", value=istruzioni_default, height=300, key="manual_instructions")
+    st.text_area("Note e Istruzioni:", value=testo_istruzioni, height=350, key="manual_area")
     
     st.markdown("---")
-    st.button("🔄 AZZERA SESSIONE", on_click=activate_reset, use_container_width=True)
+    st.button("🔄 RESET TOTALE", on_click=activate_reset, use_container_width=True)
 
 # =========================================================
 # 4. LOGICA DI GENERAZIONE E TRADUZIONE
