@@ -246,6 +246,9 @@ def update_dims_from_section():
 
 st.title("⚙️ REG - Title Generator & Classification")
 
+# Distribuzione spazi: Sinistra (Filtri), Centro (Input), Destra (Istruzioni/Appunti)
+c_left, c_main, c_right = st.columns([1, 2.5, 1.2], gap="large")
+
 # --- 1. TASTO AZZERA SUPERIORE CENTRATO ---
 c1, c2, c3 = st.columns([2, 1, 2])
 with c2:
@@ -381,6 +384,28 @@ with col_workarea:
             
     with col_img:
         st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", caption="Schema Riferimento", use_container_width=True)
+
+with c_right:
+    st.subheader("📖 Modo d'uso")
+    
+    # Istruzioni chiare e modificabili
+    testo_istruzioni = (
+        "MANUALE RAPIDO:\n"
+        "1. Seleziona la Categoria a sinistra.\n"
+        "2. Scegli un Modello (Pills).\n"
+        "3. Seleziona il Dettaglio tecnico.\n"
+        "4. Inserisci le quote in millimetri.\n"
+        "5. Genera la stringa finale.\n\n"
+        "TIPS:\n"
+        "- Usa le 'Note libere' per varianti.\n"
+        "- Le dimensioni L, P, H vengono\n"
+        "  formattate automaticamente."
+    )
+    
+    st.text_area("Note e Istruzioni:", value=testo_istruzioni, height=350, key="manual_area")
+    
+    st.markdown("---")
+    st.button("🔄 RESET TOTALE", on_click=activate_reset, use_container_width=True)
 
 # =========================================================
 # 4. LOGICA DI GENERAZIONE E TRADUZIONE
