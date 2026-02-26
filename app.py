@@ -2,19 +2,40 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # =========================================================
-# 0. CONFIGURAZIONE PAGINA E LOGICA RESET
+# 0. CONFIGURAZIONE PAGINA E LOGICA RESET (POTENZIATA)
 # =========================================================
-st.set_page_config(page_title="Technical Generator v7.8", layout="wide")
-
-# Logica di Reset corretta (fuori dal callback)
-if "trigger_reset" in st.session_state and st.session_state.trigger_reset:
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.rerun()
+st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
 def activate_reset():
-    st.session_state.trigger_reset = True
+    """Reset mirato di tutti i campi di input"""
+    # 1. Lista delle chiavi fisse da pulire
+    keys_to_reset = [
+        'dim_l', 'dim_p', 'dim_h', 'dim_dia', 'dim_dia_gen', 'dim_s',
+        'extra_text', 'selectbox_part', 'comp_tags', 'extra_tags',
+        'stringa_editabile', 'check_1090', 'check_assembled'
+    ]
+    
+    # 2. Reset delle chiavi fisse esistenti
+    for key in keys_to_reset:
+        if key in st.session_state:
+            if key in ['extra_tags', 'comp_tags']:
+                st.session_state[key] = []  # Le Pills vogliono una lista vuota
+            elif key in ['check_1090', 'check_assembled']:
+                st.session_state[key] = False # I Toggle vogliono False
+            elif key == 'selectbox_part':
+                st.session_state[key] = None  # La Selectbox vuole None per il placeholder
+            else:
+                st.session_state[key] = ""    # I testi vogliono stringa vuota
+    
+    # 3. Reset dinamico per campi manual_ e sub_ (i campi extra)
+    for key in list(st.session_state.keys()):
+        if key.startswith("manual_") or key.startswith("sub_"):
+            st.session_state[key] = ""
+            
+    # Messaggio di conferma temporaneo (opzionale)
+    st.toast("Campi resettati con successo!", icon="🔄")
 
+# CSS personalizzato (il tuo originale con qualche piccolo ritocco)
 st.markdown("""
     <style>
         div[data-testid="stWidgetLabel"] { margin-bottom: 5px !important; }
