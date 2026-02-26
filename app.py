@@ -246,9 +246,6 @@ def update_dims_from_section():
 
 st.title("⚙️ REG - Title Generator & Classification")
 
-# Distribuzione spazi: Sinistra (Filtri), Centro (Input), Destra (Istruzioni/Appunti)
-c_left, c_main, c_right = st.columns([1, 2.5, 1.2], gap="large")
-
 # --- 1. TASTO AZZERA SUPERIORE CENTRATO ---
 c1, c2, c3 = st.columns([2, 1, 2])
 with c2:
