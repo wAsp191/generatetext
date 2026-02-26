@@ -389,7 +389,7 @@ with col_workarea:
         )
     
 # =========================================================
-# 4. LOGICA DI GENERAZIONE E TRADUZIONE
+# 4. LOGICA DI GENERAZIONE E TRADUZIONE (v8.3)
 # =========================================================
 
 st.divider()
@@ -426,7 +426,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
             
             lph_str = "X".join(dim_final_parts)
             
-            # --- Modifica: Assemblaggio LPH + Ø + S ---
             dim_final_comps = []
             if lph_str: dim_final_comps.append(lph_str)
             if dia_val_s: dim_final_comps.append(f"Ø{dia_val_s}")
@@ -434,7 +433,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
             
             dim_final = " ".join(dim_final_comps)
 
-        # --- B. Extra da Bottoni ---
+        # --- B. Extra da Bottoni (Pills) ---
         extra_pills_list = []
         for ex in (extra_selezionati or []):
             base_trans = extra_dedicati_dict.get(ex, ex.upper())
@@ -450,7 +449,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
             else:
                 extra_pills_list.append(base_trans)
 
-        # --- C. Note Libere ---
+        # --- C. Note Libere (Traduzione) ---
         note_libere_tradotte = ""
         if extra_libero:
             testo_pulito = extra_libero.lower()
@@ -458,56 +457,49 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
                 if ita in testo_pulito:
                     testo_pulito = testo_pulito.replace(ita, eng)
             try:
+                # Utilizziamo GoogleTranslator per la parte non presente nel glossario
                 note_libere_tradotte = GoogleTranslator(source='it', target='en').translate(testo_pulito).upper()
             except:
                 note_libere_tradotte = extra_libero.upper()
 
-        # --- D. Ordinamento Corretto (Modificato per v7.8) ---
-        # Spostiamo davanti solo se il termine è ESATTAMENTE nella lista TERMINI_ANTICIPATI
+        # --- D. Ordinamento Prefissi/Suffissi ---
+        # Prefissi: solo se il termine è ESATTAMENTE nella lista (es. "METAL")
         prefissi = [ex for ex in extra_pills_list if ex in TERMINI_ANTICIPATI]
-        
-        # Tutto il resto (comprese frasi composte come "HOOK ONTO UPRIGHT") va dopo
+        # Suffissi: tutto il resto (es. "HOOK ONTO UPRIGHT")
         suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
         
         prefix_str = " ".join(prefissi) if prefissi else ""
         extra_suffissi_str = ", ".join(suffissi) if suffissi else ""
         
         comp_list = [c for c in (comp_selezionate or []) if c.strip()]
-        comp_str = ", ".join(comp_list) if comp_list else ""
+        comp_str = " - ".join(comp_list) if comp_list else ""
 
         # --- E. Assemblaggio ---
-        # CONTROLLO RIDONDANZA: Se il materiale è METAL e il nome parte contiene già METAL (es. SHEET METAL)
-        # evitiamo di scrivere METAL SHEET METAL.
         
+        # 1. Controllo ridondanza Materiale
         if mat_en == "METAL" and "METAL" in part_en.upper():
-            # In questo caso usiamo solo part_en senza aggiungere mat_en davanti
             descrizione_centrale = f"{prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
         else:
-            # Caso standard (es. METAL BRACKET)
             descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
         
-        final_segments = [descrizione_centrale]
-        # --- UNIONE SUFFISSI E NOTE (Con la virgola) ---
-        # Creiamo un blocco unico che contiene sia i suffissi flaggati che le note libere
-        blocco_dettagli = []
-        if extra_suffissi_str:
-            blocco_dettagli.append(extra_suffissi_str)
+        # 2. UNIONE NOTE LIBERE CON VIRGOLA (Attaccate alla descrizione)
         if note_libere_tradotte:
-            blocco_dettagli.append(note_libere_tradotte)
+            descrizione_centrale = f"{descrizione_centrale}, {note_libere_tradotte}"
         
-        # Uniamo i suffissi e le note con ", "
-        dettagli_finali_str = ", ".join(blocco_dettagli)
-
-        # --- ASSEMBLAGGIO FINALE SEGMENTI ---
+        # 3. Costruzione lista segmenti per separazione con trattino (-)
         final_segments = [descrizione_centrale]
-        if dettagli_finali_str:
-            final_segments.append(dettagli_finali_str) # Questo aggiungerà il " - " solo prima del blocco
+        
+        if extra_suffissi_str:
+            final_segments.append(extra_suffissi_str)
+            
         if comp_str:
             final_segments.append(comp_str)
             
+        # 4. Unione finale con Trattino
         temp_str = " - ".join(final_segments).upper().replace("  ", " ")
-        temp_str = temp_str.replace("WITH WITH", "WITH")
         
+        # 5. Pulizia "WITH" ridondanti
+        temp_str = temp_str.replace("WITH WITH", "WITH")
         if temp_str.count("WITH") > 1:
             first_with_idx = temp_str.find("WITH")
             first_with_end = first_with_idx + 4
@@ -515,12 +507,14 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
             parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
             temp_str = parte_iniziale + parte_restante
 
+        # 6. Prefissi Speciali (Assembly e Strutturale)
         if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled", False):
             temp_str = f"ASSEMBLED - {temp_str}"
         
         if uni_en_1090_active:
             temp_str = f"UNI EN-1090 - {temp_str}"
             
+        # 7. Salvataggio finale
         st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
 
 # =========================================================
