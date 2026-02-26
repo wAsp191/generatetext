@@ -311,7 +311,8 @@ with c_main:
         dim_l = f1.text_input("Lunghezza (L)", key="dim_l")
         dim_dia = f2.text_input("Diametro (M/D)", key="dim_dia")
         dim_p, dim_h, dim_dia_gen, dim_s = "", "", "", ""
-    else:
+   else:
+        # Questo blocco deve essere rientrato rispetto a "with c_main:"
         g1, g2, g3, g4, g5 = st.columns(5)
         dim_l = g1.text_input("L", key="dim_l")
         dim_p = g2.text_input("P", key="dim_p")
@@ -319,13 +320,17 @@ with c_main:
         dim_dia_gen = g4.text_input("Ø", key="dim_dia_gen")
         dim_s = g5.selectbox("S", options=OPZIONI_SPESSORE_STD if macro_it != "WOOD COMP" else OPZIONI_SPESSORE_WOOD, key="dim_s")
 
- with col_img:
-        st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", caption="Schema Riferimento", use_container_width=True)
+    # CORREZIONE: Uso c_main (o tolgo il 'with' se voglio che stia al centro)
+    # L'indentazione deve essere identica a quella di "else:"
+    st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
+             caption="Schema Riferimento", 
+             use_container_width=True)
 
 # =========================================================
-# 4. LOGICA DI GENERAZIONE E TRADUZIONE
+# 5. LOGICA DI GENERAZIONE E TRADUZIONE
 # =========================================================
 
+# Torniamo al margine sinistro (fuori dalle colonne) per la riga di separazione
 st.divider()
 
 if 'stringa_editabile' not in st.session_state:
