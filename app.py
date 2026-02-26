@@ -449,21 +449,31 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
             
             dim_final = " ".join(dim_final_comps)
 
-        # --- B. Extra da Bottoni (Pills) ---
+        # --- B. Extra da Bottoni (Pills) - ORDINE FISSO ---
         extra_pills_list = []
-        for ex in (extra_selezionati or []):
-            base_trans = extra_dedicati_dict.get(ex, ex.upper())
-            if ex in SUB_OPTIONS_CONFIG:
-                sub_key = f"sub_{ex}"
-                valore_sub_it = st.session_state.get(sub_key, "")
-                traduzione_sub = SUB_OPTIONS_CONFIG[ex].get(valore_sub_it, "")
-                extra_pills_list.append(f"{base_trans} {traduzione_sub}".strip())
-            elif ex in EXTRA_CON_INPUT_MANUALE:
-                manual_val = st.session_state.get(f"manual_{ex}", "").strip().upper()
-                if manual_val: extra_pills_list.append(f"{base_trans} {manual_val}")
-                else: extra_pills_list.append(base_trans)
-            else:
-                extra_pills_list.append(base_trans)
+        
+        # Invece di: for ex in (extra_selezionati or []):
+        # Usiamo l'ordine originale del database/options:
+        ordine_fisso_opzioni = list(extra_dedicati_dict.keys())
+        
+        for ex in ordine_fisso_opzioni:
+            if extra_selezionati and ex in extra_selezionati:
+                base_trans = extra_dedicati_dict.get(ex, ex.upper())
+                
+                if ex in SUB_OPTIONS_CONFIG:
+                    sub_key = f"sub_{ex}"
+                    valore_sub_it = st.session_state.get(sub_key, "")
+                    traduzione_sub = SUB_OPTIONS_CONFIG[ex].get(valore_sub_it, "")
+                    extra_pills_list.append(f"{base_trans} {traduzione_sub}".strip())
+                    
+                elif ex in EXTRA_CON_INPUT_MANUALE:
+                    manual_val = st.session_state.get(f"manual_{ex}", "").strip().upper()
+                    if manual_val: 
+                        extra_pills_list.append(f"{base_trans} {manual_val}")
+                    else: 
+                        extra_pills_list.append(base_trans)
+                else:
+                    extra_pills_list.append(base_trans)
 
         # --- C. Note Libere (Traduzione) ---
         note_libere_tradotte = ""
