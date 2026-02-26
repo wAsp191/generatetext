@@ -456,8 +456,11 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
             except:
                 note_libere_tradotte = extra_libero.upper()
 
-        # --- D. Ordinamento ---
-        prefissi = [ex for ex in extra_pills_list if any(p in ex for p in TERMINI_ANTICIPATI) and "FOR" not in ex]
+        # --- D. Ordinamento Corretto (Modificato per v7.8) ---
+        # Spostiamo davanti solo se il termine è ESATTAMENTE nella lista TERMINI_ANTICIPATI
+        prefissi = [ex for ex in extra_pills_list if ex in TERMINI_ANTICIPATI]
+        
+        # Tutto il resto (comprese frasi composte come "HOOK ONTO UPRIGHT") va dopo
         suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
         
         prefix_str = " ".join(prefissi) if prefissi else ""
