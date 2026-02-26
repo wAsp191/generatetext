@@ -241,11 +241,11 @@ def update_dims_from_section():
         st.session_state.dim_l, st.session_state.dim_p = "90", "30"
 
 # =========================================================
-# 3. INTERFACCIA UTENTE (Layout Ottimizzato v8.0)
+# 3. INTERFACCIA UTENTE (Layout Verticale Dimensioni v8.1)
 # =========================================================
 
-# Variabili di configurazione rapida (Modificabili solo da codice)
-LARGHEZZA_IMMAGINE = 450 
+# Variabili di configurazione rapida
+LARGHEZZA_IMMAGINE = 400 
 TESTO_MANUALE = """
 **PROCEDURA STANDARD:**
 1. **CATEGORIA**: Seleziona il gruppo a sinistra.
@@ -270,7 +270,7 @@ with c2:
 
 st.markdown("---")
 
-# LAYOUT A 2 COLONNE: Sidebar Comandi (SX) | Area Lavoro (DX)
+# LAYOUT A 2 COLONNE PRINCIPALI: Sidebar (SX) | Area Lavoro (DX)
 col_left, col_workarea = st.columns([1, 3], gap="large")
 
 with col_left:
@@ -278,15 +278,13 @@ with col_left:
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro", label_visibility="collapsed")
     
     st.markdown("---")
-    
-    # MODO D'USO FISSO (Sotto la categoria)
     st.subheader("📖 Manuale d'uso")
-    st.info(TESTO_MANUALE) # Utilizzo di st.info per un look pulito, chiaro e non editabile
+    st.info(TESTO_MANUALE)
 
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Compatibilità")
     
-    # --- RIGA MATERIALE + COMPATIBILITÀ AFFIANCATI ---
+    # RIGA MATERIALE + COMPATIBILITÀ
     c_mat, c_comp = st.columns([1, 1.5])
     
     with c_mat:
@@ -306,8 +304,6 @@ with col_workarea:
             comp_selezionata = st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
             comp_selezionate = [comp_selezionata] if comp_selezionata else []
             
-            # Logica strutturale UNI EN-1090
-            uni_en_1090_active = False 
             if any(m in comp_selezionate for m in ["FORTISSIMO", "MINIRACK"]):
                 st.warning("⚡ Strutturale")
                 uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
@@ -316,9 +312,8 @@ with col_workarea:
 
     st.markdown("---")
     
-    # --- SELEZIONE PARTICOLARE ---
+    # SELEZIONE PARTICOLARE
     part_dict = DATABASE[macro_it]["Particolari"]
-    
     def format_part_label(nome_it):
         if nome_it is None: return "Seleziona o digita il particolare..."
         nome_en = part_dict[nome_it][0]
@@ -342,51 +337,48 @@ with col_workarea:
         
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
-            extra_selezionati = st.pills(f"Opzioni per {scelta_part_it}:", options=extra_options, selection_mode="multi", key="extra_tags")
-            
+            extra_selezionati = st.pills(f"Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
             if extra_selezionati:
                 for ex in extra_selezionati:
                     if ex in SUB_OPTIONS_CONFIG:
-                        st.caption(f"↳ Specifiche per: **{ex}**")
-                        opzioni_sub = SUB_OPTIONS_CONFIG[ex]
-                        st.selectbox(f"↳ Seleziona variante {ex}:", options=list(opzioni_sub.keys()), key=f"sub_{ex}", label_visibility="collapsed", on_change=update_dims_from_section if ex=="Sezione" else None)
+                        st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
                     elif ex in EXTRA_CON_INPUT_MANUALE:
-                        st.caption(f"↳ Inserimento manuale per: **{ex}**")
-                        st.text_input(f"Specifica valore per {ex}:", key=f"manual_{ex}", label_visibility="collapsed")
-    else:
-        st.info("⚠️ Seleziona un particolare per vedere le opzioni.")
+                        st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
 
     extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
     st.markdown("---")
-    st.subheader("📏 4. Dimensioni e Normative")
+    st.subheader("📏 4. Dimensionamento e Normative")
     
-    # Griglia Dimensioni
-    if macro_it == "FASTENER":
-        c_f1, c_f2, c_f3 = st.columns(3)
-        with c_f1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-        with c_f2: dim_dia = st.text_input("Diametro (D/M)", key="dim_dia")
-        with c_f3: 
-            opzioni_filtrare = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-            norma_scelta_estesa = st.selectbox(f"Normativa", options=list(opzioni_filtrare.keys()))
-            normativa = opzioni_filtrare[norma_scelta_estesa] if norma_scelta_estesa else ""
-    else:
-        c_g1, c_g2, c_g3, c_g4, c_g5 = st.columns(5)
-        with c_g1: dim_l = st.text_input("L", key="dim_l")
-        with c_g2: dim_p = st.text_input("P", key="dim_p")
-        with c_g3: dim_h = st.text_input("H", key="dim_h")
-        with c_g4: dim_dia_gen = st.text_input("Ø", key="dim_dia_gen")
-        with c_g5: 
-            lista_spessori = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
-            dim_s = st.selectbox("S", options=lista_spessori, key="dim_s")
+    # --- NUOVO LAYOUT: CAMPI INCOLONNATI A SINISTRA, IMMAGINE A DESTRA ---
+    col_campi, col_immagine = st.columns([1, 1.5], gap="medium")
 
-    # --- IMMAGINE SCHEMA SOTTO IL DIMENSIONAMENTO ---
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.image(
-        "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
-        caption="Schema Riferimento Dimensioni", 
-        width=LARGHEZZA_IMMAGINE
-    )
+    with col_campi:
+        if macro_it == "FASTENER":
+            dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+            dim_dia = st.text_input("Diametro (D/M)", key="dim_dia")
+            opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
+            norma_scelta = st.selectbox("Normativa", options=list(opzioni_norm.keys()))
+            normativa = opzioni_norm[norma_scelta] if norma_scelta else ""
+            dim_p, dim_h, dim_s, dim_dia_gen = "", "", "", ""
+        else:
+            dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+            dim_p = st.text_input("Profondità (P)", key="dim_p")
+            dim_h = st.text_input("Altezza (H)", key="dim_h")
+            dim_dia_gen = st.text_input("Diametro (Ø)", key="dim_dia_gen")
+            
+            if macro_it != "ASSEMBLY":
+                lista_s = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
+                dim_s = st.selectbox("Spessore (S)", options=lista_s, key="dim_s")
+            else:
+                dim_s = ""
+
+    with col_immagine:
+        st.image(
+            "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
+            caption="Riferimento Quote", 
+            width=LARGHEZZA_IMMAGINE
+        )
     
 # =========================================================
 # 4. LOGICA DI GENERAZIONE E TRADUZIONE
