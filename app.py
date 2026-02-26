@@ -390,7 +390,7 @@ with col_workarea:
         )
     
 # =========================================================
-# 4. LOGICA DI GENERAZIONE E TRADUZIONE (v8.3)
+# 4. LOGICA DI GENERAZIONE E TRADUZIONE (v8.6 - Comma Fix)
 # =========================================================
 
 st.divider()
@@ -458,48 +458,44 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
                 if ita in testo_pulito:
                     testo_pulito = testo_pulito.replace(ita, eng)
             try:
-                # Utilizziamo GoogleTranslator per la parte non presente nel glossario
                 note_libere_tradotte = GoogleTranslator(source='it', target='en').translate(testo_pulito).upper()
             except:
                 note_libere_tradotte = extra_libero.upper()
 
-        # --- D. Ordinamento Prefissi/Suffissi ---
-        # Prefissi: solo se il termine è ESATTAMENTE nella lista (es. "METAL")
+        # --- D. Ordinamento Prefissi/Suffissi Pills ---
         prefissi = [ex for ex in extra_pills_list if ex in TERMINI_ANTICIPATI]
-        # Suffissi: tutto il resto (es. "HOOK ONTO UPRIGHT")
         suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
         
         prefix_str = " ".join(prefissi) if prefissi else ""
-        extra_suffissi_str = ", ".join(suffissi) if suffissi else ""
+        extra_suffissi_str = " ".join(suffissi) if suffissi else "" # Spazio tra extra
         
         comp_list = [c for c in (comp_selezionate or []) if c.strip()]
         comp_str = " - ".join(comp_list) if comp_list else ""
 
-        # --- E. Assemblaggio ---
+        # --- E. Assemblaggio (LOGICA RICHIESTA) ---
         
-        # 1. Controllo ridondanza Materiale
+        # 1. Base Descrizione (Materiale + Prefisso + Nome + Misure)
         if mat_en == "METAL" and "METAL" in part_en.upper():
-            descrizione_centrale = f"{prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
+            corpo = f"{prefix_str} {part_en} {dim_final}".strip()
         else:
-            descrizione_centrale = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip().replace("  ", " ")
+            corpo = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip()
         
-        # 2. UNIONE NOTE LIBERE CON VIRGOLA (Attaccate alla descrizione)
-        if note_libere_tradotte:
-            descrizione_centrale = f"{descrizione_centrale}, {note_libere_tradotte}"
-        
-        # 3. Costruzione lista segmenti per separazione con trattino (-)
-        final_segments = [descrizione_centrale]
-        
+        # 2. Aggiunta Extra (Pills) uniti da spazio (come richiesto in esempio)
         if extra_suffissi_str:
-            final_segments.append(extra_suffissi_str)
+            corpo = f"{corpo} {extra_suffissi_str}".strip()
             
+        # 3. Aggiunta Note Libere precedute da VIRGOLA
+        if note_libere_tradotte:
+            corpo = f"{corpo}, {note_libere_tradotte}".strip()
+        
+        # 4. Unione finale con il MODELLO tramite TRATTINO
+        final_segments = [corpo]
         if comp_str:
             final_segments.append(comp_str)
-            
-        # 4. Unione finale con Trattino
+
         temp_str = " - ".join(final_segments).upper().replace("  ", " ")
         
-        # 5. Pulizia "WITH" ridondanti
+        # 5. Pulizia finale "WITH" e prefissi speciali
         temp_str = temp_str.replace("WITH WITH", "WITH")
         if temp_str.count("WITH") > 1:
             first_with_idx = temp_str.find("WITH")
@@ -508,14 +504,12 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
             parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
             temp_str = parte_iniziale + parte_restante
 
-        # 6. Prefissi Speciali (Assembly e Strutturale)
         if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled", False):
             temp_str = f"ASSEMBLED - {temp_str}"
         
         if uni_en_1090_active:
             temp_str = f"UNI EN-1090 - {temp_str}"
             
-        # 7. Salvataggio finale
         st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
 
 # =========================================================
