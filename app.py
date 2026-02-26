@@ -184,7 +184,7 @@ OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F25 READY", "F50", "F50 BESP
 MAPPA_NORMATIVE_FASTENER = {
     "Vite": {
         "": "",
-        "DIN 912 - Brugola testa cilindrica": "DIN 912",
+        "DIN 912 - Testa cilindrica": "DIN 912",
         "DIN 933 - Esagonale filetto totale": "DIN 933",
         "DIN 931 - Esagonale filetto parziale": "DIN 931",
         "DIN 7991 - Testa svasata esagono incassato": "DIN 7991",
