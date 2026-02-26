@@ -321,18 +321,21 @@ with c_main:
 
     # Inserimento immagine all'interno della colonna centrale
     st.markdown("---") # Una linea sottile per separare
-    # Sostituisci la vecchia riga st.image con questa:
-    st.image(
-        "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
-        caption="Schema Riferimento Dimensioni", 
-        width=350  # Regola questo numero finché non raggiungi la dimensione desiderata
-    )
-
+    # Crea 3 mini-spazi dentro la colonna centrale per centrare l'immagine
+    sub_col_1, sub_col_img, sub_col_2 = st.columns([1, 2, 1])
+    
+    with sub_col_img:
+        st.image(
+            "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
+            caption="Schema Riferimento Dimensioni",
+            use_container_width=True # Qui lo riattiviamo perché la larghezza è limitata dalla mini-colonna
+        )
 # Ora usciamo dal blocco "with" e torniamo al margine sinistro
 st.divider()
 
 if 'stringa_editabile' not in st.session_state:
     st.session_state['stringa_editabile'] = ""
+    
 # =========================================================
 # 4. LOGICA DI GENERAZIONE E TRADUZIONE
 # =========================================================
