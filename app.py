@@ -241,11 +241,25 @@ def update_dims_from_section():
         st.session_state.dim_l, st.session_state.dim_p = "90", "30"
 
 # =========================================================
-# 3. INTERFACCIA UTENTE (Layout Ottimizzato v7.9)
+# 3. INTERFACCIA UTENTE (Layout Ottimizzato v8.0)
 # =========================================================
 
-# Variabile per il controllo manuale della dimensione immagine dal codice
+# Variabili di configurazione rapida (Modificabili solo da codice)
 LARGHEZZA_IMMAGINE = 450 
+TESTO_MANUALE = """
+**PROCEDURA STANDARD:**
+1. **CATEGORIA**: Seleziona il gruppo a sinistra.
+2. **MODELLO**: Scegli il sistema (F25, Fortissimo, ecc.).
+3. **PARTICOLARE**: Cerca il componente specifico.
+4. **QUOTE**: Inserisci i valori in millimetri.
+5. **GENERA**: Clicca il tasto rosso in fondo.
+
+---
+**NOTE TECNICHE:**
+* I prefissi L-P-H sono automatici.
+* Le note libere vengono tradotte in inglese.
+* Lunghezza max stringa: 100 caratteri.
+"""
 
 st.title("⚙️ REG - Title Generator & Classification")
 
@@ -256,14 +270,18 @@ with c2:
 
 st.markdown("---")
 
-# LAYOUT A 3 COLONNE: Filtri (SX), Area Lavoro (Centro), Istruzioni (DX)
-col_macro, col_workarea, col_instructions = st.columns([1, 2.5, 1.2], gap="large")
+# LAYOUT A 2 COLONNE: Sidebar Comandi (SX) | Area Lavoro (DX)
+col_left, col_workarea = st.columns([1, 3], gap="large")
 
-with col_macro:
+with col_left:
     st.subheader("📂 1. Categoria")
-    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro")
+    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro", label_visibility="collapsed")
     
-    # La compatibilità è stata spostata nell'area centrale per maggiore visibilità
+    st.markdown("---")
+    
+    # MODO D'USO FISSO (Sotto la categoria)
+    st.subheader("📖 Manuale d'uso")
+    st.info(TESTO_MANUALE) # Utilizzo di st.info per un look pulito, chiaro e non editabile
 
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Compatibilità")
@@ -274,7 +292,7 @@ with col_workarea:
     with c_mat:
         mat_en = ""
         if macro_it == "ASSEMBLY":
-            st.toggle("ASSEMBLATA", key="check_assembled")
+            st.toggle("ASSEMBILATO", key="check_assembled")
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
@@ -291,7 +309,7 @@ with col_workarea:
             # Logica strutturale UNI EN-1090
             uni_en_1090_active = False 
             if any(m in comp_selezionate for m in ["FORTISSIMO", "MINIRACK"]):
-                st.warning("⚡ Configurazione Strutturale")
+                st.warning("⚡ Strutturale")
                 uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
         else:
             comp_selezionate = []
@@ -318,11 +336,6 @@ with col_workarea:
     st.markdown("---")
     st.subheader("✨ 3. Extra e Note")
     
-    part_en = ""
-    extra_dedicati_dict = {}
-    tag_suggerimento = ""
-    extra_selezionati = []
-    
     if scelta_part_it:
         dati_part = part_dict[scelta_part_it]
         part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
@@ -340,8 +353,6 @@ with col_workarea:
                     elif ex in EXTRA_CON_INPUT_MANUALE:
                         st.caption(f"↳ Inserimento manuale per: **{ex}**")
                         st.text_input(f"Specifica valore per {ex}:", key=f"manual_{ex}", label_visibility="collapsed")
-        else:
-            st.info("Nessuna opzione extra disponibile.")
     else:
         st.info("⚠️ Seleziona un particolare per vedere le opzioni.")
 
@@ -350,6 +361,7 @@ with col_workarea:
     st.markdown("---")
     st.subheader("📏 4. Dimensioni e Normative")
     
+    # Griglia Dimensioni
     if macro_it == "FASTENER":
         c_f1, c_f2, c_f3 = st.columns(3)
         with c_f1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
@@ -372,28 +384,10 @@ with col_workarea:
     st.markdown("<br>", unsafe_allow_html=True)
     st.image(
         "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
-        caption="Schema Riferimento", 
+        caption="Schema Riferimento Dimensioni", 
         width=LARGHEZZA_IMMAGINE
     )
-
-with col_instructions:
-    st.subheader("📖 Modo d'uso")
     
-    # Area di testo chiara e modificabile (Light Mode)
-    istruzioni_testo = (
-        "PROCEDURA:\n"
-        "1. Scegli Categoria (Sinistra)\n"
-        "2. Seleziona Materiale e Modello\n"
-        "3. Cerca il Particolare tecnico\n"
-        "4. Inserisci quote in mm\n"
-        "5. Genera e copia la stringa\n\n"
-        "APPUNTI:"
-    )
-    
-    st.text_area("Istruzioni e Note manuali:", value=istruzioni_testo, height=400, key="manual_notes")
-    
-    st.markdown("---")
-    st.button("🔄 AZZERA SESSIONE", on_click=activate_reset, use_container_width=True, key="btn_right_reset")
 # =========================================================
 # 4. LOGICA DI GENERAZIONE E TRADUZIONE
 # =========================================================
