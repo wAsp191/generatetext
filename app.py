@@ -81,7 +81,7 @@ SUB_OPTIONS_CONFIG = {
         "Attacco barra": "HOOK FOR BAR", "Attacco multilame": "HOOK FOR MULTISRIP", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"
     },
     "Orientamento": {
-        "Destra": "RIGHR", "Sinistra": "LEFT"
+        "Destra": "RIGHT", "Sinistra": "LEFT"
     },
     "Posizioni multiple": {
         "1 posizione": "1 POSITION", "2 posizioni": "2 position", "3 posizioni": "3 POSITION"
