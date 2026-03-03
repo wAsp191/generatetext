@@ -443,6 +443,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
             if p_val_s: dim_final_parts.append(f"P{p_val_s}")
             if h_val_s: dim_final_parts.append(f"H{h_val_s}")
             
+            lph_str = " ".join(dim_final_parts)
+            
             dim_final_comps = []
             if lph_str: dim_final_comps.append(lph_str)
             if dia_val_s: dim_final_comps.append(f"Ø{dia_val_s}")
