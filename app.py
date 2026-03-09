@@ -74,7 +74,7 @@ SUB_OPTIONS_CONFIG = {
     "Tipologia di mensola (+)": {
         "Mensola saldata a filo superiore": "UPPER BRACKET", "Mensola saldata a filo inferiore": "LOWER BRACKET"
     },
-    "Compatibilità piede di base (+)" {
+    "Compatibilità piede di base (+)": {
         "Per piede H90": "FOR H90 BASE FOOT", "Per piede H100": "FOR H100 BASE FOOT", "Per piede H150": "FOR H150 BASE FOOT"
     },
     "Attacco gancio (+)": {
