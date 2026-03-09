@@ -317,7 +317,7 @@ with col_workarea:
     
     with c_mat:
         if macro_it == "ASSEMBLY":
-            st.toggle("ASSEMBILATO", key="check_assembled")
+            st.toggle("ASSEMBLATO", key="check_assembled")
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
