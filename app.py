@@ -394,12 +394,8 @@ with col_workarea:
             dim_h = st.text_input("Altezza (H)", key="dim_h")
             dim_dia_gen = st.text_input("Diametro (Ø)", key="dim_dia_gen")
             
-            if macro_it != "ASSEMBLY":
-                lista_s = OPZIONI_SPESSORE_WOOD if macro_it == "WOOD COMP" else OPZIONI_SPESSORE_STD
-                dim_s = st.selectbox("Spessore (S)", options=lista_s, key="dim_s")
-            else:
-                dim_s = ""
-
+            dim_s = "" # Spessore rimosso dall'interfaccia
+            
     with col_immagine:
         st.image(
             "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
