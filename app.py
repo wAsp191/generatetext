@@ -572,19 +572,27 @@ if st.session_state['stringa_editabile']:
 
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     
-    # Tag suggerimento gestito in modo sicuro
-    all_tags = []
-    if 'tag_suggerimento' in locals() and tag_suggerimento:
-        all_tags.append(tag_suggerimento.upper())
-    all_tags.extend([c.upper() for c in comp_list_tags])
-    
-    if uni_en_1090_active:
-        all_tags.append("UNI EN-1090-1")
-    if 'normativa' in locals() and normativa:
-        all_tags.append(normativa.upper())
-    
-    if all_tags:
-        st.info(f"**TAGS:** {' | '.join(all_tags)}")
+    # --- LOGICA VISUALIZZAZIONE CLASSIFICAZIONE ---
+all_tags = []
+
+# 1. Aggiungiamo i tag dal database (quelli estratti con il ".join" di prima)
+if 'tag_suggerimento' in locals() and tag_suggerimento:
+    # Dato che tag_suggerimento è già una stringa "TAG1 - TAG2", la aggiungiamo
+    all_tags.append(tag_suggerimento.upper())
+
+# 2. Aggiungiamo la compatibilità (F25, ecc.)
+all_tags.extend([c.upper() for c in comp_list_tags])
+
+# 3. Aggiungiamo certificazioni e normative
+if uni_en_1090_active:
+    all_tags.append("UNI EN-1090-1")
+if 'normativa' in locals() and normativa:
+    all_tags.append(normativa.upper())
+
+# 4. Visualizzazione finale con la nuova dicitura
+if all_tags:
+    # Sostituito TAGS con CLASSIFY
+    st.info(f"🔍 **CLASSIFY:** {' | '.join(all_tags)}")
 
 # --- 2. TASTO AZZERA INFERIORE CENTRATO ---
 st.markdown("<br>", unsafe_allow_html=True)
