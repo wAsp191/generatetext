@@ -42,9 +42,23 @@ def activate_reset():
             st.session_state[key] = ""
             
     st.toast("Interfaccia pulita!", icon="✨")
+
 # =========================================================
 # 1. DIZIONARI E DATABASE
 # =========================================================
+
+# --- REGOLE DI INCOMPATIBILITÀ (FILTRO SOFT) ---
+# Aggiungi qui i gruppi di opzioni che NON devono essere selezionate insieme.
+# Usa i nomi esatti in Italiano che compaiono a schermo.
+COPPIE_INCOMPATIBILI = [
+    {"Statico", "Regolabile"},
+    {"Angolo aperto", "Angolo chiuso"},
+    {"Portante", "Non portante"},
+    {"Singolo", "Doppio"},
+    {"Per ripiano in vetro", "Per ripiano in legno"},
+    {"Con serratura", "Senza serratura"},
+    {"Destra", "Sinistra"} # Se gestiti come extra semplici
+]
 
 GLOSSARIO_TECNICO = {
     "mensola": "BRACKET",
@@ -430,7 +444,26 @@ st.divider()
 if 'stringa_editabile' not in st.session_state:
     st.session_state['stringa_editabile'] = ""
 
-if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
+# --- CONTROLLO INCOMPATIBILITÀ (FILTRO SOFT) ---
+errori_rilevati = []
+
+# Se abbiamo delle extra selezionate, confrontiamole col database di esclusione
+if extra_selezionati:
+    for coppia in COPPIE_INCOMPATIBILI:
+        # Se entrambi i termini della coppia "proibita" sono tra quelli selezionati:
+        if coppia.issubset(set(extra_selezionati)):
+            elementi = list(coppia)
+            errori_rilevati.append(f"⚠️ **Incongruenza Tecnica:** Non puoi selezionare **'{elementi[0]}'** e **'{elementi[1]}'** contemporaneamente.")
+
+# Se ci sono errori, mostriamo i banner rossi
+for errore in errori_rilevati:
+    st.error(errore)
+
+# La variabile diventa True se c'è almeno un errore, disabilitando così il tasto
+blocco_genera = len(errori_rilevati) > 0
+
+# TASTO DI GENERAZIONE (Ora con il parametro disabled)
+if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=blocco_genera):
     if not scelta_part_it:
         st.error("⚠️ Seleziona un particolare prima di generare la stringa!")
     else:
@@ -574,26 +607,24 @@ if st.session_state['stringa_editabile']:
     comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     
     # --- LOGICA VISUALIZZAZIONE CLASSIFICAZIONE ---
-all_tags = []
-
-# 1. Aggiungiamo i tag dal database (quelli estratti con il ".join" di prima)
-if 'tag_suggerimento' in locals() and tag_suggerimento:
-    # Dato che tag_suggerimento è già una stringa "TAG1 - TAG2", la aggiungiamo
-    all_tags.append(tag_suggerimento.upper())
-
-# 2. Aggiungiamo la compatibilità (F25, ecc.)
-all_tags.extend([c.upper() for c in comp_list_tags])
-
-# 3. Aggiungiamo certificazioni e normative
-if uni_en_1090_active:
-    all_tags.append("UNI EN-1090-1")
-if 'normativa' in locals() and normativa:
-    all_tags.append(normativa.upper())
-
-# 4. Visualizzazione finale con la nuova dicitura
-if all_tags:
-    # Sostituito TAGS con CLASSIFY
-    st.info(f"🔍 **CLASSIFY:** {' | '.join(all_tags)}")
+    all_tags = []
+    
+    # 1. Aggiungiamo i tag dal database (quelli estratti con il ".join" di prima)
+    if 'tag_suggerimento' in locals() and tag_suggerimento:
+        all_tags.append(tag_suggerimento.upper())
+    
+    # 2. Aggiungiamo la compatibilità (F25, ecc.)
+    all_tags.extend([c.upper() for c in comp_list_tags])
+    
+    # 3. Aggiungiamo certificazioni e normative
+    if uni_en_1090_active:
+        all_tags.append("UNI EN-1090-1")
+    if 'normativa' in locals() and normativa:
+        all_tags.append(normativa.upper())
+    
+    # 4. Visualizzazione finale con la nuova dicitura
+    if all_tags:
+        st.info(f"🔍 **CLASSIFY:** {' | '.join(all_tags)}")
 
 # --- 2. TASTO AZZERA INFERIORE CENTRATO ---
 st.markdown("<br>", unsafe_allow_html=True)
