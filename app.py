@@ -367,19 +367,35 @@ with col_workarea:
     st.subheader("✨ 3. Extra e Note")
     
     if scelta_part_it:
-        if scelta_part_it:
+        # Questa riga è dentro l'IF (rientrata di 4 spazi)
         dati_part = part_dict[scelta_part_it]
         
-        # 1. Recuperiamo i primi due elementi fissi
+        # Anche queste devono essere allineate con la riga sopra
         part_en = dati_part[0]
         extra_dedicati_dict = dati_part[1]
 
-        # 2. Uniamo tutti gli elementi rimanenti (dal terzo in poi)
+        # Logica per unire i tag (tutto rientrato)
         if len(dati_part) > 2:
-            # Prende tutto dall'indice 2 alla fine e li unisce
             tag_suggerimento = " - ".join(dati_part[2:]) 
         else:
             tag_suggerimento = ""
+
+        # Qui continua il codice per mostrare le opzioni (sempre rientrato)
+        extra_options = list(extra_dedicati_dict.keys())
+        if extra_options:
+            extra_selezionati = st.pills(f"Opzioni per {scelta_part_it}:", options=extra_options, selection_mode="multi", key="extra_tags")
+            
+            # Se ci sono extra selezionati, mostriamo i sotto-menu (rientrato ancora di più)
+            if extra_selezionati:
+                for ex in extra_selezionati:
+                    if ex in SUB_OPTIONS_CONFIG:
+                        st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
+                    elif ex in EXTRA_CON_INPUT_MANUALE:
+                        st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
+        
+        # Visualizzazione del suggerimento (se presente)
+        if tag_suggerimento:
+            st.info(f"💡 Suggerimento: {tag_suggerimento}")
         
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
