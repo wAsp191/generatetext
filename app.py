@@ -92,6 +92,9 @@ SUB_OPTIONS_CONFIG = {
     },
     "Predisposto per montante (+)": {
         "L80": "FOR L80 UPRIGHT", "L100/L120": "FOR L100/L120 UPRIGHT"
+    },
+    "Numero tasche (+)": {
+        "1 Tasca": "1 POCKET", "2 Tasche": "2 POCKETS"
     }   
 }
 
@@ -197,6 +200,7 @@ DATABASE = {
             "Banco espositore di legno": ["WOODEN DESK", {"Con cassetto": "WITH DRAWER", "Con ruote": "WITH WHEELS"}, "DESK"],
             "Avancassa": ["IMPULSE UNIT", {"Con ripiani": "WITH SHELF", "Con ripiani inclinati": "WITH INCLINATED SHELF", "Con rete divisoria": "WITH DIVIDING NET", "Con ruote": "WITH WHEELS", "Con ganci": "WITH HOOKS", "Con batticarrello": "WITH TROLLEY BEATER"}, "DISPLAY"],
             "Cassettiera": ["CHEST OF DRAWERS", {"Con guide RAM": "WITH RAM GUIDE", "Attacco montante": "HOOK ONTO UPRIGHT"}, "DRAWER"],
+            "Espositore riviste": ["DISPLAY FOR MAGAZINE", {"Numero tasche (+)": "", "Con portaprezzo in filo": "WITH PRIZE-HOLDER WIRE"}, "DISPLAY", "BOOK AND MAGAZINE"],
         }
     }
 }
