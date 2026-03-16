@@ -51,7 +51,7 @@ def activate_reset():
 # Aggiungi qui i gruppi di opzioni che NON devono essere selezionate insieme.
 # Usa i nomi esatti in Italiano che compaiono a schermo.
 COPPIE_INCOMPATIBILI = [
-    {"Statico", "Regolabile"},
+    {"Statico", "Antisismico"},
     {"Angolo aperto", "Angolo chiuso"},
     {"Portante", "Non portante"},
     {"Singolo", "Doppio"},
