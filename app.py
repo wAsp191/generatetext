@@ -304,6 +304,7 @@ tag_suggerimento = ""
 extra_selezionati = []
 normativa = ""
 comp_list_tags = []
+blocco_incompatibilita = False  # Variabile per gestire il blocco del tasto finale
 
 # Variabili di configurazione rapida
 LARGHEZZA_IMMAGINE = 600 
@@ -393,8 +394,6 @@ with col_workarea:
     
     if scelta_part_it:
         dati_part = part_dict[scelta_part_it]
-        
-        # LOGICA MULTI-TAG (Corretta)
         part_en = dati_part[0]
         extra_dedicati_dict = dati_part[1]
         
@@ -406,6 +405,19 @@ with col_workarea:
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
             extra_selezionati = st.pills(f"Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
+            
+            # ---------------------------------------------------------
+            # LOGICA INTERSEZIONE (Fix Incompatibilità più di 2 parole)
+            # ---------------------------------------------------------
+            tags_attivi = set(extra_selezionati) if extra_selezionati else set()
+            
+            for gruppo in COPPIE_INCOMPATIBILI:
+                intersezione = set(gruppo).intersection(tags_attivi)
+                if len(intersezione) >= 2:
+                    st.error(f"⚠️ **CONFLITTO:** Non puoi selezionare contemporaneamente: {', '.join(intersezione)}")
+                    blocco_incompatibilita = True
+            # ---------------------------------------------------------
+
             if extra_selezionati:
                 for ex in extra_selezionati:
                     if ex in SUB_OPTIONS_CONFIG:
@@ -436,8 +448,7 @@ with col_workarea:
             dim_p = st.text_input("Profondità (P)", key="dim_p")
             dim_h = st.text_input("Altezza (H)", key="dim_h")
             dim_dia_gen = st.text_input("Diametro (Ø)", key="dim_dia_gen")
-            
-            dim_s = "" # Spessore rimosso dall'interfaccia
+            dim_s = "" 
             
     with col_immagine:
         st.image(
