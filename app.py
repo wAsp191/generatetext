@@ -57,7 +57,18 @@ COPPIE_INCOMPATIBILI = [
     {"Singolo", "Doppio"},
     {"Per ripiano in vetro", "Per ripiano in legno"},
     {"Con serratura", "Senza serratura"},
-    {"Destra", "Sinistra"} # Se gestiti come extra semplici
+    {"Passo 25", "Passo 50"},
+    {"L50", "L55"},
+    {"Scorrevoli", "A saracinesca"},
+    {"Per attacco montante", "Per attacco fiancata"},
+    {"Superiore", "Tra ripiani di base"},
+    {"Dritto", "Inclinato"},
+    {"Cromato", "Verniciato"},
+    {"Multibarra", "Multilame", "In rete"},
+    {"Profilo a L", "Profilo a U"},
+    {"Per ripiano di base", "Per fiancata"},
+    {"Liscio", "Liscia", "Forato", "Forata", "In filo"},
+    {"Terminale", "Centrale"},
 ]
 
 GLOSSARIO_TECNICO = {
