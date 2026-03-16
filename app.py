@@ -278,6 +278,7 @@ extra_dedicati_dict = {}
 tag_suggerimento = ""
 extra_selezionati = []
 normativa = ""
+comp_list_tags = []
 
 # Variabili di configurazione rapida
 LARGHEZZA_IMMAGINE = 600 
