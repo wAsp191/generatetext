@@ -92,7 +92,7 @@ SUB_OPTIONS_CONFIG = {
     },
     "Predisposto per montante (+)": {
         "L80": "FOR L80 UPRIGHT", "L100/L120": "FOR L100/L120 UPRIGHT"
-    }
+    },
     "Numero di tasche (+)": {
         "1 Tasca": "1 POCKET", "2 Tasche": "2 POCKETS"
     }   
