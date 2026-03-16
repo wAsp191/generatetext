@@ -267,7 +267,7 @@ def update_dims_from_section():
         st.session_state.dim_l, st.session_state.dim_p = "90", "30"
 
 # =========================================================
-# 3. INTERFACCIA UTENTE (Layout Verticale - Fix NameError)
+# 3. INTERFACCIA UTENTE (Layout Verticale - Fix Multi-Tags)
 # =========================================================
 
 # --- INIZIALIZZAZIONE VARIABILI DI STATO (Per evitare NameError) ---
@@ -338,7 +338,6 @@ with col_workarea:
             comp_selezionata = st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
             comp_selezionate = [comp_selezionata] if comp_selezionata else []
             
-            # Qui la variabile viene sovrascritta solo se il checkbox appare
             if any(m in comp_selezionate for m in ["FORTISSIMO", "MINIRACK"]):
                 st.warning("⚡ Strutturale")
                 uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
@@ -368,7 +367,15 @@ with col_workarea:
     
     if scelta_part_it:
         dati_part = part_dict[scelta_part_it]
-        part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
+        
+        # LOGICA MULTI-TAG (Corretta)
+        part_en = dati_part[0]
+        extra_dedicati_dict = dati_part[1]
+        
+        if len(dati_part) > 2:
+            tag_suggerimento = " - ".join(dati_part[2:]) 
+        else:
+            tag_suggerimento = ""
         
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
@@ -379,6 +386,9 @@ with col_workarea:
                         st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
                     elif ex in EXTRA_CON_INPUT_MANUALE:
                         st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
+        
+        if tag_suggerimento:
+            st.caption(f"🔍 Suggerimento Classificazione: **{tag_suggerimento}**")
 
     extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
