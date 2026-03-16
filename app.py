@@ -367,8 +367,19 @@ with col_workarea:
     st.subheader("✨ 3. Extra e Note")
     
     if scelta_part_it:
+        if scelta_part_it:
         dati_part = part_dict[scelta_part_it]
-        part_en, extra_dedicati_dict, tag_suggerimento = dati_part[0], dati_part[1], dati_part[2]
+        
+        # 1. Recuperiamo i primi due elementi fissi
+        part_en = dati_part[0]
+        extra_dedicati_dict = dati_part[1]
+
+        # 2. Uniamo tutti gli elementi rimanenti (dal terzo in poi)
+        if len(dati_part) > 2:
+            # Prende tutto dall'indice 2 alla fine e li unisce
+            tag_suggerimento = " - ".join(dati_part[2:]) 
+        else:
+            tag_suggerimento = ""
         
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
