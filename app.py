@@ -78,7 +78,8 @@ GLOSSARIO_TECNICO = {
     "spalla": "FRAME",
     "innesto": "COUPLING",
     "montante": "UPRIGHT",
-    "per": "FOR"
+    "per": "FOR",
+    "losanga": "LOSANGA"
 }
 
 SUB_OPTIONS_CONFIG = {
