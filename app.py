@@ -207,8 +207,8 @@ DATABASE = {
         "macro_en": "GLASS COMPONENT",
         "Particolari": {
             "Ripiano": ["GLASS SHELF", {}, "SHELF"],
-            "Anta": ["GLASS DOOR", {"SX": "LEFT", "DX": "RIGHT", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"}, "DOOR"],
-            "Cancelletto": ["GLASS ARM", {"Orientamento": "", "Illuminato": "ILLUMINATED"}, "ARM"],
+            "Anta": ["GLASS DOOR", {"Orientamento (+)": "", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"}, "DOOR"],
+            "Cancelletto": ["GLASS ARM", {"Orientamento (+)": "", "Illuminato": "ILLUMINATED"}, "ARM"],
         }
     },
     "FASTENER": {
