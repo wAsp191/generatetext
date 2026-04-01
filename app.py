@@ -128,7 +128,7 @@ MATERIALI_CONFIG = {
     "METAL COMP": {"METAL": "METAL", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
     "WOOD COMP": {"LAMINATO": "LAMINATED", "NOBILITATO": "MELAMINE", "TRUCIOLARE": "OSB"},
     "PLASTIC COMP": {"POLICARBONATO": "POLYCARBONATE", "PVC": "PVC", "GOMMA": "RUBBER"},
-    "GLASS COMP": {"VETRO TEMPRATO": "TEMPERED", "VETRO SATINATO": "SATIN"},
+    "GLASS COMP": {"VETRO TEMPRATO": "TEMPERED GLASS", "VETRO SATINATO": "SATIN GLASS"},
     "FASTENER": {"ZINCATO": "GALVANIZED", "BRUNITO": "BURNISHED", "NERO": "BLACK"}
 }
 
@@ -207,8 +207,8 @@ DATABASE = {
         "macro_en": "GLASS COMPONENT",
         "Particolari": {
             "Ripiano": ["GLASS SHELF", {}, "SHELF"],
-            "Anta": ["GLASS DOOR", {"Orientamento (+)": "", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"}, "DOOR"],
-            "Cancelletto": ["GLASS ARM", {"Orientamento (+)": "", "Illuminato": "ILLUMINATED"}, "ARM"],
+            "Anta": ["GLASS DOOR", {"SX": "LEFT", "DX": "RIGHT", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"}, "DOOR"],
+            "Cancelletto": ["GLASS ARM", {"Orientamento": "", "Illuminato": "ILLUMINATED"}, "ARM"],
         }
     },
     "FASTENER": {
@@ -470,37 +470,37 @@ with col_workarea:
         )
     
 # =========================================================
-# 4. LOGICA DI GENERAZIONE E TRADUZIONE (v8.7 - Fix Sovrascrittura)
+# 4. LOGICA DI GENERAZIONE E TRADUZIONE (v8.6 - Comma Fix)
 # =========================================================
 
 st.divider()
 
-# Inizializzazione stato se non esiste
 if 'stringa_editabile' not in st.session_state:
     st.session_state['stringa_editabile'] = ""
 
 # --- CONTROLLO INCOMPATIBILITÀ (FILTRO SOFT) ---
 errori_rilevati = []
 
+# Se abbiamo delle extra selezionate, confrontiamole col database di esclusione
 if extra_selezionati:
     for coppia in COPPIE_INCOMPATIBILI:
+        # Se entrambi i termini della coppia "proibita" sono tra quelli selezionati:
         if coppia.issubset(set(extra_selezionati)):
             elementi = list(coppia)
             errori_rilevati.append(f"⚠️ **Incongruenza Tecnica:** Non puoi selezionare **'{elementi[0]}'** e **'{elementi[1]}'** contemporaneamente.")
 
+# Se ci sono errori, mostriamo i banner rossi
 for errore in errori_rilevati:
     st.error(errore)
 
+# La variabile diventa True se c'è almeno un errore, disabilitando così il tasto
 blocco_genera = len(errori_rilevati) > 0
 
-# TASTO DI GENERAZIONE
+# TASTO DI GENERAZIONE (Ora con il parametro disabled)
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=blocco_genera):
     if not scelta_part_it:
         st.error("⚠️ Seleziona un particolare prima di generare la stringa!")
     else:
-        # --- FIX: RESETTA LA STRINGA ALL'INIZIO DI OGNI GENERAZIONE ---
-        st.session_state['stringa_editabile'] = "" 
-        
         # --- A. Dimensioni ---
         dim_final_parts = []
         if macro_it == "FASTENER":
@@ -512,9 +512,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             if l_val:
                 dim_final_parts.append(f"L{l_val}")
             dim_final = "X".join(dim_final_parts)
-            # Recupero normativa se esistente
-            if 'normativa' in locals() and normativa: 
-                dim_final += f" {normativa}"
+            if 'normativa' in locals() and normativa: dim_final += f" {normativa}"
         else:
             l_val_s = st.session_state.get("dim_l", "").strip().upper()
             p_val_s = st.session_state.get("dim_p", "").strip().upper()
@@ -527,6 +525,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             if h_val_s: dim_final_parts.append(f"H{h_val_s}")
             
             lph_str = " ".join(dim_final_parts)
+            
             dim_final_comps = []
             if lph_str: dim_final_comps.append(lph_str)
             if dia_val_s: dim_final_comps.append(f"Ø{dia_val_s}")
@@ -536,6 +535,9 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
 
         # --- B. Extra da Bottoni (Pills) - ORDINE FISSO ---
         extra_pills_list = []
+        
+        # Invece di: for ex in (extra_selezionati or []):
+        # Usiamo l'ordine originale del database/options:
         ordine_fisso_opzioni = list(extra_dedicati_dict.keys())
         
         for ex in ordine_fisso_opzioni:
@@ -569,55 +571,77 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             except:
                 note_libere_tradotte = extra_libero.upper()
 
-        # --- D. Ordinamento Prefissi/Suffissi ---
+        # --- D. Ordinamento Prefissi/Suffissi Pills ---
         prefissi = [ex for ex in extra_pills_list if ex in TERMINI_ANTICIPATI]
         suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
         
         prefix_str = " ".join(prefissi) if prefissi else ""
-        extra_suffissi_str = " ".join(suffissi) if suffissi else ""
+        extra_suffissi_str = " ".join(suffissi) if suffissi else "" # Spazio tra extra
         
         comp_list = [c for c in (comp_selezionate or []) if c.strip()]
         comp_str = " - ".join(comp_list) if comp_list else ""
 
-        # ... (tutta la tua logica di costruzione della stringa rimane uguale) ...
+        # --- E. Assemblaggio (LOGICA RICHIESTA) ---
+        
+        # 1. Base Descrizione (Materiale + Prefisso + Nome + Misure)
+        if mat_en == "METAL" and "METAL" in part_en.upper():
+            corpo = f"{prefix_str} {part_en} {dim_final}".strip()
+        else:
+            corpo = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip()
+        
+        # 2. Aggiunta Extra (Pills) uniti da spazio (come richiesto in esempio)
+        if extra_suffissi_str:
+            corpo = f"{corpo} {extra_suffissi_str}".strip()
+            
+        # 3. Aggiunta Note Libere precedute da VIRGOLA
+        if note_libere_tradotte:
+            corpo = f"{corpo}, {note_libere_tradotte}".strip()
+        
+        # 4. Unione finale con il MODELLO tramite TRATTINO
+        final_segments = [corpo]
+        if comp_str:
+            final_segments.append(comp_str)
 
-        # --- E. Assemblaggio FINALE ---
         temp_str = " - ".join(final_segments).upper().replace("  ", " ")
         
-        # Pulizia "WITH" e Finitura Legno (come nel tuo codice)
-        # ...
+        # 5. Pulizia finale "WITH" e prefissi speciali
+        temp_str = temp_str.replace("WITH WITH", "WITH")
+        if temp_str.count("WITH") > 1:
+            first_with_idx = temp_str.find("WITH")
+            first_with_end = first_with_idx + 4
+            parte_iniziale = temp_str[:first_with_end]
+            parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
+            temp_str = parte_iniziale + parte_restante 
         
-        # --- IL FIX CRUCIALE ---
-        # 1. Salviamo la nuova stringa generata
-        nuova_stringa_generata = temp_str.strip()
-        
-        # 2. Aggiorniamo sia la variabile di riferimento che il widget dell'area di testo
-        st.session_state["stringa_editabile"] = nuova_stringa_generata
-        
-        # Se l'area di testo esiste già, forziamo il suo valore al nuovo risultato
-        if "testo_area_finale" in st.session_state:
-            st.session_state["testo_area_finale"] = nuova_stringa_generata
+        # --- NUOVA INSERZIONE: AGGIUNTA SIGLA FINITURA LEGNO ---
+        f_full = st.session_state.get("finitura_legno_sel", "")
+        if f_full and " - " in f_full:
+            sigla_fin = f_full.split(" - ")[0]
+            temp_str += f" {sigla_fin}"
 
-# --- BLOCCO EDITING FINALE ---
-# Usiamo direttamente la variabile di sessione come "value"
-if st.session_state.get("stringa_editabile"):
+        # Salvataggio in sessione per permettere modifica manuale
+        st.session_state["stringa_editabile"] = temp_str.strip()
+
+# --- RE-INSERZIONE DEL BLOCCO DI EDITING E CONTROLLO CARATTERI ---
+if "stringa_editabile" in st.session_state and st.session_state["stringa_editabile"]:
     st.markdown("### 📝 Risultato Finale (Modificabile)")
     
-    # IMPORTANTE: Non passare 'value=' se la key è già nel session_state, 
-    # Streamlit lo gestisce automaticamente.
+    # Campo di testo editabile
     testo_finale = st.text_area(
-        "Puoi modificare manualmente il testo generato:", 
+        "Puoi modificare manualmente il testo generato prima di copiarlo:", 
+        value=st.session_state["stringa_editabile"],
         height=100,
-        key="testo_area_finale" # Questa key ora è sincronizzata col reset sopra
+        key="testo_area_finale"
     )
     
-    # Sincronizziamo la stringa editabile con quello che l'utente scrive manualmente
-    st.session_state["stringa_editabile"] = testo_finale
-    
+    # Controllo caratteri (Limite 100)
     count = len(testo_finale)
     if count > 100:
-        st.error(f"📏 Caratteri: {count} / 100 - Superato limite SAP!")
+        st.error(f"📏 Caratteri: {count} / 100 - ATTENZIONE: La stringa supera il limite SAP!")
+    elif count > 85:
+        st.warning(f"📏 Caratteri: {count} / 100 - Quasi al limite.")
     else:
-        st.success(f"📏 Caratteri: {count} / 100 - OK.")
+        st.success(f"📏 Caratteri: {count} / 100 - Lunghezza corretta.")
     
+    # Codice finale pulito per il copia-incolla
     st.code(testo_finale, language=None)
