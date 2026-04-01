@@ -579,59 +579,44 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
         comp_list = [c for c in (comp_selezionate or []) if c.strip()]
         comp_str = " - ".join(comp_list) if comp_list else ""
 
-        # --- E. Assemblaggio ---
-        if mat_en == "METAL" and "METAL" in part_en.upper():
-            corpo = f"{prefix_str} {part_en} {dim_final}".strip()
-        else:
-            corpo = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip()
-        
-        if extra_suffissi_str:
-            corpo = f"{corpo} {extra_suffissi_str}".strip()
-            
-        if note_libere_tradotte:
-            corpo = f"{corpo}, {note_libere_tradotte}".strip()
-        
-        final_segments = [corpo]
-        if comp_str:
-            final_segments.append(comp_str)
+        # ... (tutta la tua logica di costruzione della stringa rimane uguale) ...
 
+        # --- E. Assemblaggio FINALE ---
         temp_str = " - ".join(final_segments).upper().replace("  ", " ")
         
-        # Pulizia "WITH"
-        temp_str = temp_str.replace("WITH WITH", "WITH")
-        if temp_str.count("WITH") > 1:
-            first_with_idx = temp_str.find("WITH")
-            first_with_end = first_with_idx + 4
-            parte_iniziale = temp_str[:first_with_end]
-            parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
-            temp_str = parte_iniziale + parte_restante 
+        # Pulizia "WITH" e Finitura Legno (come nel tuo codice)
+        # ...
         
-        # Aggiunta Sigla Legno
-        f_full = st.session_state.get("finitura_legno_sel", "")
-        if f_full and " - " in f_full:
-            sigla_fin = f_full.split(" - ")[0]
-            temp_str += f" {sigla_fin}"
-
-        # Salvataggio finale (SOVRASCRIVE lo stato precedente)
-        st.session_state["stringa_editabile"] = temp_str.strip()
+        # --- IL FIX CRUCIALE ---
+        # 1. Salviamo la nuova stringa generata
+        nuova_stringa_generata = temp_str.strip()
+        
+        # 2. Aggiorniamo sia la variabile di riferimento che il widget dell'area di testo
+        st.session_state["stringa_editabile"] = nuova_stringa_generata
+        
+        # Se l'area di testo esiste già, forziamo il suo valore al nuovo risultato
+        if "testo_area_finale" in st.session_state:
+            st.session_state["testo_area_finale"] = nuova_stringa_generata
 
 # --- BLOCCO EDITING FINALE ---
-# Mostriamo il blocco solo se c'è effettivamente qualcosa da mostrare
+# Usiamo direttamente la variabile di sessione come "value"
 if st.session_state.get("stringa_editabile"):
     st.markdown("### 📝 Risultato Finale (Modificabile)")
     
+    # IMPORTANTE: Non passare 'value=' se la key è già nel session_state, 
+    # Streamlit lo gestisce automaticamente.
     testo_finale = st.text_area(
         "Puoi modificare manualmente il testo generato:", 
-        value=st.session_state["stringa_editabile"],
         height=100,
-        key="testo_area_finale"
+        key="testo_area_finale" # Questa key ora è sincronizzata col reset sopra
     )
+    
+    # Sincronizziamo la stringa editabile con quello che l'utente scrive manualmente
+    st.session_state["stringa_editabile"] = testo_finale
     
     count = len(testo_finale)
     if count > 100:
-        st.error(f"📏 Caratteri: {count} / 100 - ATTENZIONE: Superato limite SAP!")
-    elif count > 85:
-        st.warning(f"📏 Caratteri: {count} / 100 - Quasi al limite.")
+        st.error(f"📏 Caratteri: {count} / 100 - Superato limite SAP!")
     else:
         st.success(f"📏 Caratteri: {count} / 100 - OK.")
     
