@@ -103,7 +103,26 @@ DB_FINITURE_LEGNO = {
 }
 # ### FINE MODIFICA LEGNO ###
 
-COPPIE_INCOMPATIBILI = [{"Statico", "Antisismico"}, {"Angolo aperto", "Angolo chiuso"}, {"Portante", "Non portante"}, {"Singolo", "Doppio"}, {"Per ripiano in vetro", "Per ripiano in legno"}, {"Con serratura", "Senza serratura"}, {"Passo 25", "Passo 50"}, {"L50", "L55"}, {"Scorrevoli", "A saracinesca"}, {"Per attacco montante", "Per attacco fiancata"}, {"Superiore", "Tra ripiani di base"}, {"Dritto", "Inclinato"}, {"Cromato", "Verniciato"}, {"Multibarra", "Multilame", "In rete"}, {"Profilo a L", "Profilo a U"}, {"Per ripiano di base", "Per fiancata"}, {"Liscio", "Liscia", "Forato", "Forata", "In filo"}, {"Terminale", "Centrale"}]
+COPPIE_INCOMPATIBILI = [
+    {"Statico", "Antisismico"}, 
+    {"Angolo aperto", "Angolo chiuso"}, 
+    {"Portante", "Non portante"}, 
+    {"Singolo", "Doppio"}, 
+    {"Per ripiano in vetro", "Per ripiano in legno"}, 
+    {"Con serratura", "Senza serratura"}, 
+    {"Passo 25", "Passo 50"}, 
+    {"L50", "L55"}, 
+    {"Scorrevoli", "A saracinesca"}, 
+    {"Per attacco montante", "Per attacco fiancata"}, 
+    {"Superiore", "Tra ripiani di base"}, 
+    {"Dritto", "Inclinato"}, 
+    {"Cromato", "Verniciato"}, 
+    {"Multibarra", "Multilame", "In rete"}, 
+    {"Profilo a L", "Profilo a U"}, 
+    {"Per ripiano di base", "Per fiancata"}, 
+    {"Liscio", "Liscia", "Forato", "Forata", "In filo"}, 
+    {"Terminale", "Centrale"}
+]
 
 GLOSSARIO_TECNICO = {"mensola": "BRACKET", "mensole": "BRACKETS", "gondola": "GONDOLA", "spalla": "FRAME", "innesto": "COUPLING", "montante": "UPRIGHT", "per": "FOR", "losanga": "LOSANGA"}
 
