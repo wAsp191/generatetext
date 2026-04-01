@@ -48,6 +48,8 @@ def activate_reset():
 # =========================================================
 
 # --- REGOLE DI INCOMPATIBILITÀ (FILTRO SOFT) ---
+# Aggiungi qui i gruppi di opzioni che NON devono essere selezionate insieme.
+# Usa i nomi esatti in Italiano che compaiono a schermo.
 COPPIE_INCOMPATIBILI = [
     {"Statico", "Antisismico"},
     {"Angolo aperto", "Angolo chiuso"},
@@ -130,13 +132,6 @@ MATERIALI_CONFIG = {
     "PLASTIC COMP": {"POLICARBONATO": "POLYCARBONATE", "PVC": "PVC", "GOMMA": "RUBBER"},
     "GLASS COMP": {"VETRO TEMPRATO": "TEMPERED GLASS", "VETRO SATINATO": "SATIN GLASS"},
     "FASTENER": {"ZINCATO": "GALVANIZED", "BRUNITO": "BURNISHED", "NERO": "BLACK"}
-}
-
-# --- NUOVA INSERZIONE: DB FINITURE LEGNO ---
-DB_FINITURE_LEGNO = {
-    "LAMINATO": ["", "LE04 - LAM R20064 ROVERE", "LE06 - LAM. PFLEIDERER U16002W TORTORA", "LE11 - LAM. KASTAMONU A847 ALASKA", "LE15 - LAM ANTIGR THERMOP U12231 PFLEDERER", "LE24 - LAM. ROV. MILANO R20095MO", "LE27 - CLEAF SHERWOOD S073SJP", "LE40 - LAM. KAINDL 37744 BIANCO", "LE42 - LAM. KAINDL 37777 FRASSINO COIMBRA", "LE63 - LAM. ROV. MILANO R20095 ML", "LE73 - LAM. ROVERE KRONO D4225 OV", "LE79 - LAM PFLEIDERER F76044 SD - GRIGIO", "LE86 - LAM EUREKA OAK DA1 FIN.EVO", "LH06 - LAM. FUNDER 0260 AREZZO", "LH23 - LAM. CLEAF SABLE' VALLEY LR22", "LH27 - LAM. CLEAF ARES FB11 BETON", "LH29 - LAM. PFLEIDERER R42033 ML", "LH37 - LAM. CLEAF MONTILLA FC 18", "LH38 - LAM. CLEAF MILLENIUM S083 NAGOLD", "LH40 - LAM. SAIB CH3013 GRIGIO GRAFITE", "LH62 - LAM. CLEAF PIOMBO HM07", "LH64 - LAM. EGGER W1000ST19 B.CO PREMIUM", "LH81 - LAM. EGGER H3331 ST15 HYDROFUGE", "LH83 - LAM. BIANCO TRAFFICO SDW10140", "LH95 - LAM. PFLEIDERER ROVERE R20099", "LH98 - LAM. PFLEIDERER BLU CRISTAL U18003", "LH99 - LAM. SM'ART 4565 OLMO MIELE", "LTH1 - LAM. THERMOPAL U506 ANTRHAZIT", "LU51 - LAM. AMET.U504 ST BLU", "LU61 - LAM. EGGER H3303", "LU62 - LAM. ABET LAMINATI 1860PRINT", "LU63 - LAM. GREENLAM 5049 - SUEDE RED OAK", "LU64 - LAM. EGGER H3152 ROV VICEN SBIA ST19", "LU71 - LAM. KRONOSPAN D4823VL", "LU73 - LAM. ABET PRINT 1832 F. SEI", "LU74 - LAM. FORMICA K 1238 UN", "LU75 - LAM. LEGNOPAN 111 FIN ROV 19POR NAT", "L035 - LAM. PRINT 421 SEI NERO", "L036 - LAM. ABET PRINT FIN. 460 SEI VERDE", "L039 - LAM. PRINT 871 SEI GRIGIO CENE", "L040 - LAM. PRINT 475 SEI GRIGIO SILICIO", "L041 - LAM. PRINT 411 SEI BIANCO", "L386 - LAM. OLMO LEONE PLEID.R37009 MO", "L406 - LAM. PRINT 406 BIANCO", "L410 - LAM. ABET PRINT 410 SEI BIANCO", "L418 - LAM. PRINT 418 SEI BIANCO", "L428 - LAM. PRINT 428 SEI BLU", "L466 - LAM. PHOENIX F76026 MARRONE CR PFL", "L469 - LAM. PRINT 469 SEI GIALLO", "L559 - LAM. FUNDERMAX 0921 SU BROWN SILVER", "L563 - LAM. PRINT 563 MANDARIN GRIGIO", "L578 - LAM. ROVERE BARDOLINO", "L579 - LAM. PFLEID.R20128 ROVERE SON.F.RU", "L590 - LAM. EGGER U332 ARANCIO", "L641 - LAM. THERMOPAL SR 209/01 B.LUC", "L696 - LAM. THERM.F21/005 OLIVO SPAGN CHIA", "L716 - LAM. THERMOPAL U018(47) GRIGIO", "L745 - LAM. THERM R20031RU L745", "L752 - LAM. PFLEIDERER W10003 MP BIANCO", "L767 - LAM. EGGER ROV.HALIFAX H1180 ST37", "L786 - LAM. PRINT 1677 ACERO EX PURICELLI", "L814 - LAM. ABET 1666 FIN SEI DUE FAGGIO", "L833 - LAM. PRINT 2810 CLIMB", "L835 - LAM. PRINT 835 SEI ARANCIO", "L852 - LAM. PRINT 852 SEI BLU", "L873 - LAM. PRINT 873 FIN SATINATA", "L879 - LAM. PRINT 879 SEI GRIGIO ANTRACITE"],
-    "NOBILITATO": ["", "LU70 - NOB. KRONO ABETE D79841", "NE05 - NOB. PFLEIDERER U16002W TORTORA", "NE12 - NOB. KASTAMONU A847 ALASKA", "NE19 - NOB. EGGER W911 BIANCO ST15", "NE28 - NOB. CLEAF SHERWOOD S073 S.J.P.", "NE38 - NOB. KAINDL 34140 RV ROV.SANREMO CL", "NE41 - NOB. KAINDL 37777 FRASSINO COIMBRA", "NE46 - NOB. PFLEIDERER U19008 VERDE SCURO", "NE62 - NOB. 256 H1145 ST10 CHENE BARDOLINO", "NE67 - NOB. ROVERE GLADST H3309 ST28", "NE70 - NOB. GRAPHITE U961 ST9", "NE74 - NOB. ROVERE KRONO D4225 OV A", "NE75 - NOB. EGGER H3156 ROV.CORB.GR", "NE88 - NOB. CLEAF UA32 TALCO GRIGIO", "NE91 - NOB. PFLEIDERER PHOENIX F76026", "NE99 - NOB. PFLEIDERER R20099", "NH01 - NOB. R20065 ROVERE MONTAGNA SCURO", "NH03 - NOB. EGGER GLADSTONE BIANCO H3335", "NH04 - NOB. FUNDER 0290 NA ROVERE SBIA", "NH07 - NOB. FUNDER 0260 AREZZO", "NH22 - NOB. CLEAF SABLE' VALLEY LR22", "NH26 - NOB. CLEAF ARES FB11 BETON", "NH28 - NOB. PFLEIDERER R42033 ML", "NH33 - NOB. KAINDL K4949 AT SPRUCE ANT EXP", "NH34 - NOB. PFLEIDERER U11209ML", "NH35 - NOB. LEGNOPAN 09 ROVERE SEGATO", "NH36 - NOB. NERO PFLEIDERER U12000 MP", "NH39 - NOB. CLEAF MILLENIUM S083 NAGOLD", "NH64 - NOB. EGGER W1000ST19 B.CO PREMIUM", "NH68 - NOB. FUNDERMAX 0921 SU BROWN SILVER", "NH69 - NOB. PFLEIDERER U12018SD GRIGIO B.", "NH82 - NOB. BIANCO TRAFFICO SDW10140", "NH85 - NOB. CLEAF S160 OKOBO", "NH92 - NOB. ROV.MILANO R20095 NW", "NH94 - NOB. FUNDERMAX VERDE MEDIO 0041", "NH97 - NOB. PFLEIDERER BLU CRISTAL U18003", "NU50 - NOB. EGGER U504 ST BLU", "NU60 - NOB. EGGER H3303", "NU65 - NOB. EGGER H3152 ROV VICEN SBIA ST19", "NU66 - NOB. PFLEIDERER U15190 SD-CUVO", "NU67 - NOB. PFLEIDERER U16000 SD-GR.TARTUFO", "NU68 - NOB. SM'ART 4565 OLMO MIELE", "NU69 - NOB. KRONO ABETE D79841", "NU71 - NOB. KRONOSPAN D4823VL", "NU76 - NOB. LEGNOPAN 111 FIN ROV 19POR NAT", "N001 - NOB. NOCE PADANO", "N003 - NOB. GRIGIO CENERE O335", "N004 - NOB. GRIGIO SILICIO 0357", "N005 - NOB. GRIG ANTRACIT PFLEIDERER U12231", "N006 - NOB. BIANCO", "N013 - NOB. ACERO NATURALE", "N018 - NOB. NERO FIN CERA", "N391 - NOB. OLMO LEONE N391", "N457 - NOB. PFLEIDERER U12115", "N500 - NOB. PFLEIDERER R42006 ML CIL.HAVAN", "N538 - NOB. PFLEID.R20128 ROVERE SON.F.RU", "N554 - NOB. THERMOPAL U508 GRIGIO", "N585 - NOB. THERMO U506 ANTR.MP CERA OPACO", "N589 - NOB. EGGER U332 ARANCIO", "N594 - NOB. EGGER H1145 ROVERE BARDOL", "N640 - NOB. THERMOPAL SR 209/01 B.LUC", "N656 - NOB. THERMOPAL SV 140 BIANCO LUCIDO", "N675 - NOB. THERM.U018(47) GRIGIO", "N698 - NOB. THERM.F21/005 OLIVO SPAGNA", "N744 - NOB. THERM R20031 RU", "N748 - NOB. PFLEIDERER U12179 GRIGIO", "N750 - NOB. R20038 ROVERE CHALET NAT.P", "N759 - NOB. EGGER ROV. HALIFAX H1180 ST37", "N765 - NOB. EGGER H1487 ST22 ABETE", "N768 - NOB. ROV. MILANO R20095MO (ex NH92)", "N769 - NOB. OLMO LEONE PLEID.R37009 MW", "N897 - NOB. THERMOPAL U00059 BLU", "N946 - NOB. TERMOPAL U00225 47 PERL ROSSO", "N957 - NOB. MAGNOLIA LIGNOLUX 312 ANNOVATI", "N963 - NOB. GRIGIO CHIARO THERM.U1131"],
-    "TRUCIOLARE": ["", "RAW - TRUCIOLARE GREZZO", "IDRO - TRUCIOLARE IDROFUGO"]
 }
 
 DATABASE = {
@@ -365,10 +360,6 @@ with col_workarea:
             if materiali_disponibili:
                 mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
                 mat_en = materiali_disponibili[mat_it]
-                
-                # --- NUOVA INSERZIONE: MENU FINITURA LEGNO ---
-                if macro_it == "WOOD COMP" and mat_it in DB_FINITURE_LEGNO:
-                    st.selectbox(f"🎨 Finitura {mat_it}:", options=DB_FINITURE_LEGNO[mat_it], key="finitura_legno_sel")
 
     with c_comp:
         comp_selezionate = []
@@ -611,37 +602,57 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             first_with_end = first_with_idx + 4
             parte_iniziale = temp_str[:first_with_end]
             parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
-            temp_str = parte_iniziale + parte_restante 
+            temp_str = parte_iniziale + parte_restante
+
+        if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled", False):
+            temp_str = f"ASSEMBLED - {temp_str}"
         
-        # --- NUOVA INSERZIONE: AGGIUNTA SIGLA FINITURA LEGNO ---
-        f_full = st.session_state.get("finitura_legno_sel", "")
-        if f_full and " - " in f_full:
-            sigla_fin = f_full.split(" - ")[0]
-            temp_str += f" {sigla_fin}"
+        if uni_en_1090_active:
+            temp_str = f"UNI EN-1090 - {temp_str}"
+            
+        st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
 
-        # Salvataggio in sessione per permettere modifica manuale
-        st.session_state["stringa_editabile"] = temp_str.strip()
+# =========================================================
+# 5. OUTPUT
+# =========================================================
 
-# --- RE-INSERZIONE DEL BLOCCO DI EDITING E CONTROLLO CARATTERI ---
-if "stringa_editabile" in st.session_state and st.session_state["stringa_editabile"]:
-    st.markdown("### 📝 Risultato Finale (Modificabile)")
+if st.session_state['stringa_editabile']:
+    st.markdown("### 📋 Risultato Finale")
+    st.code(st.session_state['stringa_editabile'], language=None)
     
-    # Campo di testo editabile
-    testo_finale = st.text_area(
-        "Puoi modificare manualmente il testo generato prima di copiarlo:", 
-        value=st.session_state["stringa_editabile"],
-        height=100,
-        key="testo_area_finale"
-    )
-    
-    # Controllo caratteri (Limite 100)
-    count = len(testo_finale)
-    if count > 100:
-        st.error(f"📏 Caratteri: {count} / 100 - ATTENZIONE: La stringa supera il limite SAP!")
-    elif count > 85:
-        st.warning(f"📏 Caratteri: {count} / 100 - Quasi al limite.")
+    with st.expander("✏️ Modifica testo manualmente"):
+        st.text_input("Modifica qui:", key='stringa_editabile', label_visibility="collapsed")
+
+    lunghezza = len(st.session_state['stringa_editabile'])
+    if lunghezza >= 99:
+        st.error(f"⚠️ LIMITE SUPERATO ({lunghezza})")
     else:
-        st.success(f"📏 Caratteri: {count} / 100 - Lunghezza corretta.")
+        st.success(f"Lunghezza: {lunghezza} caratteri")
+
+    comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
     
-    # Codice finale pulito per il copia-incolla
-    st.code(testo_finale, language=None)
+    # --- LOGICA VISUALIZZAZIONE CLASSIFICAZIONE ---
+    all_tags = []
+    
+    # 1. Aggiungiamo i tag dal database (quelli estratti con il ".join" di prima)
+    if 'tag_suggerimento' in locals() and tag_suggerimento:
+        all_tags.append(tag_suggerimento.upper())
+    
+    # 2. Aggiungiamo la compatibilità (F25, ecc.)
+    all_tags.extend([c.upper() for c in comp_list_tags])
+    
+    # 3. Aggiungiamo certificazioni e normative
+    if uni_en_1090_active:
+        all_tags.append("UNI EN-1090-1")
+    if 'normativa' in locals() and normativa:
+        all_tags.append(normativa.upper())
+    
+    # 4. Visualizzazione finale con la nuova dicitura
+    if all_tags:
+        st.info(f"🔍 **CLASSIFY:** {' | '.join(all_tags)}")
+
+# --- 2. TASTO AZZERA INFERIORE CENTRATO ---
+st.markdown("<br>", unsafe_allow_html=True)
+cb1, cb2, cb3 = st.columns([2, 1, 2])
+with cb2:
+    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_bottom")
