@@ -408,18 +408,23 @@ with col_workarea:
         )
 
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE (OTTIMIZZATA)
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE - FIX NAMEERROR
 # =========================================================
 
 st.divider()
 
-# Inizializzazione stato stringa
-if 'stringa_editabile' not in st.session_state:
-    st.session_state['stringa_editabile'] = ""
+# --- RECUPERO SICURO DELLE VARIABILI ---
+# Recuperiamo i valori direttamente dallo stato per evitare NameError
+extra_libero = st.session_state.get("extra_text", "").strip()
+# comp_selezionate e extra_selezionati dovrebbero essere già definiti 
+# dai widget pills nel Modulo 2, ma per sicurezza:
+if 'extra_tags' not in st.session_state: st.session_state['extra_tags'] = []
+extra_selezionati = st.session_state['extra_tags']
 
 # --- A. GESTIONE ERRORI E INCOMPATIBILITÀ ---
 errori_rilevati = []
 if extra_selezionati:
+    # ... resto del codice delle incompatibilità ...
     for coppia in COPPIE_INCOMPATIBILI:
         if coppia.issubset(set(extra_selezionati)):
             errori_rilevati.append(f"⚠️ **Incongruenza:** Non puoi usare '{list(coppia)[0]}' e '{list(coppia)[1]}' insieme.")
