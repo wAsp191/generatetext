@@ -423,13 +423,23 @@ extra_dedicati_dict = {}
 extra_selezionati = []
 blocco_incompatibilita = False 
 
-# Configurazione visuale
+# Variabili di configurazione rapida
 LARGHEZZA_IMMAGINE = 600 
 TESTO_MANUALE = """
-**ISTRUZIONI RAPIDE:**
-1. **WOODCOMP**: Seleziona prima il materiale (Laminato/Nobilitato) nei Pills per sbloccare il catalogo finiture.
-2. **ASSEMBLY**: Usa la spunta 'Finiture Multiple' se devi inserire più codici (fino a 3).
+**PROCEDURA STANDARD:**
+1. **CATEGORIA**: Seleziona il gruppo a sinistra.
+2. **MODELLO**: Scegli tipologia materiale e la compatibilità (F25, Fortissimo, ecc.).
+3. **PARTICOLARE**: Cerca il componente specifico e aggiungi le varie caratteristiche
+4. **QUOTE**: Inserisci i valori in millimetri.
+5. **GENERA**: Clicca il tasto rosso in fondo.
+
+---
+**NOTE TECNICHE:**
+* I prefissi L-P-H sono automatici.
+* Le note libere vengono tradotte in inglese.
+* Lunghezza max stringa: 100 caratteri.
 """
+
 
 st.title("⚙️ REG - Title Generator & Classification")
 
