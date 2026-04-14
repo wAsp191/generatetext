@@ -2,36 +2,37 @@ import streamlit as st
 from deep_translator import GoogleTranslator
 
 # =========================================================
-# 0. CONFIGURAZIONE PAGINA E LOGICA RESET (COMPLETA)
+# 0. CONFIGURAZIONE PAGINA E LOGICA RESET (POTENZIATA)
 # =========================================================
-st.set_page_config(page_title="Technical Generator v8.8", layout="wide")
+st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
 def activate_reset():
-    """Reset totale dei campi di input e dello stato della sessione"""
+    """Reset mirato dei campi di input senza mandare in crash i componenti"""
     
+    # 1. Definizione delle chiavi
     keys_to_reset = [
         'dim_l', 'dim_p', 'dim_h', 'dim_dia', 'dim_dia_gen', 'dim_s',
         'extra_text', 'selectbox_part', 'comp_tags', 'extra_tags',
         'stringa_editabile', 'check_1090', 'check_assembled',
         'cat_wood', 'fin_wood', 'cat_as_1', 'fin_as_1', 
-        'cat_as_2', 'fin_as_2', 'cat_as_3', 'fin_as_3', 
-        'show_finishes_assembly' # Chiave per il nuovo toggle
+        'cat_as_2', 'fin_as_2', 'cat_as_3', 'fin_as_3'
     ]
     
     for key in keys_to_reset:
         if key in st.session_state:
+            # --- CORREZIONE CRASH PILLS ---
             if key == 'comp_tags':
                 st.session_state[key] = None 
             elif key == 'extra_tags':
                 st.session_state[key] = []
-            elif key in ['check_1090', 'check_assembled', 'show_finishes_assembly']:
+            elif key in ['check_1090', 'check_assembled']:
                 st.session_state[key] = False
             elif key == 'selectbox_part':
                 st.session_state[key] = None
             else:
                 st.session_state[key] = ""
     
-    # Reset dinamico per sottovarianti e input manuali
+    # 2. Reset dinamico per campi manual_ e sub_
     for key in list(st.session_state.keys()):
         if key.startswith("manual_") or key.startswith("sub_"):
             st.session_state[key] = ""
@@ -39,9 +40,10 @@ def activate_reset():
     st.toast("Interfaccia pulita!", icon="✨")
 
 # =========================================================
-# 1. DATABASE FINITURE E COSTANTI
+# 1. DIZIONARI E DATABASE
 # =========================================================
 
+# --- NUOVO DATABASE FINITURE LEGNO ---
 DB_FINITURE_LEGNO = {
     "LAMINATO": [
         "", "LE04 - LAM R20064 ROVERE", "LE06 - LAM. PFLEIDERER U16002W TORTORA", 
@@ -122,6 +124,7 @@ DB_FINITURE_LEGNO = {
     ]
 }
 
+# --- REGOLE DI INCOMPATIBILITÀ (FILTRO SOFT) ---
 COPPIE_INCOMPATIBILI = [
     {"Statico", "Antisismico"}, {"Angolo aperto", "Angolo chiuso"}, {"Portante", "Non portante"},
     {"Singolo", "Doppio"}, {"Per ripiano in vetro", "Per ripiano in legno"}, {"Con serratura", "Senza serratura"},
@@ -158,7 +161,7 @@ SUB_OPTIONS_CONFIG = {
         "Per piede H90": "FOR H90 BASE FOOT", "Per piede H100": "FOR H100 BASE FOOT", "Per piede H150": "FOR H150 BASE FOOT"
     },
     "Attacco gancio (+)": {
-        "Attacco barra": "HOOK FOR BAR", "Attacco multilame": "HOOK FOR MULTISTRIP", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"
+        "Attacco barra": "HOOK FOR BAR", "Attacco multilame": "HOOK FOR MULTISRIP", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"
     },
     "Orientamento (+)": {
         "Destra": "RIGHT", "Sinistra": "LEFT"
@@ -222,8 +225,8 @@ DATABASE = {
             "Filo": ["WIRE", {"Piegato": "BENT", "Piegato-saldato": "BENT AND WELDED", "Con viteria saldata": "WITH WELDING SCREWS"}, "WIRE"],
             "Montante": ["UPRIGHT", {"Sezione (+)": "", "Statico": "STATIC", "Antisismico": "ANTI-SEISMIC", "Regolabile": "ADJUSTABLE"}, "UPRIGHT"],
             "Lamiera generica": ["SHEET METAL", {"Forata": "PERFORATED", "Piegata": "BENT", "Saldata": "WELDED"}, "GENERIC SHEET METAL"],
-            "Pannello frontale": ["FRONT PANEL", {"Forato": "PERFORATED", "Aggangio montante": "HOOK ONTO UPRIGHT"}, "PANEL"],
-            "Adattatore": ["ADAPTER", {"Forato": "PERFORATED", "Aggangio montante": "HOOK ONTO UPRIGHT", "Passo 25": "PITCH 25", "Passo 50": "PITCH 50", "L50": "L50", "L55": "L55"}, "ADAPTER"],
+            "Pannello frontale": ["FRONT PANEL", {"Forato": "PERFORATED", "Aggangio montante": "HOOK ONTO UPFRIGHT"}, "PANEL"],
+            "Adattatore": ["ADAPTER", {"Forato": "PERFORATED", "Aggangio montante": "HOOK ONTO UPFRIGHT", "Passo 25": "PITCH 25", "Passo 50": "PITCH 50", "L50": "L50", "L55": "L55"}, "ADAPTER"],
             "Canalina passa cavi": ["CABLE TRAY", {"Forato": "PERFORATED", "Con viteria": "WITH SCREWS"}, "ESA"]
         }
     },
@@ -240,13 +243,42 @@ DATABASE = {
             "Compensazione": ["WOODEN FILLER PIECE", {"Per Top legno": "FOR TOP SHELF"}, "SPACER"]
         }
     },
+    "PLASTIC COMP": {
+        "macro_en": "PLASTIC COMPONENT",
+        "Particolari": {
+            "Tappo": ["PLASTIC CAP", {}, "CAP"],
+            "Guarnizione": ["GASKET", {}, "ACCESSORY"],
+            "Cerniera": ["HINGE", {}, "ACCESSORY"],
+            "Divisorio": ["DIVIDER", {"Sloping": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
+            "Frontalino": ["RISER", {"Per ripiano": "FOR SHELF", "Trasparente": "TRASPARENT"}, "RISER"],
+            "Portaprezzo": ["TICKET-HOLDER", {"Trasparente": "TRASPARENT", "Colorato": "COLOURED", "Con tasca oscillante": "WITH LIFT-UP POCKET", "Adesivo": "ADHESIVE", "Con asola centrale": "WITH CENTRAL SLOT"}, "TICKET-HOLDER"]
+        }
+    },
+    "GLASS COMP": {
+        "macro_en": "GLASS COMPONENT",
+        "Particolari": {
+            "Ripiano": ["GLASS SHELF", {}, "SHELF"],
+            "Anta": ["GLASS DOOR", {"Orientamento (+)": "", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"}, "DOOR"],
+            "Cancelletto": ["GLASS ARM", {"Orientamento (+)": "", "Illuminato": "ILLUMINATED"}, "ARM"],
+        }
+    },
+    "FASTENER": {
+        "macro_en": "FASTENER",
+        "Particolari": {
+            "Vite": ["SCREW", {"Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUCK HEAD", "Testa esagonale": "HEX HEAD", "Testa a croce": "CROSS HEAD", "Testa esagono incassato": "HEXAGON SOCKET HEAD", "Testa Bombata": "T-BOM"}, "SCREW"],
+            "Bullone": ["BOLT", {}, "FASTENER"],
+            "Rondella": ["WASHER", {"Dentellata": "SERRATED LOCK", "Fascia Larga": "WIDE BEND", "Elastica": "GROWER"}, "WASHER"],
+            "Dado": ["NUT", {"Autobloccante": "SELF-LOCKING", "Flangiato": "FLANGED"}, "NUT"],
+            "Inserti filettati": ["RIVET", {"Con testa": "WITH HEAD", "Senza testa": "WITHOUT HEAD"}, "RIVET"]
+        }
+    },
     "ASSEMBLY": {
         "macro_en": "ASSEMBLY",
         "Particolari": {
             "Vetrina": ["SHOWCASE", {"Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con ante scorrevoli": "WITH SLIDING DOOR"}, "SHOWCASE"],
             "Espositore": ["DISPLAY", {"Mobile": "MOBILE", "Per alimenti": "FOR FOOD"}, "DISPLAY"],
             "Totem": ["TOTEM", {"Mobile": "MOBILE", "Rotante": "ROTATING", "Per casse automatiche": "FOR SELF PAY"}, "DISPLAY"],
-            "Spalla": ["FRAME", {"Numero diagonali (+)": "", "Antisismico": "SEISMIC-RESISTANT", "Sezione (+)": "", "Zincato": "GALVANIZED", "Verniciata": "POWDER COATED"}, "FRAME"],
+            "Spalla": ["FRAME", {"Numero diagonali (+)": "", "Antisismico": "SEISMIC-RESISTANT", "Sezione (+)": "", "Zincato": "GALVANIZED", "Verniciata": "POWEDR COATED"}, "FRAME"],
             "Controventatura": ["CROSS-BRACING", {"Gondola": "GONDOLA", "Sezione (+)": "", "Su due livelli": "TWO LEVELS", "Numero diagonali (+)": "", "Con distanziale (+)": "WITH SPACER"}, "CROSS-BRACING"],
             "Banco espositore di legno": ["WOODEN DESK", {"Con cassetto": "WITH DRAWER", "Con ruote": "WITH WHEELS"}, "DESK"],
             "Avancassa": ["IMPULSE UNIT", {"Con ripiani": "WITH SHELF", "Con ripiani inclinati": "WITH INCLINATED SHELF", "Con rete divisoria": "WITH DIVIDING NET", "Con ruote": "WITH WHEELS", "Con ganci": "WITH HOOKS", "Con batticarrello": "WITH TROLLEY BEATER"}, "DISPLAY"],
@@ -259,6 +291,36 @@ DATABASE = {
 
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F25 READY", "F50", "F50 BESPOKE", "F50 READY", "UNIVERSAL", "BC", "FORTISSIMO", "MINIRACK", "UNIMOB"]
 
+MAPPA_NORMATIVE_FASTENER = {
+    "Vite": {
+        "": "",
+        "DIN 912 - Testa cilindrica": "DIN 912",
+        "DIN 933 - Esagonale filetto totale": "DIN 933",
+        "DIN 931 - Esagonale filetto parziale": "DIN 931",
+        "DIN 7991 - Testa svasata esagono incassato": "DIN 7991",
+        "ISO 7380 - Testa bombata esagono incassato": "ISO 7380",
+        "DIN 571 - Tirafondo per legno": "DIN 571",
+        "DIN 7504-K - Autoperforante Esagonale": "DIN 7504-K",
+        "DIN 7504-N - Autoperforante Bombata": "DIN 7504-N",
+        "DIN 7504-P - Autoperforante Svasata": "DIN 7504-P"
+    },
+    "Dado": {
+        "": "",
+        "DIN 934 - Esagonale standard": "DIN 934",
+        "DIN 985 - Autobloccante nylon": "DIN 985",
+        "DIN 6923 - Flangiato zigrinato": "DIN 6923"
+    },
+    "Rondella": {
+        "": "",
+        "DIN 125 - Piana standard": "DIN 125",
+        "DIN 9021 - Fascia larga": "DIN 9021",
+        "DIN 6798 - Dentellata": "DIN 6798",
+        "DIN 127 - Grower (elastica)": "DIN 127"
+    },
+    "Bullone": { "": "" },
+    "Inserti filettati": { "": "" }
+}
+
 TERMINI_ANTICIPATI = [
     "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "STATIC", "ADJUSTABLE", "SEISMIC",
     "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "CONNECTING", "SHUTTER", "COUPLING",
@@ -267,15 +329,25 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. LOGICA DI COSTRUZIONE INTERFACCIA
+# 3. INTERFACCIA UTENTE
 # =========================================================
+
+# --- INIZIALIZZAZIONE VARIABILI DI STATO ---
+uni_en_1090_active = False 
+mat_en = ""
+part_en = ""
+extra_dedicati_dict = {}
+tag_suggerimento = ""
+extra_selezionati = []
+normativa = ""
+finitura_finale = ""
 
 st.title("⚙️ REG - Title Generator & Classification")
 
-# --- 1. TASTO RESET ---
+# --- 1. TASTO AZZERA SUPERIORE CENTRATO ---
 c1, c2, c3 = st.columns([2, 1, 2])
 with c2:
-    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True)
+    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_top")
 
 st.markdown("---")
 
@@ -286,8 +358,8 @@ with col_left:
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro", label_visibility="collapsed")
     
     st.markdown("---")
-    st.subheader("📖 Note d'uso")
-    st.info("**VERSIONE 8.8**\n- Gestione Assembly ottimizzata\n- Finiture Legno opzionali\n- Traduzione automatica Note")
+    st.subheader("📖 Manuale d'uso")
+    st.info("**NOTE TECNICHE:**\n* I prefissi L-P-H sono automatici.\n* Lunghezza max stringa: 100 caratteri.")
 
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Compatibilità")
@@ -296,56 +368,61 @@ with col_workarea:
     c_mat, c_comp = st.columns([1, 1.5])
     
     with c_mat:
-        mat_en = ""
-        # Logica condizionale per ASSEMBLY vs Altri
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBLATO", key="check_assembled")
-            # --- MODIFICA RICHIESTA: TOGGLE ATTIVAZIONE FINITURE ---
-            show_finishes_active = st.toggle("Configura finiture (Legno)", key="show_finishes_assembly")
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
                 mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
                 mat_en = materiali_disponibili[mat_it]
-            # Per WOOD COMP le finiture sono sempre attive
-            show_finishes_active = (macro_it == "WOOD COMP")
 
     with c_comp:
-        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-        comp_selezionata = st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
-        
-        if any(m == comp_selezionata for m in ["FORTISSIMO", "MINIRACK"]):
-            st.warning("⚡ Strutturale")
-            st.checkbox("Certificazione UNI EN-1090", key="check_1090")
+        comp_selezionate = []
+        if macro_it != "FASTENER":
+            pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+            comp_selezionata = st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
+            comp_selezionate = [comp_selezionata] if comp_selezionata else []
+            
+            if any(m in comp_selezionate for m in ["FORTISSIMO", "MINIRACK"]):
+                st.warning("⚡ Strutturale")
+                uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
+        else:
+            comp_selezionate = []
 
     st.markdown("---")
     
     # SELEZIONE PARTICOLARE
     part_dict = DATABASE[macro_it]["Particolari"]
+    def format_part_label(nome_it):
+        if nome_it is None: return "Seleziona o digita il particolare..."
+        nome_en = part_dict[nome_it][0]
+        return f"🔧 {nome_it} ({nome_en})"
+        
     scelta_part_it = st.selectbox(
         "Cerca o seleziona dettaglio:", 
         options=sorted(list(part_dict.keys())), 
         index=None,
-        placeholder="Seleziona il componente...",
+        placeholder="Seleziona o digita il particolare...",
+        format_func=format_part_label,
         key="selectbox_part"
     )
 
-    # --- SEZIONE FINITURE (VISIBILE SOLO SE ATTIVATA) ---
-    finitura_finale = ""
-    if show_finishes_active:
+    # --- NUOVA SEZIONE FINITURE (Solo per Wood e Assembly) ---
+    if macro_it in ["WOOD COMP", "ASSEMBLY"]:
         st.markdown("---")
         st.subheader("🎨 2b. Configurazione Finiture")
         
         if macro_it == "WOOD COMP":
             fcol1, fcol2 = st.columns(2)
             with fcol1:
-                cat_f = st.selectbox("Categoria Finitura", list(DB_FINITURE_LEGNO.keys()), key="cat_wood")
+                cat_f = st.selectbox("Categoria Finitura Legno", list(DB_FINITURE_LEGNO.keys()), key="cat_wood")
             with fcol2:
                 finitura_scelta = st.selectbox("Dettaglio Finitura", DB_FINITURE_LEGNO[cat_f], key="fin_wood")
-                if finitura_scelta: finitura_finale = finitura_scelta
+                if finitura_scelta:
+                    finitura_finale = finitura_scelta
                     
         elif macro_it == "ASSEMBLY":
-            st.caption("Finiture multiple per l'assieme:")
+            st.caption("Configurazione finiture multiple per assieme:")
             scelte_finali_as = []
             acol1, acol2, acol3 = st.columns(3)
             with acol1:
@@ -367,119 +444,148 @@ with col_workarea:
                 finitura_finale = " | ".join(scelte_finali_as)
 
     st.markdown("---")
-    st.subheader("✨ 3. Opzioni Extra e Dimensioni")
+    st.subheader("✨ 3. Extra e Note")
     
-    # Inizializziamo variabili per la logica di generazione
-    part_en = ""
-    extra_dedicati_dict = {}
-    extra_selezionati = []
-
     if scelta_part_it:
         dati_part = part_dict[scelta_part_it]
         part_en = dati_part[0]
         extra_dedicati_dict = dati_part[1]
         
+        if len(dati_part) > 2:
+            tag_suggerimento = " - ".join(dati_part[2:]) 
+        else:
+            tag_suggerimento = ""
+        
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
-            extra_selezionati = st.pills(f"Opzioni per {scelta_part_it}:", options=extra_options, selection_mode="multi", key="extra_tags")
+            extra_selezionati = st.pills(f"Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-            # Controllo conflitti
-            if extra_selezionati:
-                tags_attivi = set(extra_selezionati)
-                for gruppo in COPPIE_INCOMPATIBILI:
-                    intersezione = gruppo.intersection(tags_attivi)
-                    if len(intersezione) >= 2:
-                        st.error(f"⚠️ Conflitto: {', '.join(intersezione)}")
+            # LOGICA INCOMPATIBILITÀ
+            tags_attivi = set(extra_selezionati) if extra_selezionati else set()
+            for gruppo in COPPIE_INCOMPATIBILI:
+                intersezione = set(gruppo).intersection(tags_attivi)
+                if len(intersezione) >= 2:
+                    st.error(f"⚠️ **CONFLITTO:** Non puoi selezionare contemporaneamente: {', '.join(intersezione)}")
 
-                # Sottovarianti
+            if extra_selezionati:
                 for ex in extra_selezionati:
                     if ex in SUB_OPTIONS_CONFIG:
-                        st.selectbox(f"↳ Specifiche {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
+                        st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
                     elif ex in EXTRA_CON_INPUT_MANUALE:
-                        st.text_input(f"↳ Valore manuale {ex}:", key=f"manual_{ex}")
+                        st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
 
-    extra_libero = st.text_input("Note libere (IT) - Verranno tradotte:", key="extra_text").strip()
+    extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
 
     st.markdown("---")
-    # Ingressi dimensionali
-    c_d1, c_d2, c_d3, c_d4 = st.columns(4)
-    with c_d1: dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-    with c_d2: dim_p = st.text_input("Profondità (P)", key="dim_p")
-    with c_d3: dim_h = st.text_input("Altezza (H)", key="dim_h")
-    with c_d4: dim_dia = st.text_input("Diametro (Ø)", key="dim_dia_gen")
+    st.subheader("📏 4. Dimensionamento e Normative")
+    col_campi, col_immagine = st.columns([1, 1.5], gap="medium")
+
+    with col_campi:
+        if macro_it == "FASTENER":
+            dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+            dim_dia = st.text_input("Diametro (D/M)", key="dim_dia")
+            opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
+            norma_scelta = st.selectbox("Normativa", options=list(opzioni_norm.keys()))
+            normativa = opzioni_norm[norma_scelta] if norma_scelta else ""
+        else:
+            dim_l = st.text_input("Lunghezza (L)", key="dim_l")
+            dim_p = st.text_input("Profondità (P)", key="dim_p")
+            dim_h = st.text_input("Altezza (H)", key="dim_h")
+            dim_dia_gen = st.text_input("Diametro (Ø)", key="dim_dia_gen")
+            
+    with col_immagine:
+        st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", width=600)
 
 # =========================================================
-# 3. LOGICA DI GENERAZIONE STRINGA
+# 4. LOGICA DI GENERAZIONE E TRADUZIONE
 # =========================================================
 
 st.divider()
 
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     if not scelta_part_it:
-        st.error("⚠️ Errore: Seleziona un particolare!")
+        st.error("⚠️ Seleziona un particolare prima di generare la stringa!")
     else:
-        # 1. Dimensioni
-        dim_parts = []
-        if dim_l: dim_parts.append(f"L{dim_l.strip().upper()}")
-        if dim_p: dim_parts.append(f"P{dim_p.strip().upper()}")
-        if dim_h: dim_parts.append(f"H{dim_h.strip().upper()}")
-        lph_str = " ".join(dim_parts)
-        
-        dim_final = lph_str
-        if dim_dia:
-            dim_final = f"{lph_str} Ø{dim_dia.strip().upper()}".strip()
-
-        # 2. Gestione Extra
-        pills_tradotti = []
-        for ex in (extra_selezionati or []):
-            base_en = extra_dedicati_dict.get(ex, ex.upper())
-            if ex in SUB_OPTIONS_CONFIG:
-                val_sub_it = st.session_state.get(f"sub_{ex}", "")
-                val_sub_en = SUB_OPTIONS_CONFIG[ex].get(val_sub_it, "")
-                pills_tradotti.append(f"{base_en} {val_sub_en}".strip())
-            elif ex in EXTRA_CON_INPUT_MANUALE:
-                val_man = st.session_state.get(f"manual_{ex}", "").strip().upper()
-                pills_tradotti.append(f"{base_en} {val_man}".strip())
-            else:
-                pills_tradotti.append(base_en)
-
-        # 3. Separazione Prefissi/Suffissi
-        prefissi_list = [t for t in pills_tradotti if any(x in t for x in TERMINI_ANTICIPATI)]
-        suffissi_list = [t for t in pills_tradotti if t not in prefissi_list]
-        
-        # 4. Traduzione Note Libere
-        note_en = ""
-        if extra_libero:
-            testo_prep = extra_libero.lower()
-            for it, en in GLOSSARIO_TECNICO.items():
-                testo_prep = testo_prep.replace(it, en)
-            try:
-                note_en = GoogleTranslator(source='it', target='en').translate(testo_prep).upper()
-            except:
-                note_en = extra_libero.upper()
-
-        # 5. Costruzione Finale
-        str_prefissi = " ".join(prefissi_list)
-        str_suffissi = " ".join(suffissi_list)
-        
-        componenti_titolo = []
-        if mat_en: componenti_titolo.append(mat_en)
-        if str_prefissi: componenti_titolo.append(str_prefissi)
-        componenti_titolo.append(part_en)
-        if dim_final: componenti_titolo.append(dim_final)
-        if str_suffissi: componenti_titolo.append(str_suffissi)
-        if finitura_finale: componenti_titolo.append(finitura_finale)
-        
-        stringa_base = " ".join(componenti_titolo)
-        
-        if note_en:
-            stringa_base = f"{stringa_base}, {note_en}"
-            
-        # Aggiunta tag compatibilità (pills)
-        if comp_selezionata:
-            risultato_finale = f"{stringa_base} - {comp_selezionata}"
+        # --- A. Dimensioni ---
+        dim_final_parts = []
+        if macro_it == "FASTENER":
+            d_val = st.session_state.get("dim_dia", "").strip().upper()
+            l_val = st.session_state.get("dim_l", "").strip().upper()
+            if d_val:
+                prefix_d = "" if d_val.startswith('M') else "D"
+                dim_final_parts.append(f"{prefix_d}{d_val}")
+            if l_val:
+                dim_final_parts.append(f"L{l_val}")
+            dim_final = "X".join(dim_final_parts)
+            if normativa: dim_final += f" {normativa}"
         else:
-            risultato_finale = stringa_base
+            l_val_s = st.session_state.get("dim_l", "").strip().upper()
+            p_val_s = st.session_state.get("dim_p", "").strip().upper()
+            h_val_s = st.session_state.get("dim_h", "").strip().upper()
+            dia_val_s = st.session_state.get("dim_dia_gen", "").strip().upper()
+            if l_val_s: dim_final_parts.append(f"L{l_val_s}")
+            if p_val_s: dim_final_parts.append(f"P{p_val_s}")
+            if h_val_s: dim_final_parts.append(f"H{h_val_s}")
+            lph_str = " ".join(dim_final_parts)
+            dim_final_comps = []
+            if lph_str: dim_final_comps.append(lph_str)
+            if dia_val_s: dim_final_comps.append(f"Ø{dia_val_s}")
+            dim_final = " ".join(dim_final_comps)
 
-        st.subheader("Titolo Tecnico Generato:")
-        st.code(risultato_finale.upper().replace("  ", " "), language="text")
+        # --- B. Extra da Bottoni (Pills) ---
+        extra_pills_list = []
+        ordine_fisso_opzioni = list(extra_dedicati_dict.keys())
+        for ex in ordine_fisso_opzioni:
+            if extra_selezionati and ex in extra_selezionati:
+                base_trans = extra_dedicati_dict.get(ex, ex.upper())
+                if ex in SUB_OPTIONS_CONFIG:
+                    valore_sub_it = st.session_state.get(f"sub_{ex}", "")
+                    traduzione_sub = SUB_OPTIONS_CONFIG[ex].get(valore_sub_it, "")
+                    extra_pills_list.append(f"{base_trans} {traduzione_sub}".strip())
+                elif ex in EXTRA_CON_INPUT_MANUALE:
+                    manual_val = st.session_state.get(f"manual_{ex}", "").strip().upper()
+                    if manual_val: extra_pills_list.append(f"{base_trans} {manual_val}")
+                    else: extra_pills_list.append(base_trans)
+                else:
+                    extra_pills_list.append(base_trans)
+
+        # --- C. Note Libere ---
+        note_libere_tradotte = ""
+        if extra_libero:
+            testo_pulito = extra_libero.lower()
+            for ita, eng in GLOSSARIO_TECNICO.items():
+                if ita in testo_pulito: testo_pulito = testo_pulito.replace(ita, eng)
+            try:
+                note_libere_tradotte = GoogleTranslator(source='it', target='en').translate(testo_pulito).upper()
+            except:
+                note_libere_tradotte = extra_libero.upper()
+
+        # --- D. Ordinamento ---
+        prefissi = [ex for ex in extra_pills_list if ex in TERMINI_ANTICIPATI]
+        suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
+        prefix_str = " ".join(prefissi)
+        extra_suffissi_str = " ".join(suffissi)
+        comp_str = st.session_state.get("comp_tags", "")
+
+        # --- E. Assemblaggio FINALE ---
+        if mat_en == "METAL" and "METAL" in part_en.upper():
+            corpo = f"{prefix_str} {part_en} {dim_final}".strip()
+        else:
+            corpo = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip()
+        
+        if extra_suffissi_str:
+            corpo = f"{corpo} {extra_suffissi_str}".strip()
+            
+        # Aggiunta finitura specifica (MODIFICA RICHIESTA)
+        if finitura_finale:
+            corpo = f"{corpo} {finitura_finale}".strip()
+            
+        if note_libere_tradotte:
+            corpo = f"{corpo}, {note_libere_tradotte}".strip()
+        
+        final_segments = [corpo]
+        if comp_str: final_segments.append(comp_str)
+
+        risultato = " - ".join(final_segments).upper().replace("  ", " ")
+        st.subheader("Risultato Generato:")
+        st.code(risultato, language="text")
