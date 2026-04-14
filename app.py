@@ -408,157 +408,119 @@ with col_workarea:
         )
 
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v8.6 - Comma Fix)
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE (OTTIMIZZATA)
 # =========================================================
 
 st.divider()
 
+# Inizializzazione stato stringa
 if 'stringa_editabile' not in st.session_state:
     st.session_state['stringa_editabile'] = ""
 
-# --- CONTROLLO INCOMPATIBILITÀ (FILTRO SOFT) ---
+# --- A. GESTIONE ERRORI E INCOMPATIBILITÀ ---
 errori_rilevati = []
-
-# Se abbiamo delle extra selezionate, confrontiamole col database di esclusione
 if extra_selezionati:
     for coppia in COPPIE_INCOMPATIBILI:
-        # Se entrambi i termini della coppia "proibita" sono tra quelli selezionati:
         if coppia.issubset(set(extra_selezionati)):
-            elementi = list(coppia)
-            errori_rilevati.append(f"⚠️ **Incongruenza Tecnica:** Non puoi selezionare **'{elementi[0]}'** e **'{elementi[1]}'** contemporaneamente.")
+            errori_rilevati.append(f"⚠️ **Incongruenza:** Non puoi usare '{list(coppia)[0]}' e '{list(coppia)[1]}' insieme.")
 
-# Se ci sono errori, mostriamo i banner rossi
 for errore in errori_rilevati:
     st.error(errore)
 
-# La variabile diventa True se c'è almeno un errore, disabilitando così il tasto
 blocco_genera = len(errori_rilevati) > 0
 
-# TASTO DI GENERAZIONE (Ora con il parametro disabled)
+# --- B. TASTO GENERAZIONE ---
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=blocco_genera):
     if not scelta_part_it:
-        st.error("⚠️ Seleziona un particolare prima di generare la stringa!")
+        st.error("⚠️ Seleziona un particolare prima di procedere!")
     else:
-        # --- A. Dimensioni ---
-        dim_final_parts = []
+        # 1. ELABORAZIONE DIMENSIONI
+        dim_parts = []
         if macro_it == "FASTENER":
             d_val = st.session_state.get("dim_dia", "").strip().upper()
             l_val = st.session_state.get("dim_l", "").strip().upper()
             if d_val:
-                prefix_d = "" if d_val.startswith('M') else "D"
-                dim_final_parts.append(f"{prefix_d}{d_val}")
-            if l_val:
-                dim_final_parts.append(f"L{l_val}")
-            dim_final = "X".join(dim_final_parts)
-            if 'normativa' in locals() and normativa: dim_final += f" {normativa}"
+                prefix = "" if d_val.startswith('M') else "D"
+                dim_parts.append(f"{prefix}{d_val}")
+            if l_val: dim_parts.append(f"L{l_val}")
+            dim_final = "X".join(dim_parts)
+            if normativa: dim_final += f" {normativa}"
         else:
-            l_val_s = st.session_state.get("dim_l", "").strip().upper()
-            p_val_s = st.session_state.get("dim_p", "").strip().upper()
-            h_val_s = st.session_state.get("dim_h", "").strip().upper()
-            dia_val_s = st.session_state.get("dim_dia_gen", "").strip().upper()
-            s_val = st.session_state.get("dim_s", "").strip()
+            # Recupero valori da session_state
+            for p, label in [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H")]:
+                val = st.session_state.get(p, "").strip().upper()
+                if val: dim_parts.append(f"{label}{val}")
             
-            if l_val_s: dim_final_parts.append(f"L{l_val_s}")
-            if p_val_s: dim_final_parts.append(f"P{p_val_s}")
-            if h_val_s: dim_final_parts.append(f"H{h_val_s}")
+            lph_str = " ".join(dim_parts)
+            dia_val = st.session_state.get("dim_dia_gen", "").strip().upper()
+            s_val = st.session_state.get("dim_s", "").strip().upper()
             
-            lph_str = " ".join(dim_final_parts)
-            
-            dim_final_comps = []
-            if lph_str: dim_final_comps.append(lph_str)
-            if dia_val_s: dim_final_comps.append(f"Ø{dia_val_s}")
-            if s_val: dim_final_comps.append(f"S{s_val}")
-            
-            dim_final = " ".join(dim_final_comps)
+            dim_final = " ".join(filter(None, [lph_str, f"Ø{dia_val}" if dia_val else None, f"S{s_val}" if s_val else None]))
 
-        # --- B. Extra da Bottoni (Pills) - ORDINE FISSO ---
-        extra_pills_list = []
-        
-        # Invece di: for ex in (extra_selezionati or []):
-        # Usiamo l'ordine originale del database/options:
-        ordine_fisso_opzioni = list(extra_dedicati_dict.keys())
-        
-        for ex in ordine_fisso_opzioni:
-            if extra_selezionati and ex in extra_selezionati:
-                base_trans = extra_dedicati_dict.get(ex, ex.upper())
-                
-                if ex in SUB_OPTIONS_CONFIG:
-                    sub_key = f"sub_{ex}"
-                    valore_sub_it = st.session_state.get(sub_key, "")
-                    traduzione_sub = SUB_OPTIONS_CONFIG[ex].get(valore_sub_it, "")
-                    extra_pills_list.append(f"{base_trans} {traduzione_sub}".strip())
-                    
-                elif ex in EXTRA_CON_INPUT_MANUALE:
-                    manual_val = st.session_state.get(f"manual_{ex}", "").strip().upper()
-                    if manual_val: 
-                        extra_pills_list.append(f"{base_trans} {manual_val}")
-                    else: 
-                        extra_pills_list.append(base_trans)
+        # 2. ELABORAZIONE EXTRA (PILLS) - Mantenendo ordine DB
+        extra_pills_final = []
+        for opt in list(extra_dedicati_dict.keys()):
+            if extra_selezionati and opt in extra_selezionati:
+                base_t = extra_dedicati_dict.get(opt, opt.upper())
+                # Gestione Sotto-Opzioni (+)
+                if opt in SUB_OPTIONS_CONFIG:
+                    val_sub = st.session_state.get(f"sub_{opt}", "")
+                    trad_sub = SUB_OPTIONS_CONFIG[opt].get(val_sub, "")
+                    extra_pills_final.append(f"{base_t} {trad_sub}".strip())
+                # Gestione Input Manuale
+                elif opt in EXTRA_CON_INPUT_MANUALE:
+                    v_man = st.session_state.get(f"manual_{opt}", "").strip().upper()
+                    extra_pills_final.append(f"{base_t} {v_man}" if v_man else base_t)
                 else:
-                    extra_pills_list.append(base_trans)
+                    extra_pills_final.append(base_t)
 
-        # --- C. Note Libere (Traduzione) ---
-        note_libere_tradotte = ""
+        # 3. TRADUZIONE NOTE LIBERE
+        note_tradotte = ""
         if extra_libero:
-            testo_pulito = extra_libero.lower()
+            testo_it = extra_libero.lower()
             for ita, eng in GLOSSARIO_TECNICO.items():
-                if ita in testo_pulito:
-                    testo_pulito = testo_pulito.replace(ita, eng)
+                testo_it = testo_it.replace(ita, eng)
             try:
-                note_libere_tradotte = GoogleTranslator(source='it', target='en').translate(testo_pulito).upper()
+                note_tradotte = GoogleTranslator(source='it', target='en').translate(testo_it).upper()
             except:
-                note_libere_tradotte = extra_libero.upper()
+                note_tradotte = extra_libero.upper()
 
-        # --- D. Ordinamento Prefissi/Suffissi Pills ---
-        prefissi = [ex for ex in extra_pills_list if ex in TERMINI_ANTICIPATI]
-        suffissi = [ex for ex in extra_pills_list if ex not in prefissi]
+        # 4. ASSEMBLAGGIO LOGICO
+        # Divisione tra prefissi (TERMINI_ANTICIPATI) e suffissi
+        pre = [ex for ex in extra_pills_final if any(term in ex for term in TERMINI_ANTICIPATI)]
+        suf = [ex for ex in extra_pills_final if ex not in pre]
         
-        prefix_str = " ".join(prefissi) if prefissi else ""
-        extra_suffissi_str = " ".join(suffissi) if suffissi else "" # Spazio tra extra
+        pre_str = " ".join(pre)
+        suf_str = " ".join(suf)
         
-        comp_list = [c for c in (comp_selezionate or []) if c.strip()]
-        comp_str = " - ".join(comp_list) if comp_list else ""
+        # Gestione Materiale: evito "METAL METAL"
+        mat_prefix = mat_en if not (mat_en == "METAL" and "METAL" in part_en.upper()) else ""
+        
+        # Costruzione corpo centrale
+        corpo = f"{mat_prefix} {pre_str} {part_en} {dim_final} {suf_str}".replace("  ", " ").strip()
+        
+        # Aggiunta Note con virgola
+        if note_tradotte:
+            corpo = f"{corpo}, {note_tradotte}"
 
-        # --- E. Assemblaggio (LOGICA RICHIESTA) ---
-        
-        # 1. Base Descrizione (Materiale + Prefisso + Nome + Misure)
-        if mat_en == "METAL" and "METAL" in part_en.upper():
-            corpo = f"{prefix_str} {part_en} {dim_final}".strip()
-        else:
-            corpo = f"{mat_en} {prefix_str} {part_en} {dim_final}".strip()
-        
-        # 2. Aggiunta Extra (Pills) uniti da spazio (come richiesto in esempio)
-        if extra_suffissi_str:
-            corpo = f"{corpo} {extra_suffissi_str}".strip()
-            
-        # 3. Aggiunta Note Libere precedute da VIRGOLA
-        if note_libere_tradotte:
-            corpo = f"{corpo}, {note_libere_tradotte}".strip()
-        
-        # 4. Unione finale con il MODELLO tramite TRATTINO
-        final_segments = [corpo]
-        if comp_str:
-            final_segments.append(comp_str)
+        # Unione con Modello/Compatibilità
+        comp_str = st.session_state.get("comp_tags", "")
+        res = f"{corpo} - {comp_str}" if comp_str else corpo
 
-        temp_str = " - ".join(final_segments).upper().replace("  ", " ")
+        # 5. PULIZIA FINALE (GRAMMATICA AI)
+        res = res.upper().replace("WITH WITH", "WITH")
+        if res.count("WITH") > 1:
+            parts = res.split("WITH")
+            res = parts[0] + "WITH" + " AND".join(parts[1:])
         
-        # 5. Pulizia finale "WITH" e prefissi speciali
-        temp_str = temp_str.replace("WITH WITH", "WITH")
-        if temp_str.count("WITH") > 1:
-            first_with_idx = temp_str.find("WITH")
-            first_with_end = first_with_idx + 4
-            parte_iniziale = temp_str[:first_with_end]
-            parte_restante = temp_str[first_with_end:].replace("WITH", "AND")
-            temp_str = parte_iniziale + parte_restante
-
-        if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled", False):
-            temp_str = f"ASSEMBLED - {temp_str}"
-        
+        # Prefissi di certificazione
+        if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled"):
+            res = f"ASSEMBLED - {res}"
         if uni_en_1090_active:
-            temp_str = f"UNI EN-1090 - {temp_str}"
-            
-        st.session_state['stringa_editabile'] = temp_str.replace("  ", " ").strip()
+            res = f"UNI EN-1090 - {res}"
 
+        st.session_state['stringa_editabile'] = res.replace("  ", " ").strip()
+        
 # =========================================================
 # 5. OUTPUT
 # =========================================================
