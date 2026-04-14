@@ -40,51 +40,35 @@ def activate_reset():
     st.toast("Interfaccia pulita!", icon="✨")
     
 # =========================================================
-# 1. DIZIONARI E DATABASE
+# 1. DIZIONARI E DATABASE (OTTIMIZZATO)
 # =========================================================
 
 # --- REGOLE DI INCOMPATIBILITÀ (FILTRO SOFT) ---
-# Aggiungi qui i gruppi di opzioni che NON devono essere selezionate insieme.
-# Usa i nomi esatti in Italiano che compaiono a schermo.
+# Gruppi di opzioni che non possono coesistere. 
 COPPIE_INCOMPATIBILI = [
-    {"Statico", "Antisismico"},
-    {"Angolo aperto", "Angolo chiuso"},
-    {"Portante", "Non portante"},
-    {"Singolo", "Doppio"},
-    {"Per ripiano in vetro", "Per ripiano in legno"},
-    {"Con serratura", "Senza serratura"},
-    {"Passo 25", "Passo 50"},
-    {"L50", "L55"},
-    {"Scorrevoli", "A saracinesca"},
-    {"Per attacco montante", "Per attacco fiancata"},
-    {"Superiore", "Tra ripiani di base"},
-    {"Dritto", "Inclinato"},
-    {"Cromato", "Verniciato"},
-    {"Multibarra", "Multilame", "In rete"},
-    {"Profilo a L", "Profilo a U"},
-    {"Per ripiano di base", "Per fiancata"},
-    {"Liscio", "Liscia", "Forato", "Forata", "In filo"},
-    {"Terminale", "Centrale"},
-    {"Zincato", "Verniciata"},
+    {"Statico", "Antisismico"}, {"Angolo aperto", "Angolo chiuso"},
+    {"Portante", "Non portante"}, {"Singolo", "Doppio"},
+    {"Per ripiano in vetro", "Per ripiano in legno"}, {"Con serratura", "Senza serratura"},
+    {"Passo 25", "Passo 50"}, {"L50", "L55"}, {"Scorrevoli", "A saracinesca"},
+    {"Per attacco montante", "Per attacco fiancata"}, {"Superiore", "Tra ripiani di base"},
+    {"Dritto", "Inclinato"}, {"Cromato", "Verniciato"},
+    {"Multibarra", "Multilame", "In rete"}, {"Profilo a L", "Profilo a U"},
+    {"Per ripiano di base", "Per fiancata"}, {"Terminale", "Centrale"},
+    {"Liscio", "Liscia", "Forato", "Forata", "In filo"}, {"Zincato", "Verniciata"}
 ]
 
+# --- TRADUZIONI FISSE ---
 GLOSSARIO_TECNICO = {
-    "mensola": "BRACKET",
-    "mensole": "BRACKETS",
-    "gondola": "GONDOLA",
-    "spalla": "FRAME",
-    "innesto": "COUPLING",
-    "montante": "UPRIGHT",
-    "per": "FOR",
-    "losanga": "LOSANGA"
+    "mensola": "BRACKET", "mensole": "BRACKETS", "gondola": "GONDOLA",
+    "spalla": "FRAME", "innesto": "COUPLING", "montante": "UPRIGHT",
+    "per": "FOR", "losanga": "LOSANGA"
 }
 
+# --- CONFIGURAZIONE SOTTO-OPZIONI (+) ---
 SUB_OPTIONS_CONFIG = {
     "VPA (+)": {
-        "Serie S": "S SERIES",
-        "Serie SS": "SS SERIES",
-        "Serie M": "M SERIES",
-        "Serie L": "L SERIES"
+        "Serie S": "S SERIES", "Serie SS": "SS SERIES", 
+        "Serie M": "M SERIES", "Serie L": "L SERIES"
     },
     "Con distanziale (+)": {
         "L100": "L100", "L150": "L150", "L200": "L200", "L250": "L250"
@@ -93,36 +77,38 @@ SUB_OPTIONS_CONFIG = {
         "Doppie": "DD", "Triple": "TD", "Quadruple": "QD"
     },
     "Sezione (+)": {
-        "L55": "L55", "L80 Z/S": "L80 Z/S", "L80 Z/M": "L80 Z/M", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", "70X30": "70X30", "90X30": "90X30"
+        "L55": "L55", "L80 Z/S": "L80 Z/S", "L80 Z/M": "L80 Z/M", 
+        "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", 
+        "70X30": "70X30", "90X30": "90X30"
     },
     "Tipologia di mensola (+)": {
-        "Mensola saldata a filo superiore": "UPPER BRACKET", "Mensola saldata a filo inferiore": "LOWER BRACKET"
+        "Mensola saldata a filo superiore": "UPPER BRACKET", 
+        "Mensola saldata a filo inferiore": "LOWER BRACKET"
     },
     "Compatibilità piede di base (+)": {
-        "Per piede H90": "FOR H90 BASE FOOT", "Per piede H100": "FOR H100 BASE FOOT", "Per piede H150": "FOR H150 BASE FOOT"
+        "Per piede H90": "FOR H90 BASE FOOT", 
+        "Per piede H100": "FOR H100 BASE FOOT", 
+        "Per piede H150": "FOR H150 BASE FOOT"
     },
     "Attacco gancio (+)": {
-        "Attacco barra": "HOOK FOR BAR", "Attacco multilame": "HOOK FOR MULTISRIP", "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"
+        "Attacco barra": "HOOK FOR BAR", 
+        "Attacco multilame": "HOOK FOR MULTISTRIP", 
+        "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"
     },
-    "Orientamento (+)": {
-        "Destra": "RIGHT", "Sinistra": "LEFT"
-    },
+    "Orientamento (+)": {"Destra": "RIGHT", "Sinistra": "LEFT"},
     "Posizioni multiple (+)": {
-        "1 posizione": "1 POSITION", "2 posizioni": "2 position", "3 posizioni": "3 POSITION"
+        "1 posizione": "1 POSITION", "2 posizioni": "2 POSITION", "3 posizioni": "3 POSITION"
     },
-    "Altezza piede (+)": {
-        "H90": "H90", "H100": "H100", "H150": "H150"
-    },
+    "Altezza piede (+)": {"H90": "H90", "H100": "H100", "H150": "H150"},
     "Predisposto per montante (+)": {
         "L80": "FOR L80 UPRIGHT", "L100/L120": "FOR L100/L120 UPRIGHT"
     },
-    "Numero tasche (+)": {
-        "1 Tasca": "1 POCKET", "2 Tasche": "2 POCKETS"
-    }   
+    "Numero tasche (+)": {"1 Tasca": "1 POCKET", "2 Tasche": "2 POCKETS"}   
 }
 
 EXTRA_CON_INPUT_MANUALE = ["Sezione circolare", "Sezione quadrata"]
 
+# --- CONFIGURAZIONE MATERIALI ---
 MATERIALI_CONFIG = {
     "METAL COMP": {"METAL": "METAL", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
     "WOOD COMP": {"LAMINATO": "LAMINATED", "NOBILITATO": "MELAMINE", "TRUCIOLARE": "OSB"},
@@ -131,6 +117,7 @@ MATERIALI_CONFIG = {
     "FASTENER": {"ZINCATO": "GALVANIZED", "BRUNITO": "BURNISHED", "NERO": ""}
 }
 
+# --- DATABASE COMPONENTI ---
 DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
@@ -166,8 +153,8 @@ DATABASE = {
             "Filo": ["WIRE", {"Piegato": "BENT", "Piegato-saldato": "BENT AND WELDED", "Con viteria saldata": "WITH WELDING SCREWS"}, "WIRE"],
             "Montante": ["UPRIGHT", {"Sezione (+)": "", "Statico": "STATIC", "Antisismico": "ANTI-SEISMIC", "Regolabile": "ADJUSTABLE"}, "UPRIGHT"],
             "Lamiera generica": ["SHEET METAL", {"Forata": "PERFORATED", "Piegata": "BENT", "Saldata": "WELDED"}, "GENERIC SHEET METAL"],
-            "Pannello frontale": ["FRONT PANEL", {"Forato": "PERFORATED", "Aggangio montante": "HOOK ONTO UPFRIGHT"}, "PANEL"],
-            "Adattatore": ["ADAPTER", {"Forato": "PERFORATED", "Aggangio montante": "HOOK ONTO UPFRIGHT", "Passo 25": "PITCH 25", "Passo 50": "PITCH 50", "L50": "L50", "L55": "L55"}, "ADAPTER"],
+            "Pannello frontale": ["FRONT PANEL", {"Forato": "PERFORATED", "Aggangio montante": "HOOK ONTO UPRIGHT"}, "PANEL"],
+            "Adattatore": ["ADAPTER", {"Forato": "PERFORATED", "Aggangio montante": "HOOK ONTO UPRIGHT", "Passo 25": "PITCH 25", "Passo 50": "PITCH 50", "L50": "L50", "L55": "L55"}, "ADAPTER"],
             "Canalina passa cavi": ["CABLE TRAY", {"Forato": "PERFORATED", "Con viteria": "WITH SCREWS"}, "ESA"]
         }
     },
@@ -206,9 +193,9 @@ DATABASE = {
     "FASTENER": {
         "macro_en": "FASTENER",
         "Particolari": {
-            "Vite": ["SCREW", {"Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUCK HEAD", "Testa esagonale": "HEX HEAD", "Testa a croce": "CROSS HEAD", "Testa esagono incassato": "HEXAGON SOCKET HEAD", "Testa Bombata": "T-BOM"}, "SCREW"],
+            "Vite": ["SCREW", {"Autoperforanti": "SELF-DRILLING", "Testa svasata": "COUNTERSUNK HEAD", "Testa esagonale": "HEX HEAD", "Testa a croce": "CROSS HEAD", "Testa esagono incassato": "HEXAGON SOCKET HEAD", "Testa Bombata": "T-BOM"}, "SCREW"],
             "Bullone": ["BOLT", {}, "FASTENER"],
-            "Rondella": ["WASHER", {"Dentellata": "SERRATED LOCK", "Fascia Larga": "WIDE BEND", "Elastica": "GROWER"}, "WASHER"],
+            "Rondella": ["WASHER", {"Dentellata": "SERRATED LOCK", "Fascia Larga": "WIDE BAND", "Elastica": "GROWER"}, "WASHER"],
             "Dado": ["NUT", {"Autobloccante": "SELF-LOCKING", "Flangiato": "FLANGED"}, "NUT"],
             "Inserti filettati": ["RIVET", {"Con testa": "WITH HEAD", "Senza testa": "WITHOUT HEAD"}, "RIVET"]
         }
@@ -219,12 +206,12 @@ DATABASE = {
             "Vetrina": ["SHOWCASE", {"Terminale": "END", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con ante scorrevoli": "WITH SLIDING DOOR"}, "SHOWCASE"],
             "Espositore": ["DISPLAY", {"Mobile": "MOBILE", "Per alimenti": "FOR FOOD"}, "DISPLAY"],
             "Totem": ["TOTEM", {"Mobile": "MOBILE", "Rotante": "ROTATING", "Per casse automatiche": "FOR SELF PAY"}, "DISPLAY"],
-            "Spalla": ["FRAME", {"Numero diagonali (+)": "", "Antisismico": "SEISMIC-RESISTANT", "Sezione (+)": "", "Zincato": "GALVANIZED", "Verniciata": "POWEDR COATED"}, "FRAME"],
+            "Spalla": ["FRAME", {"Numero diagonali (+)": "", "Antisismico": "SEISMIC-RESISTANT", "Sezione (+)": "", "Zincato": "GALVANIZED", "Verniciata": "POWDER COATED"}, "FRAME"],
             "Controventatura": ["CROSS-BRACING", {"Gondola": "GONDOLA", "Sezione (+)": "", "Su due livelli": "TWO LEVELS", "Numero diagonali (+)": "", "Con distanziale (+)": "WITH SPACER"}, "CROSS-BRACING"],
             "Banco espositore di legno": ["WOODEN DESK", {"Con cassetto": "WITH DRAWER", "Con ruote": "WITH WHEELS"}, "DESK"],
             "Avancassa": ["IMPULSE UNIT", {"Con ripiani": "WITH SHELF", "Con ripiani inclinati": "WITH INCLINATED SHELF", "Con rete divisoria": "WITH DIVIDING NET", "Con ruote": "WITH WHEELS", "Con ganci": "WITH HOOKS", "Con batticarrello": "WITH TROLLEY BEATER"}, "DISPLAY"],
             "Cassettiera": ["CHEST OF DRAWERS", {"Con guide RAM": "WITH RAM GUIDE", "Attacco montante": "HOOK ONTO UPRIGHT"}, "DRAWER"],
-            "Espositore riviste": ["DISPLAY FOR MAGAZINE", {"Numero tasche (+)": "", "Con portaprezzo in filo": "WITH PRIZE-HOLDER WIRE"}, "DISPLAY", "BOOK AND MAGAZINE"],
+            "Espositore riviste": ["DISPLAY FOR MAGAZINE", {"Numero tasche (+)": "", "Con portaprezzo in filo": "WITH PRICE-HOLDER WIRE"}, "DISPLAY", "BOOK AND MAGAZINE"],
             "Cassa pagamento automatico": ["SELF CHECKOUT", {"Con macchine di pagamento": "WITH GLORY MACHINES PAYMENT"}, "SELF CHECKOUT (SCO)"]
         }
     }
