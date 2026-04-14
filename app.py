@@ -1,48 +1,44 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
 
+import streamlit as st
+
 # =========================================================
-# 0. CONFIGURAZIONE PAGINA E LOGICA RESET (POTENZIATA)
+# 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
 def activate_reset():
-    """Reset mirato dei campi di input senza mandare in crash i componenti"""
+    """Reset centralizzato e robusto dello stato dell'interfaccia"""
     
-    # 1. Definizione delle chiavi
-    keys_to_reset = [
-        'dim_l', 'dim_p', 'dim_h', 'dim_dia', 'dim_dia_gen', 'dim_s',
-        'extra_text', 'selectbox_part', 'comp_tags', 'extra_tags',
-        'stringa_editabile', 'check_1090', 'check_assembled'
+    # Mappatura dei valori di default per tipo di componente
+    # Questo elimina i vari if/elif rendendo il codice compatto
+    defaults = {
+        'comp_tags': None,         # Pills single
+        'selectbox_part': None,    # Selectbox
+        'extra_tags': [],          # Pills multi
+        'check_1090': False,       # Checkbox/Toggle
+        'check_assembled': False,  # Checkbox/Toggle
+    }
+
+    # Chiavi che devono essere resettate a stringa vuota
+    text_keys = [
+        'dim_l', 'dim_p', 'dim_h', 'dim_dia', 'dim_dia_gen', 
+        'dim_s', 'extra_text', 'stringa_editabile'
     ]
-    
-    for key in keys_to_reset:
+
+    # 1. Reset chiavi fisse
+    for key in (list(defaults.keys()) + text_keys):
         if key in st.session_state:
-            # --- CORREZIONE CRASH PILLS ---
-            if key == 'comp_tags':
-                # Essendo selection_mode="single", resettiamo a None, non []
-                st.session_state[key] = None 
-            
-            elif key == 'extra_tags':
-                # Essendo multi-selezione, qui la lista [] va bene
-                st.session_state[key] = []
-                
-            elif key in ['check_1090', 'check_assembled']:
-                st.session_state[key] = False
-                
-            elif key == 'selectbox_part':
-                st.session_state[key] = None
-                
-            else:
-                st.session_state[key] = ""
-    
-    # 2. Reset dinamico per campi manual_ e sub_
+            st.session_state[key] = defaults.get(key, "")
+
+    # 2. Reset dinamico (campi generati a runtime)
     for key in list(st.session_state.keys()):
-        if key.startswith("manual_") or key.startswith("sub_"):
+        if key.startswith(("manual_", "sub_")):
             st.session_state[key] = ""
             
     st.toast("Interfaccia pulita!", icon="✨")
-
+    
 # =========================================================
 # 1. DIZIONARI E DATABASE
 # =========================================================
