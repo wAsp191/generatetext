@@ -93,7 +93,7 @@ SUB_OPTIONS_CONFIG = {
         "L100": "L100", "L150": "L150", "L200": "L200", "L250": "L250"
     },
     "Numero diagonali (+)": {
-        "2": "2 DIAGONALS", "3": "3 DIAGONALS", "4": "4 DIAGONALS"
+        "Doppie": "DD", "Triple": "TD", "Quadruple": "QD"
     },
     "Sezione (+)": {
         "L55": "L55", "L80 Z/S": "L80 Z/S", "L80 Z/M": "L80 Z/M", "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", "70X30": "70X30", "90X30": "90X30"
