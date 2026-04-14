@@ -413,32 +413,34 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. INTERFACCIA UTENTE (v9.3 - Fix NameError 'attivi')
+# 2. INTERFACCIA UTENTE (v9.4 - Fix Costanti Globali)
 # =========================================================
 
-# --- INIZIALIZZAZIONE VARIABILI ---
+# --- 2.0 COSTANTI E INIZIALIZZAZIONI (Sempre eseguite) ---
+LARGHEZZA_IMMAGINE = 600 
 uni_en_1090_active = False 
 mat_en, part_en, normativa, tag_suggerimento = "", "", "", ""
 extra_dedicati_dict = {}
 extra_selezionati = []
-attivi = [] # <--- Inizializzazione cruciale per evitare NameError
+attivi = [] 
 blocco_incompatibilita = False 
 
 st.title("⚙️ REG - Title Generator & Classification")
 
-# --- TASTO AZZERA ---
+# --- 2.1 TASTO AZZERA SUPERIORE ---
 c1, c2, c3 = st.columns([2, 1, 2])
 with c2:
     st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_top")
 
 st.markdown("---")
 
+# --- 2.2 LAYOUT PRINCIPALE ---
 col_left, col_workarea = st.columns([1, 3], gap="large")
 
 with col_left:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro", label_visibility="collapsed")
-    st.info("**WOODCOMP**: Seleziona il tipo nei Pills per filtrare il catalogo finiture qui sotto.")
+    st.info("**WOODCOMP**: Seleziona il materiale nei Pills per attivare il catalogo finiture.")
 
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Compatibilità")
@@ -462,8 +464,16 @@ with col_workarea:
                 uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
 
     st.markdown("---")
+    
+    # SELEZIONE PARTICOLARE
     part_dict = DATABASE[macro_it]["Particolari"]
-    scelta_part_it = st.selectbox("Cerca dettaglio:", options=sorted(list(part_dict.keys())), index=None, key="selectbox_part")
+    scelta_part_it = st.selectbox(
+        "Cerca dettaglio:", 
+        options=sorted(list(part_dict.keys())), 
+        index=None, 
+        key="selectbox_part",
+        placeholder="Seleziona componente..."
+    )
 
     st.markdown("---")
     st.subheader("✨ 3. Extra e Note")
@@ -474,11 +484,9 @@ with col_workarea:
         
         extra_options = list(extra_dedicati_dict.keys())
         extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
-        
-        # Definiamo 'attivi' qui così è disponibile per tutto il resto del modulo
         attivi = extra_selezionati if extra_selezionati else []
         
-        # --- LOGICA CATALOGO SEMPRE VISIBILE PER WOODCOMP ---
+        # --- LOGICA CATALOGO FINITURE WOODCOMP ---
         if macro_it == "WOODCOMP":
             opzioni_filtrate = []
             if "LAMINATO" in attivi:
@@ -488,24 +496,16 @@ with col_workarea:
             if "TRUCIOLARE" in attivi:
                 opzioni_filtrate += [k for k in FINITURE_LEGNO.keys() if any(x in k for x in ["TRUCIOLARE", "RAW", "IDRO"])]
             
-            placeholder_text = "Seleziona prima Laminato/Nobilitato..." if not opzioni_filtrate else "Scegli la finitura..."
-            
             st.selectbox(
                 "🎨 Catalogo Finiture Legno:", 
-                options=sorted(opzioni_filtrate) if opzioni_filtrate else ["Scegli un tipo di pannello nei Pills sopra"],
+                options=sorted(opzioni_filtrate) if opzioni_filtrate else ["Seleziona tipo pannello nei Pills sopra"],
                 key="fin_wood_select",
                 index=None,
                 disabled=not opzioni_filtrate,
-                placeholder=placeholder_text
+                placeholder="Scegli finitura..."
             )
 
-        # Gestione conflitti
-        tags_attivi_set = set(attivi)
-        for gruppo in COPPIE_INCOMPATIBILI:
-            if len(set(gruppo).intersection(tags_attivi_set)) >= 2:
-                st.error(f"⚠️ Conflitto tra: {', '.join(gruppo)}")
-
-        # Ciclo varianti (Ora 'attivi' è sempre definito)
+        # Gestione Varianti e Input Manuali
         for ex in attivi:
             if ex in SUB_OPTIONS_CONFIG:
                 st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
@@ -524,6 +524,7 @@ with col_workarea:
 
     st.markdown("---")
     st.subheader("📏 4. Dimensionamento")
+    
     col_c, col_i = st.columns([1, 1.5])
     with col_c:
         if macro_it == "FASTENER":
@@ -534,7 +535,9 @@ with col_workarea:
             st.text_input("Profondità (P)", key="dim_p")
             st.text_input("Altezza (H)", key="dim_h")
             st.text_input("Diametro (Ø)", key="dim_dia_gen")
+            
     with col_i:
+        # Ora LARGHEZZA_IMMAGINE è sicuramente definita all'inizio
         st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", width=LARGHEZZA_IMMAGINE)
         
 # =========================================================
