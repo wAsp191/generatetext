@@ -260,66 +260,43 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. LOGICA FUNZIONALE (possiamo anche eliminare)
+# 2. INTERFACCIA UTENTE (Layout & Logica)
 # =========================================================
 
-def update_dims_from_section():
-    sez = st.session_state.get("sub_Sezione", "")
-    if "L55" in sez:
-        st.session_state.dim_l, st.session_state.dim_p = "55", "63"
-    elif "L80" in sez:
-        st.session_state.dim_l, st.session_state.dim_p = "80", "69"
-    elif "L100" in sez:
-        st.session_state.dim_l, st.session_state.dim_p = "100", "75"
-    elif "L120" in sez:
-        st.session_state.dim_l, st.session_state.dim_p = "120", "75"
-    elif "70X30" in sez:
-        st.session_state.dim_l, st.session_state.dim_p = "70", "30"
-    elif "90X30" in sez:
-        st.session_state.dim_l, st.session_state.dim_p = "90", "30"
-
-# =========================================================
-# 3. INTERFACCIA UTENTE (Layout Verticale - Fix Multi-Tags)
-# =========================================================
-
-# --- INIZIALIZZAZIONE VARIABILI DI STATO (Per evitare NameError) ---
+# --- INIZIALIZZAZIONE VARIABILI DI STATO ---
 uni_en_1090_active = False 
-mat_en = ""
-part_en = ""
+mat_en, part_en, normativa, tag_suggerimento = "", "", "", ""
 extra_dedicati_dict = {}
-tag_suggerimento = ""
 extra_selezionati = []
-normativa = ""
-comp_list_tags = []
-blocco_incompatibilita = False  # Variabile per gestire il blocco del tasto finale
+blocco_incompatibilita = False 
 
-# Variabili di configurazione rapida
+# Configurazione visuale
 LARGHEZZA_IMMAGINE = 600 
 TESTO_MANUALE = """
 **PROCEDURA STANDARD:**
 1. **CATEGORIA**: Seleziona il gruppo a sinistra.
-2. **MODELLO**: Scegli tipologia materiale e la compatibilità (F25, Fortissimo, ecc.).
-3. **PARTICOLARE**: Cerca il componente specifico e aggiungi le varie caratteristiche
+2. **MODELLO**: Scegli materiale e compatibilità (F25, ecc.).
+3. **PARTICOLARE**: Cerca il componente e aggiungi varianti.
 4. **QUOTE**: Inserisci i valori in millimetri.
 5. **GENERA**: Clicca il tasto rosso in fondo.
 
 ---
 **NOTE TECNICHE:**
-* I prefissi L-P-H sono automatici.
-* Le note libere vengono tradotte in inglese.
-* Lunghezza max stringa: 100 caratteri.
+* Prefissi L-P-H automatici.
+* Note libere tradotte in inglese.
+* Max 100 caratteri totali.
 """
 
 st.title("⚙️ REG - Title Generator & Classification")
 
-# --- 1. TASTO AZZERA SUPERIORE CENTRATO ---
-c1, c2, c3 = st.columns([2, 1, 2])
-with c2:
-    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_top")
+# --- TASTO AZZERA (Sempre visibile) ---
+col_a, col_b, col_c = st.columns([2, 1, 2])
+with col_b:
+    st.button("🔄 AZZERA INTERFACCIA", on_click=activate_reset, use_container_width=True, key="btn_top")
 
 st.markdown("---")
 
-# LAYOUT A 2 COLONNE PRINCIPALI: Sidebar (SX) | Area Lavoro (DX)
+# LAYOUT: Sidebar (SX) | Area Lavoro (DX)
 col_left, col_workarea = st.columns([1, 3], gap="large")
 
 with col_left:
@@ -338,7 +315,7 @@ with col_workarea:
     
     with c_mat:
         if macro_it == "ASSEMBLY":
-            st.toggle("ASSEMBLATO", key="check_assembled")
+            st.toggle("ASSEMBLATO", key="check_assembled", help="Attiva se il componente è fornito già montato")
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
@@ -346,33 +323,25 @@ with col_workarea:
                 mat_en = materiali_disponibili[mat_it]
 
     with c_comp:
-        comp_selezionate = []
         if macro_it != "FASTENER":
             pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
             comp_selezionata = st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
-            comp_selezionate = [comp_selezionata] if comp_selezionata else []
             
-            if any(m in comp_selezionate for m in ["FORTISSIMO", "MINIRACK"]):
-                st.warning("⚡ Strutturale")
+            if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
+                st.warning("⚡ Componente Strutturale")
                 uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
-        else:
-            comp_selezionate = []
-
+    
     st.markdown("---")
     
     # SELEZIONE PARTICOLARE
     part_dict = DATABASE[macro_it]["Particolari"]
-    def format_part_label(nome_it):
-        if nome_it is None: return "Seleziona o digita il particolare..."
-        nome_en = part_dict[nome_it][0]
-        return f"🔧 {nome_it} ({nome_en})"
-        
+    
     scelta_part_it = st.selectbox(
         "Cerca o seleziona dettaglio:", 
         options=sorted(list(part_dict.keys())), 
         index=None,
-        placeholder="Seleziona o digita il particolare...",
-        format_func=format_part_label,
+        placeholder="Inizia a scrivere per cercare...",
+        format_func=lambda x: f"🔧 {x} ({part_dict[x][0]})" if x else "Seleziona...",
         key="selectbox_part"
     )
 
@@ -384,38 +353,33 @@ with col_workarea:
         part_en = dati_part[0]
         extra_dedicati_dict = dati_part[1]
         
-        if len(dati_part) > 2:
-            tag_suggerimento = " - ".join(dati_part[2:]) 
-        else:
-            tag_suggerimento = ""
+        # Gestione Tag Suggerimento
+        tag_suggerimento = " - ".join(dati_part[2:]) if len(dati_part) > 2 else ""
         
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
-            extra_selezionati = st.pills(f"Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
+            extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-            # ---------------------------------------------------------
-            # LOGICA INTERSEZIONE (Fix Incompatibilità più di 2 parole)
-            # ---------------------------------------------------------
-            tags_attivi = set(extra_selezionati) if extra_selezionati else set()
-            
-            for gruppo in COPPIE_INCOMPATIBILI:
-                intersezione = set(gruppo).intersection(tags_attivi)
-                if len(intersezione) >= 2:
-                    st.error(f"⚠️ **CONFLITTO:** Non puoi selezionare contemporaneamente: {', '.join(intersezione)}")
-                    blocco_incompatibilita = True
-            # ---------------------------------------------------------
-
+            # --- LOGICA INCOMPATIBILITÀ ---
             if extra_selezionati:
+                tags_attivi = set(extra_selezionati)
+                for gruppo in COPPIE_INCOMPATIBILI:
+                    intersezione = gruppo.intersection(tags_attivi)
+                    if len(intersezione) >= 2:
+                        st.error(f"⚠️ **CONFLITTO:** {', '.join(intersezione)} non possono stare insieme.")
+                        blocco_incompatibilita = True
+
+                # Visualizzazione Sub-Opzioni
                 for ex in extra_selezionati:
                     if ex in SUB_OPTIONS_CONFIG:
                         st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
                     elif ex in EXTRA_CON_INPUT_MANUALE:
-                        st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
+                        st.text_input(f"↳ Valore specifico per {ex}:", key=f"manual_{ex}")
         
         if tag_suggerimento:
-            st.caption(f"🔍 Suggerimento Classificazione: **{tag_suggerimento}**")
+            st.caption(f"🔍 Classificazione suggerita: **{tag_suggerimento}**")
 
-    extra_libero = st.text_input("Note libere (IT):", key="extra_text").strip()
+    st.text_input("Note libere (Traduzione automatica):", key="extra_text", placeholder="es: con tappi in gomma...").strip()
 
     st.markdown("---")
     st.subheader("📏 4. Dimensionamento e Normative")
@@ -427,25 +391,24 @@ with col_workarea:
             dim_l = st.text_input("Lunghezza (L)", key="dim_l")
             dim_dia = st.text_input("Diametro (D/M)", key="dim_dia")
             opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-            norma_scelta = st.selectbox("Normativa", options=list(opzioni_norm.keys()))
+            norma_scelta = st.selectbox("Riferimento Normativo", options=list(opzioni_norm.keys()))
             normativa = opzioni_norm[norma_scelta] if norma_scelta else ""
-            dim_p, dim_h, dim_s, dim_dia_gen = "", "", "", ""
+            dim_p, dim_h, dim_dia_gen = "", "", ""
         else:
             dim_l = st.text_input("Lunghezza (L)", key="dim_l")
             dim_p = st.text_input("Profondità (P)", key="dim_p")
             dim_h = st.text_input("Altezza (H)", key="dim_h")
             dim_dia_gen = st.text_input("Diametro (Ø)", key="dim_dia_gen")
-            dim_s = "" 
             
     with col_immagine:
         st.image(
             "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
-            caption="Riferimento Quote", 
+            caption="Standard Quote Tecniche", 
             width=LARGHEZZA_IMMAGINE
         )
-    
+
 # =========================================================
-# 4. LOGICA DI GENERAZIONE E TRADUZIONE (v8.6 - Comma Fix)
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v8.6 - Comma Fix)
 # =========================================================
 
 st.divider()
