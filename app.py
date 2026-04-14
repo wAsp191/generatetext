@@ -413,7 +413,7 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. INTERFACCIA UTENTE (v9.2 - Menu Finiture Persistente)
+# 2. INTERFACCIA UTENTE (v9.3 - Fix NameError 'attivi')
 # =========================================================
 
 # --- INIZIALIZZAZIONE VARIABILI ---
@@ -421,6 +421,7 @@ uni_en_1090_active = False
 mat_en, part_en, normativa, tag_suggerimento = "", "", "", ""
 extra_dedicati_dict = {}
 extra_selezionati = []
+attivi = [] # <--- Inizializzazione cruciale per evitare NameError
 blocco_incompatibilita = False 
 
 st.title("⚙️ REG - Title Generator & Classification")
@@ -474,21 +475,19 @@ with col_workarea:
         extra_options = list(extra_dedicati_dict.keys())
         extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
         
+        # Definiamo 'attivi' qui così è disponibile per tutto il resto del modulo
+        attivi = extra_selezionati if extra_selezionati else []
+        
         # --- LOGICA CATALOGO SEMPRE VISIBILE PER WOODCOMP ---
         if macro_it == "WOODCOMP":
-            # 1. Identifichiamo cosa è stato selezionato nei Pills
-            attivi = extra_selezionati if extra_selezionati else []
-            
-            # 2. Filtriamo le opzioni del menu a tendina
             opzioni_filtrate = []
             if "LAMINATO" in attivi:
                 opzioni_filtrate += [k for k in FINITURE_LEGNO.keys() if "LAM" in k]
             if "NOBILITATO" in attivi:
                 opzioni_filtrate += [k for k in FINITURE_LEGNO.keys() if "NOB" in k]
             if "TRUCIOLARE" in attivi:
-                opzioni_filtrate += [k for k in FINITURE_LEGNO.keys() if "TRUCIOLARE" in k or "RAW" in k or "IDRO" in k]
+                opzioni_filtrate += [k for k in FINITURE_LEGNO.keys() if any(x in k for x in ["TRUCIOLARE", "RAW", "IDRO"])]
             
-            # Se non è selezionato nulla nei Pills, mostriamo tutto o un messaggio
             placeholder_text = "Seleziona prima Laminato/Nobilitato..." if not opzioni_filtrate else "Scegli la finitura..."
             
             st.selectbox(
@@ -500,12 +499,13 @@ with col_workarea:
                 placeholder=placeholder_text
             )
 
-        # Sotto-opzioni e conflitti
-        tags_attivi_set = set(extra_selezionati) if extra_selezionati else set()
+        # Gestione conflitti
+        tags_attivi_set = set(attivi)
         for gruppo in COPPIE_INCOMPATIBILI:
             if len(set(gruppo).intersection(tags_attivi_set)) >= 2:
                 st.error(f"⚠️ Conflitto tra: {', '.join(gruppo)}")
 
+        # Ciclo varianti (Ora 'attivi' è sempre definito)
         for ex in attivi:
             if ex in SUB_OPTIONS_CONFIG:
                 st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
@@ -536,6 +536,7 @@ with col_workarea:
             st.text_input("Diametro (Ø)", key="dim_dia_gen")
     with col_i:
         st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", width=LARGHEZZA_IMMAGINE)
+        
 # =========================================================
 # 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.0 - Fin. Wood)
 # =========================================================
