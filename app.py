@@ -522,46 +522,56 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
         st.session_state['stringa_editabile'] = res.replace("  ", " ").strip()
         
 # =========================================================
-# 5. OUTPUT
+# 4. OUTPUT E CLASSIFICAZIONE (FINAL STEP)
 # =========================================================
 
-if st.session_state['stringa_editabile']:
-    st.markdown("### 📋 Risultato Finale")
+if st.session_state.get('stringa_editabile'):
+    st.markdown("---")
+    st.subheader("📋 Risultato Finale")
+    
+    # Visualizzazione stringa generata
     st.code(st.session_state['stringa_editabile'], language=None)
     
-    with st.expander("✏️ Modifica testo manualmente"):
-        st.text_input("Modifica qui:", key='stringa_editabile', label_visibility="collapsed")
+    # Campo di modifica rapida
+    with st.expander("✏️ Modifica manuale stringa"):
+        st.text_input("Modifica il testo:", key='stringa_editabile', label_visibility="collapsed")
 
+    # Monitoraggio lunghezza (Cruciale per i database aziendali)
     lunghezza = len(st.session_state['stringa_editabile'])
-    if lunghezza >= 99:
-        st.error(f"⚠️ LIMITE SUPERATO ({lunghezza})")
+    if lunghezza > 100:
+        st.error(f"⚠️ LIMITE CRITICO SUPERATO: {lunghezza}/100 caratteri")
+    elif lunghezza >= 90:
+        st.warning(f"🟡 Attenzione: Lunghezza limite vicina ({lunghezza}/100)")
     else:
-        st.success(f"Lunghezza: {lunghezza} caratteri")
+        st.success(f"✅ Lunghezza ottimale: {lunghezza} caratteri")
 
-    comp_list_tags = [c for c in (comp_selezionate or []) if c.strip()]
-    
-    # --- LOGICA VISUALIZZAZIONE CLASSIFICAZIONE ---
+    # --- SISTEMA DI CLASSIFICAZIONE (TAGS) ---
     all_tags = []
     
-    # 1. Aggiungiamo i tag dal database (quelli estratti con il ".join" di prima)
-    if 'tag_suggerimento' in locals() and tag_suggerimento:
+    # 1. Tag suggeriti dal database componenti
+    if tag_suggerimento:
         all_tags.append(tag_suggerimento.upper())
     
-    # 2. Aggiungiamo la compatibilità (F25, ecc.)
-    all_tags.extend([c.upper() for c in comp_list_tags])
+    # 2. Modello di Compatibilità (se presente)
+    comp_selezionata = st.session_state.get("comp_tags")
+    if comp_selezionata:
+        all_tags.append(comp_selezionata.upper())
     
-    # 3. Aggiungiamo certificazioni e normative
-    if uni_en_1090_active:
+    # 3. Certificazioni e Normative
+    if st.session_state.get("check_1090"):
         all_tags.append("UNI EN-1090-1")
-    if 'normativa' in locals() and normativa:
+    
+    if normativa:
         all_tags.append(normativa.upper())
     
-    # 4. Visualizzazione finale con la nuova dicitura
+    # Visualizzazione finale dei Metadati
     if all_tags:
-        st.info(f"🔍 **CLASSIFY:** {' | '.join(all_tags)}")
+        # Rimuoviamo eventuali duplicati mantenendo l'ordine
+        all_tags = list(dict.fromkeys(all_tags))
+        st.info(f"🔍 **TAGS CLASSIFICAZIONE:** {' | '.join(all_tags)}")
 
-# --- 2. TASTO AZZERA INFERIORE CENTRATO ---
+# --- TASTO RESET INFERIORE ---
 st.markdown("<br>", unsafe_allow_html=True)
 cb1, cb2, cb3 = st.columns([2, 1, 2])
 with cb2:
-    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_bottom")
+    st.button("🔄 NUOVA GENERAZIONE", on_click=activate_reset, use_container_width=True, key="btn_bottom")
