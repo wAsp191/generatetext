@@ -455,31 +455,23 @@ with col_left:
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Compatibilità")
     
-    # --- PARTE A: TOGGLE SEMPRE VISIBILI (in base alla categoria) ---
-    c_toggle, c_vuota = st.columns([1, 1])
-    with c_toggle:
-        if macro_it == "ASSEMBLY":
-            st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
-            st.toggle("🎨 ATTIVA FINITURE MULTIPLE", key="check_fin_multi_toggle")
-        
-        elif macro_it == "WOODCOMP":
-            st.toggle("🎨 SPECIFICA FINITURA LEGNO", key="check_fin_multi_toggle")
-
-    st.markdown("---")
-
-    # --- PARTE B: MATERIALE E COMPATIBILITÀ ---
     c_mat, c_comp = st.columns([1, 1.5])
     
     with c_mat:
+        # Toggle Prefisso solo per ASSEMBLY
+        if macro_it == "ASSEMBLY":
+            st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
+        
+        # Radio Materiali (con chiave unica per categoria)
         materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
         if materiali_disponibili:
-            mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"radio_mat_{macro_it}")
+            mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"mat_radio_{macro_it}")
             mat_en = materiali_disponibili[mat_it]
 
     with c_comp:
         if macro_it != "FASTENER":
-            pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-            st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
+            pills_comp = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+            st.pills("Modello Compatibilità:", options=pills_comp, selection_mode="single", key="comp_tags")
             
             if st.session_state.get("comp_tags") in ["FORTISSIMO", "MINIRACK"]:
                 st.warning("⚡ Strutturale")
@@ -487,7 +479,7 @@ with col_workarea:
 
     st.markdown("---")
 
-    # --- PARTE C: SELEZIONE PARTICOLARE ---
+    # SELEZIONE PARTICOLARE
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.selectbox(
         "Cerca o seleziona dettaglio:", 
@@ -498,20 +490,24 @@ with col_workarea:
         key="selectbox_part"
     )
 
-    # --- PARTE D: MENU FINITURE (SPOSTATO PER EVITARE BUG) ---
-    if st.session_state.get("check_fin_multi_toggle"):
-        st.info("🎨 Configurazione Finiture")
-        if macro_it == "WOODCOMP":
-            st.selectbox(
-                "Scegli Finitura Legno:", 
-                options=["-"] + list(FINITURE_LEGNO.keys()),
-                key="fin_wood_select_unique"
-            )
-        elif macro_it == "ASSEMBLY":
-            fa1, fa2, fa3 = st.columns(3)
-            with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1_new")
-            with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGRE_keys()), key="ass_fin_2_new")
-            with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3_new")
+    # --- LOGICA FINITURE UNIFICATA (VERSIONE SEMPLICE) ---
+    if macro_it in ["WOODCOMP", "ASSEMBLY"] and scelta_part_it:
+        st.markdown("---")
+        # Toggle stondato per attivare le finiture
+        attivatore = st.toggle("🎨 ATTIVA FINITURE", key="check_fin_multi_toggle")
+        
+        if attivatore:
+            if macro_it == "WOODCOMP":
+                st.selectbox(
+                    "Seleziona Finitura Legno:", 
+                    options=["-"] + list(FINITURE_LEGNO.keys()),
+                    key="fin_wood_select_unique"
+                )
+            else: # ASSEMBLY
+                f_col1, f_col2, f_col3 = st.columns(3)
+                with f_col1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1_new")
+                with f_col2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2_new")
+                with f_col3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3_new")
 
     st.markdown("---")
     st.subheader("✨ 3. Extra e Note")
