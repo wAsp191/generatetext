@@ -455,17 +455,25 @@ with col_left:
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Compatibilità")
     
+    # --- PARTE A: TOGGLE SEMPRE VISIBILI (in base alla categoria) ---
+    c_toggle, c_vuota = st.columns([1, 1])
+    with c_toggle:
+        if macro_it == "ASSEMBLY":
+            st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
+            st.toggle("🎨 ATTIVA FINITURE MULTIPLE", key="check_fin_multi_toggle")
+        
+        elif macro_it == "WOODCOMP":
+            st.toggle("🎨 SPECIFICA FINITURA LEGNO", key="check_fin_multi_toggle")
+
+    st.markdown("---")
+
+    # --- PARTE B: MATERIALE E COMPATIBILITÀ ---
     c_mat, c_comp = st.columns([1, 1.5])
     
     with c_mat:
-        # 1. GESTIONE PREFISSI/MATERIALI (Semplificata)
-        if macro_it == "ASSEMBLY":
-            st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
-        
         materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
         if materiali_disponibili:
-            # Usiamo un key dinamico per evitare conflitti tra categorie
-            mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"radio_{macro_it}")
+            mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"radio_mat_{macro_it}")
             mat_en = materiali_disponibili[mat_it]
 
     with c_comp:
@@ -479,7 +487,7 @@ with col_workarea:
 
     st.markdown("---")
 
-    # 2. SELEZIONE PARTICOLARE (Il trigger per tutto il resto)
+    # --- PARTE C: SELEZIONE PARTICOLARE ---
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.selectbox(
         "Cerca o seleziona dettaglio:", 
@@ -490,29 +498,23 @@ with col_workarea:
         key="selectbox_part"
     )
 
-    # 3. AREA FINITURE (ESTRATTA E SEMPRE ATTIVA PER WOODCOMP E ASSEMBLY)
-    if scelta_part_it:
-        if macro_it in ["WOODCOMP", "ASSEMBLY"]:
-            # Il toggle appare solo per queste due categorie
-            testo_toggle = "🎨 SPECIFICA FINITURA" if macro_it == "WOODCOMP" else "🎨 ATTIVA FINITURE MULTIPLE"
-            st.toggle(testo_toggle, key="check_fin_multi_toggle")
-            
-            if st.session_state.get("check_fin_multi_toggle"):
-                if macro_it == "WOODCOMP":
-                    st.selectbox(
-                        "🎨 Catalogo Finiture Legno:", 
-                        options=["-"] + list(FINITURE_LEGNO.keys()),
-                        key="fin_wood_select_unique"
-                    )
-                else: # ASSEMBLY
-                    fa1, fa2, fa3 = st.columns(3)
-                    with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1_new")
-                    with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2_new")
-                    with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3_new")
+    # --- PARTE D: MENU FINITURE (SPOSTATO PER EVITARE BUG) ---
+    if st.session_state.get("check_fin_multi_toggle"):
+        st.info("🎨 Configurazione Finiture")
+        if macro_it == "WOODCOMP":
+            st.selectbox(
+                "Scegli Finitura Legno:", 
+                options=["-"] + list(FINITURE_LEGNO.keys()),
+                key="fin_wood_select_unique"
+            )
+        elif macro_it == "ASSEMBLY":
+            fa1, fa2, fa3 = st.columns(3)
+            with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1_new")
+            with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGRE_keys()), key="ass_fin_2_new")
+            with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3_new")
 
     st.markdown("---")
     st.subheader("✨ 3. Extra e Note")
-    # ... (qui prosegue con il codice dei Pills Extra che avevi già)
     
     
     if scelta_part_it:
