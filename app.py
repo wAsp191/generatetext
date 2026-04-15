@@ -458,18 +458,23 @@ with col_workarea:
     c_mat, c_comp = st.columns([1, 1.5])
     
     with c_mat:
-        # LOGICA UNIFICATA: Checkbox finiture visibile per ASSEMBLY e WOODCOMP
+        # --- SEZIONE ASSEMBLY ---
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
-            st.checkbox("🎨 Aggiungi Finiture", key="check_fin_multi")
+            # Trasformato in toggle (stondato) come richiesto
+            st.toggle("🎨 ATTIVA FINITURE", key="check_fin_multi")
         
+        # --- SEZIONE WOODCOMP ---
         elif macro_it == "WOODCOMP":
-            st.checkbox("🎨 Specifica Finitura Legno", key="check_fin_multi")
+            # Inserito qui per essere sempre visibile quando selezioni WOODCOMP
+            st.toggle("🎨 SPECIFICA FINITURE", key="check_fin_multi")
+            
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
                 mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
                 mat_en = materiali_disponibili[mat_it]
         
+        # --- ALTRE CATEGORIE ---
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
@@ -483,11 +488,12 @@ with col_workarea:
             
             if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
                 st.warning("⚡ Strutturale")
-                uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
+                # Anche questo reso toggle per coerenza estetica
+                uni_en_1090_active = st.toggle("Certificazione UNI EN-1090", key="check_1090")
 
     st.markdown("---")
     
-    # SELEZIONE PARTICOLARE
+    # SELEZIONE PARTICOLARE (Sempre visibile)
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.selectbox(
         "Cerca o seleziona dettaglio:", 
@@ -497,6 +503,22 @@ with col_workarea:
         format_func=lambda x: f"🔧 {x} ({part_dict[x][0]})" if x else "Seleziona...",
         key="selectbox_part"
     )
+
+    # --- LOGICA DINAMICA FINITURE (SPOSTATA FUORI PER SICUREZZA) ---
+    # Appare subito dopo la selezione del particolare se il toggle è attivo
+    if st.session_state.get("check_fin_multi") and scelta_part_it:
+        st.info("🎨 Configurazione Finiture Attiva")
+        if macro_it == "WOODCOMP":
+            st.selectbox(
+                "Seleziona Finitura Legno:", 
+                options=["-"] + list(FINITURE_LEGNO.keys()),
+                key="fin_wood_select"
+            )
+        elif macro_it == "ASSEMBLY":
+            fa1, fa2, fa3 = st.columns(3)
+            with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1")
+            with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2")
+            with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3")
 
     st.markdown("---")
     st.subheader("✨ 3. Extra e Note")
