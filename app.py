@@ -458,39 +458,28 @@ with col_workarea:
     c_mat, c_comp = st.columns([1, 1.5])
     
     with c_mat:
-        # --- LOGICA TOGGLE (STONDATI) ---
+        # 1. GESTIONE PREFISSI/MATERIALI (Semplificata)
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
-            # Usiamo una chiave univoca 'multi_fin_toggle'
-            st.toggle("🎨 ATTIVA FINITURE", key="check_fin_multi_toggle")
         
-        elif macro_it == "WOODCOMP":
-            # Chiave univoca per Woodcomp
-            st.toggle("🎨 SPECIFICA FINITURE", key="check_fin_multi_toggle")
-            
-            materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
-            if materiali_disponibili:
-                mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key="radio_mat_wood")
-                mat_en = materiali_disponibili[mat_it]
-        
-        else:
-            materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
-            if materiali_disponibili:
-                mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key="radio_mat_gen")
-                mat_en = materiali_disponibili[mat_it]
+        materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
+        if materiali_disponibili:
+            # Usiamo un key dinamico per evitare conflitti tra categorie
+            mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"radio_{macro_it}")
+            mat_en = materiali_disponibili[mat_it]
 
     with c_comp:
         if macro_it != "FASTENER":
             pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-            comp_selezionata = st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
+            st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
             
-            if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
+            if st.session_state.get("comp_tags") in ["FORTISSIMO", "MINIRACK"]:
                 st.warning("⚡ Strutturale")
                 uni_en_1090_active = st.toggle("Certificazione UNI EN-1090", key="check_1090")
 
     st.markdown("---")
-    
-    # SELEZIONE PARTICOLARE
+
+    # 2. SELEZIONE PARTICOLARE (Il trigger per tutto il resto)
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.selectbox(
         "Cerca o seleziona dettaglio:", 
@@ -501,28 +490,30 @@ with col_workarea:
         key="selectbox_part"
     )
 
-    # --- NUOVA LOGICA FINITURE UNIFICATA (Anti-Errore Duplicate Key) ---
-    # Usiamo il riferimento al nuovo key del toggle
-    if st.session_state.get("check_fin_multi_toggle"):
-        st.info("🎨 Configurazione Finiture")
-        if macro_it == "WOODCOMP":
-            st.selectbox(
-                "Seleziona Finitura Legno:", 
-                options=["-"] + list(FINITURE_LEGNO.keys()),
-                key="fin_wood_select_unique" # Chiave cambiata per evitare conflitti
-            )
-        elif macro_it == "ASSEMBLY":
-            fa1, fa2, fa3 = st.columns(3)
-            # Chiavi rinominate per sicurezza assoluta
-            with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1_new")
-            with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2_new")
-            with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3_new")
-
-    st.markdown("---")
-    # ... resto del codice (Extra e Note)
+    # 3. AREA FINITURE (ESTRATTA E SEMPRE ATTIVA PER WOODCOMP E ASSEMBLY)
+    if scelta_part_it:
+        if macro_it in ["WOODCOMP", "ASSEMBLY"]:
+            # Il toggle appare solo per queste due categorie
+            testo_toggle = "🎨 SPECIFICA FINITURA" if macro_it == "WOODCOMP" else "🎨 ATTIVA FINITURE MULTIPLE"
+            st.toggle(testo_toggle, key="check_fin_multi_toggle")
+            
+            if st.session_state.get("check_fin_multi_toggle"):
+                if macro_it == "WOODCOMP":
+                    st.selectbox(
+                        "🎨 Catalogo Finiture Legno:", 
+                        options=["-"] + list(FINITURE_LEGNO.keys()),
+                        key="fin_wood_select_unique"
+                    )
+                else: # ASSEMBLY
+                    fa1, fa2, fa3 = st.columns(3)
+                    with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1_new")
+                    with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2_new")
+                    with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3_new")
 
     st.markdown("---")
     st.subheader("✨ 3. Extra e Note")
+    # ... (qui prosegue con il codice dei Pills Extra che avevi già)
+    
     
     if scelta_part_it:
         dati_part = part_dict[scelta_part_it]
