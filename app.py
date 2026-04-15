@@ -456,11 +456,54 @@ with col_left:
     st.info(TESTO_MANUALE)
 
 # =========================================================
-# 2. INTERFACCIA UTENTE (v9.6 - Soluzione Universale)
+# 2. INTERFACCIA UTENTE (v9.7 - INTEGRALE & STABILE)
 # =========================================================
 
-# ... (Parte iniziale invariata fino a col_workarea) ...
+# --- 2.1 FUNZIONI DI SUPPORTO & STATO ---
+def activate_reset():
+    for key in list(st.session_state.keys()):
+        del st.session_state[key]
+    st.rerun()
 
+# Inizializzazione variabili di sicurezza
+uni_en_1090_active = False 
+mat_en, part_en, normativa = "", "", ""
+extra_selezionati = []
+blocco_incompatibilita = False 
+LARGHEZZA_IMMAGINE = 600 
+
+st.title("⚙️ REG - Title Generator & Classification")
+
+# --- 2.2 TASTO AZZERA ---
+c1, c2, c3 = st.columns([2, 1, 2])
+with c2:
+    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="global_reset_btn")
+
+st.markdown("---")
+
+# --- 2.3 LAYOUT SIDEBAR / AREA LAVORO ---
+# Definiamo le colonne che prima mancavano nel tuo codice
+col_left, col_workarea = st.columns([1, 3], gap="large")
+
+with col_left:
+    st.subheader("📂 1. Categoria")
+    macro_it = st.radio(
+        "Seleziona categoria:", 
+        options=list(DATABASE.keys()), 
+        key="radio_macro_main", 
+        label_visibility="collapsed"
+    )
+    st.markdown("---")
+    st.info("""
+    **ISTRUZIONI:**
+    1. Scegli Categoria.
+    2. Definisci il Materiale.
+    3. Seleziona il Pezzo.
+    4. Scegli la Finitura.
+    5. Inserisci le Quote.
+    """)
+
+# --- 2.4 AREA DI LAVORO CENTRALE ---
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Compatibilità")
     
@@ -470,11 +513,17 @@ with col_workarea:
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
             st.toggle("🎨 ATTIVA FINITURE MULTIPLE", key="check_fin_multi_toggle")
+            mat_it = "ASSEMBLY"
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
-                # Usiamo una key fissa per il radio del materiale
-                mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"radio_mat_{macro_it}")
+                # Key dinamica per evitare conflitti tra categorie
+                mat_it = st.radio(
+                    f"Materiale {macro_it}:", 
+                    options=list(materiali_disponibili.keys()), 
+                    horizontal=True, 
+                    key=f"radio_mat_{macro_it}"
+                )
                 mat_en = materiali_disponibili[mat_it]
 
     with c_comp:
@@ -501,21 +550,21 @@ with col_workarea:
         key="selectbox_part_final"
     )
 
-    # --- LOGICA FINITURE SEMPLIFICATA (A PROVA DI BUG) ---
+    # --- LOGICA FINITURE UNIVERSALE ---
     if scelta_part_it:
         if macro_it == "WOODCOMP":
-            # Creiamo una lista unica con TUTTE le finiture del database
+            # Uniamo tutte le finiture in una lista unica
             tutte_le_finiture = {}
             for categoria in FINITURE_LEGNO.values():
                 tutte_le_finiture.update(categoria)
             
             st.markdown("---")
             st.selectbox(
-                "🎨 Catalogo Finiture (Laminati / Nobilitati):",
+                "🎨 Catalogo Finiture (Laminati / Nobilitati / Truciolati):",
                 options=["-"] + sorted(list(tutte_le_finiture.keys())),
                 key="fin_wood_select",
                 index=0,
-                help="Cerca qui la finitura desiderata indipendentemente dal materiale scelto."
+                help="Cerca qui la finitura."
             )
 
         elif macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi_toggle"):
@@ -531,7 +580,7 @@ with col_workarea:
 
         st.markdown("---")
         
-        # --- GESTIONE EXTRA (PILLS) ---
+        # --- GESTIONE EXTRA ---
         dati_part = part_dict[scelta_part_it]
         part_en = dati_part[0]
         extra_dedicati_dict = dati_part[1]
@@ -540,7 +589,6 @@ with col_workarea:
         if extra_options:
             extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags_final")
             
-            # Varianti e input manuali
             for ex in (extra_selezionati or []):
                 if ex in SUB_OPTIONS_CONFIG:
                     st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
@@ -550,7 +598,6 @@ with col_workarea:
     st.text_input("Note libere (Traduzione automatica):", key="extra_text_input").strip()
 
     st.markdown("---")
-
     
     # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento")
