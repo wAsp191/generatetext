@@ -493,7 +493,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
         # 4. ASSEMBLAGGIO LOGICO
         # Divisione tra prefissi (TERMINI_ANTICIPATI) e suffissi
         pre = []
-suf = []
+        suf = []
 
 # Trasformiamo TERMINI_ANTICIPATI in un set di maiuscole per lookup veloce O(1)
 SET_ANTICIPATI = {term.upper() for term in TERMINI_ANTICIPATI}
