@@ -500,21 +500,22 @@ with col_workarea:
         key="selectbox_part_final"
     )
 
-    # --- LOGICA FINITURE (INTEGRATA E FILTRATA) ---
-    if scelta_part_it:
-        # CASO A: WOODCOMP (Sempre visibile se materiale scelto, filtrato per tipologia)
+    # --- LOGICA FINITURE WOODCOMP (FORZATA) ---
         if macro_it == "WOODCOMP":
-            # mat_it recuperato dal radio button sopra
-            if mat_it in FINITURE_LEGNO:
-                opzioni_per_materiale = FINITURE_LEGNO[mat_it]
+            # Andiamo a leggere direttamente il valore dal widget radio usando la sua chiave
+            materiale_scelto_stato = st.session_state.get(f"radio_mat_{macro_it}")
+            
+            if materiale_scelto_stato in FINITURE_LEGNO:
+                opzioni_per_materiale = FINITURE_LEGNO[materiale_scelto_stato]
                 st.selectbox(
-                    f"🎨 Finiture disponibili per {mat_it}:",
+                    f"🎨 Finiture disponibili per {materiale_scelto_stato}:",
                     options=["-"] + list(opzioni_per_materiale.keys()),
                     key="fin_wood_select",
-                    help="Il catalogo si aggiorna automaticamente in base al materiale scelto sopra."
+                    index=0
                 )
             else:
-                st.caption("ℹ️ Seleziona un materiale sopra per vedere le finiture disponibili.")
+                # Se non ha ancora cliccato nulla, mostriamo un avviso
+                st.info("💡 Seleziona un materiale sopra (Laminato, Nobilitato, ecc.) per scegliere la finitura.")
 
         # CASO B: ASSEMBLY (Visibile solo se toggle attivo)
         elif macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi_toggle"):
