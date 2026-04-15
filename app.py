@@ -413,10 +413,10 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. INTERFACCIA UTENTE (v9.2 - Unified Finishes Layout)
+# 2. INTERFACCIA UTENTE (v9.1 - Fix Dinamismo Finiture)
 # =========================================================
 
-# --- INIZIALIZZAZIONE VARIABILI DI STATO ---
+# --- INIZIALIZZAZIONE VARIABILI DI STATO (Prevenzione NameError) ---
 uni_en_1090_active = False 
 mat_en, part_en, normativa, tag_suggerimento = "", "", "", ""
 extra_dedicati_dict = {}
@@ -428,11 +428,18 @@ LARGHEZZA_IMMAGINE = 600
 TESTO_MANUALE = """
 **PROCEDURA STANDARD:**
 1. **CATEGORIA**: Seleziona il gruppo a sinistra.
-2. **MODELLO**: Scegli materiale e compatibilità.
-3. **PARTICOLARE**: Cerca il componente e aggiungi extra.
-4. **QUOTE**: Inserisci i valori in mm.
-5. **GENERA**: Clicca il tasto rosso.
+2. **MODELLO**: Scegli tipologia materiale e la compatibilità (F25, Fortissimo, ecc.).
+3. **PARTICOLARE**: Cerca il componente specifico e aggiungi le varie caratteristiche
+4. **QUOTE**: Inserisci i valori in millimetri.
+5. **GENERA**: Clicca il tasto rosso in fondo.
+
+---
+**NOTE TECNICHE:**
+* I prefissi L-P-H sono automatici.
+* Le note libere vengono tradotte in inglese.
+* Lunghezza max stringa: 100 caratteri.
 """
+
 
 st.title("⚙️ REG - Title Generator & Classification")
 
@@ -449,6 +456,7 @@ col_left, col_workarea = st.columns([1, 3], gap="large")
 with col_left:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro", label_visibility="collapsed")
+    
     st.markdown("---")
     st.info(TESTO_MANUALE)
 
@@ -458,27 +466,26 @@ with col_workarea:
     c_mat, c_comp = st.columns([1, 1.5])
     
     with c_mat:
-        # Toggle Prefisso solo per ASSEMBLY
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
-        
-        # Radio Materiali (con chiave unica per categoria)
-        materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
-        if materiali_disponibili:
-            mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"mat_radio_{macro_it}")
-            mat_en = materiali_disponibili[mat_it]
+            st.checkbox("Aggiungi Finiture Multiple", key="check_fin_multi")
+        else:
+            materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
+            if materiali_disponibili:
+                mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
+                mat_en = materiali_disponibili[mat_it]
 
     with c_comp:
         if macro_it != "FASTENER":
-            pills_comp = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-            st.pills("Modello Compatibilità:", options=pills_comp, selection_mode="single", key="comp_tags")
+            pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+            comp_selezionata = st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
             
-            if st.session_state.get("comp_tags") in ["FORTISSIMO", "MINIRACK"]:
+            if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
                 st.warning("⚡ Strutturale")
-                uni_en_1090_active = st.toggle("Certificazione UNI EN-1090", key="check_1090")
+                uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
 
     st.markdown("---")
-
+    
     # SELEZIONE PARTICOLARE
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.selectbox(
@@ -490,28 +497,8 @@ with col_workarea:
         key="selectbox_part"
     )
 
-    # --- LOGICA FINITURE UNIFICATA (VERSIONE SEMPLICE) ---
-    if macro_it in ["WOODCOMP", "ASSEMBLY"] and scelta_part_it:
-        st.markdown("---")
-        # Toggle stondato per attivare le finiture
-        attivatore = st.toggle("🎨 ATTIVA FINITURE", key="check_fin_multi_toggle")
-        
-        if attivatore:
-            if macro_it == "WOODCOMP":
-                st.selectbox(
-                    "Seleziona Finitura Legno:", 
-                    options=["-"] + list(FINITURE_LEGNO.keys()),
-                    key="fin_wood_select_unique"
-                )
-            else: # ASSEMBLY
-                f_col1, f_col2, f_col3 = st.columns(3)
-                with f_col1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1_new")
-                with f_col2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2_new")
-                with f_col3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3_new")
-
     st.markdown("---")
     st.subheader("✨ 3. Extra e Note")
-    
     
     if scelta_part_it:
         dati_part = part_dict[scelta_part_it]
@@ -523,6 +510,23 @@ with col_workarea:
         if extra_options:
             extra_selezionati = st.pills("Caratteristiche/Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
             
+            # --- LOGICA DINAMICA FINITURE WOODCOMP ---
+            if macro_it == "WOODCOMP":
+                # Verifichiamo se l'utente ha selezionato il tipo di pannello
+                lista_attivi = extra_selezionati if extra_selezionati else []
+                tipo_selezionato = [x for x in lista_attivi if x in ["LAMINATO", "NOBILITATO", "TRUCIOLARE"]]
+                
+                if tipo_selezionato:
+                    st.selectbox(
+                        f"🎨 Catalogo Finiture ({tipo_selezionato[0]}):", 
+                        options=list(FINITURE_LEGNO.keys()),
+                        key="fin_wood_select",
+                        index=None,
+                        placeholder="Cerca sigla o descrizione finitura..."
+                    )
+                else:
+                    st.caption("ℹ️ Seleziona 'LAMINATO' o 'NOBILITATO' nei Pills sopra per scegliere la finitura.")
+
             # Gestione Incompatibilità
             tags_attivi_set = set(extra_selezionati) if extra_selezionati else set()
             for gruppo in COPPIE_INCOMPATIBILI:
@@ -538,21 +542,13 @@ with col_workarea:
                 elif ex in EXTRA_CON_INPUT_MANUALE:
                     st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
 
-    # --- LOGICA DINAMICA FINITURE (UNIFICATA) ---
-    if st.session_state.get("check_fin_multi"):
-        st.markdown("###### 🎨 Configurazione Finiture")
-        if macro_it == "WOODCOMP":
-            st.selectbox(
-                "🎨 Catalogo Finiture Legno:", 
-                options=["-"] + list(FINITURE_LEGNO.keys()),
-                key="fin_wood_select",
-                index=0
-            )
-        elif macro_it == "ASSEMBLY":
-            fa1, fa2, fa3 = st.columns(3)
-            with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1")
-            with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2")
-            with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3")
+    # --- LOGICA FINITURE MULTIPLE ASSEMBLY ---
+    if macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi"):
+        st.markdown("###### 🎨 Configurazione Finiture Multiple (Max 3)")
+        fa1, fa2, fa3 = st.columns(3)
+        with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1")
+        with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2")
+        with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3")
 
     st.text_input("Note libere (Traduzione automatica):", key="extra_text").strip()
 
