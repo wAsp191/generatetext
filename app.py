@@ -573,7 +573,7 @@ with col_workarea:
         )
         
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.0 - Fin. Wood)
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.2 - Integrale)
 # =========================================================
 
 st.divider()
@@ -623,32 +623,36 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             dim_final = " ".join(lph)
             if dia_v: dim_final += f" Ø{dia_v}"
 
-        # 2. GESTIONE FINITURE (LOGICA RICHIESTA)
+        # 2. GESTIONE FINITURE (LOGICA CORRETTA PER DATABASE NIDIFICATO)
         sigle_finiture = []
+        
+        # Creiamo un dizionario "piatto" per trovare la sigla partendo dal nome, 
+        # cercando in tutte le sottocategorie (Laminato, Nobilitato, ecc.)
+        lookup_finiture_unificato = {}
+        for sub_cat in FINITURE_LEGNO.values():
+            lookup_finiture_unificato.update(sub_cat)
         
         # Caso WOODCOMP: Finitura singola
         if macro_it == "WOODCOMP":
             val_scelto = st.session_state.get("fin_wood_select")
-            if val_scelto and val_scelto in FINITURE_LEGNO:
-                sigle_finiture.append(FINITURE_LEGNO[val_scelto])
+            if val_scelto and val_scelto in lookup_finiture_unificato:
+                sigle_finiture.append(lookup_finiture_unificato[val_scelto])
         
         # Caso ASSEMBLY: Finiture multiple (max 3)
         elif macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi"):
             for i in range(1, 4):
                 f_key = f"ass_fin_{i}"
                 f_val = st.session_state.get(f_key)
-                if f_val and f_val != "-" and f_val in FINITURE_LEGNO:
-                    sigle_finiture.append(FINITURE_LEGNO[f_val])
+                if f_val and f_val != "-" and f_val in lookup_finiture_unificato:
+                    sigle_finiture.append(lookup_finiture_unificato[f_val])
         
         stringa_finiture = "/".join(sigle_finiture) if sigle_finiture else ""
 
         # 3. EXTRA (PILLS) - Ordine prefissi/suffissi
         pills_tradotte = []
-        # Seguiamo l'ordine del database per coerenza
         for ex in list(extra_dedicati_dict.keys()):
             if extra_selezionati and ex in extra_selezionati:
                 base = extra_dedicati_dict.get(ex, ex.upper())
-                # Sub-opzioni
                 if ex in SUB_OPTIONS_CONFIG:
                     sub_v = st.session_state.get(f"sub_{ex}", "")
                     trad = SUB_OPTIONS_CONFIG[ex].get(sub_v, "")
@@ -672,32 +676,28 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             for ita, eng in GLOSSARIO_TECNICO.items():
                 note_it = note_it.replace(ita, eng)
             try:
+                from deep_translator import GoogleTranslator
                 note_en = GoogleTranslator(source='it', target='en').translate(note_it).upper()
             except:
                 note_en = note_it.upper()
 
         # 5. ASSEMBLAGGIO FINALE
-        # Evitiamo "METAL METAL"
         m_pfx = mat_en if not (mat_en == "METAL" and "METAL" in part_en.upper()) else ""
         
-        # Schema: MATERIALE + PREFISSI + NOME + MISURE + SUFFISSI + FINITURE_LEGNO
         parti_corpo = [m_pfx, pre_str, part_en, dim_final, suf_str, stringa_finiture]
         corpo = " ".join([p for p in parti_corpo if p.strip()]).replace("  ", " ").strip()
         
         if note_en:
             corpo = f"{corpo}, {note_en}"
 
-        # Aggiunta Modello (Trattino)
         comp_tags = st.session_state.get("comp_tags", "")
         res = f"{corpo} - {comp_tags}" if comp_tags else corpo
 
-        # Pulizia Grammaticale (WITH/AND)
         res = res.upper().replace("WITH WITH", "WITH")
         if res.count("WITH") > 1:
             bits = res.split("WITH")
             res = bits[0] + "WITH" + " AND".join(bits[1:])
 
-        # Prefissi Speciali
         if uni_en_1090_active: res = f"UNI EN-1090 - {res}"
         if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled"):
             res = f"ASSEMBLED - {res}"
