@@ -315,14 +315,16 @@ DATABASE = {
     "WOOD COMP": {
         "macro_en": "WOOD COMPONENT",
         "Particolari": {
-            "Ripiano Legno": ["WOODEN SHELF", {"Con mensole": "WITH BRACKET", "Con lati bordati": "WITH EDGED SIDES", "Con zoccolatura": "WITH PLINTH", "Con viteria": "WITH SCREWS", "Fresata": "MILLING"}, "SHELF"],
-            "Schienale Legno": ["WOODEN BACK", {"Con mensole": "WITH BRACKET", "Con viteria": "WITH SCREWS", "Con lati bordati": "WITH EDGED SIDES"}, "PANEL"],
-            "Cielino": ["WOODEN CANOPY", {"Con mensole": "WITH BRACKET", "Con viteria": "WITH SCREWS", "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con lati bordati": "WITH EDGED SIDES"}, "CANOPY"],
-            "Zoccolatura": ["WOODEN PLINTH", {"Compatibilità piede di base (+)": "", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "PLINTH"],
-            "Fiancata": ["WOODEN SIDE PANEL", {"Con mensole": "WITH BRACKET", "Sagomata": "SHAPED", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS", "Fresata": "MILLING"}, "SIDE PANEL"],
-            "Copripiede": ["WOODEN FOOT-COVER", {"Compatibilità piede di base (+)": "", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "COVER"],
-            "Coprimontante": ["WOODEN UPRIGHT-COVER", {"Minirack": "MINIRACK", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "COVER"],
-            "Compensazione": ["WOODEN FILLER PIECE", {"Per Top legno": "FOR TOP SHELF"}, "SPACER"]
+            "Ripiano Legno": ["WOODEN SHELF", {"FINITURA (+)": "", "Con mensole": "WITH BRACKET", "Con lati bordati": "WITH EDGED SIDES", "Con zoccolatura": "WITH PLINTH", "Con viteria": "WITH SCREWS", "Fresata": "MILLING"}, "SHELF"],
+            "Schienale Legno": ["WOODEN BACK", {"FINITURA (+)": "", "Con mensole": "WITH BRACKET", "Con viteria": "WITH SCREWS", "Con lati bordati": "WITH EDGED SIDES"}, "PANEL"],
+            "Cielino": ["WOODEN CANOPY", {"FINITURA (+)": "", "Con mensole": "WITH BRACKET", "Con viteria": "WITH SCREWS", "Dritto": "STRAIGHT", "Inclinato": "SLOPING", "Con finestra": "WITH WINDOW", "Stondato": "CURVED", "Centrale": "CENTRAL", "Con illuminazione": "WITH LIGHTING", "Con lati bordati": "WITH EDGED SIDES"}, "CANOPY"],
+            "Zoccolatura": ["WOODEN PLINTH", {"FINITURA (+)": "", "Compatibilità piede di base (+)": "", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "PLINTH"],
+            "Fiancata": ["WOODEN SIDE PANEL", {"FINITURA (+)": "", "Con mensole": "WITH BRACKET", "Sagomata": "SHAPED", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS", "Fresata": "MILLING"}, "SIDE PANEL"],
+            "Copripiede": ["WOODEN FOOT-COVER", {"FINITURA (+)": "", "Compatibilità piede di base (+)": "", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "COVER"],
+            "Coprimontante": ["WOODEN UPRIGHT-COVER", {"FINITURA (+)": "", "Minirack": "MINIRACK", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "COVER"],
+            "Compensazione": ["WOODEN FILLER PIECE", {"FINITURA (+)": "", "Per Top legno": "FOR TOP SHELF"}, "SPACER"]
+        }
+    }
         }
     },
     "PLASTIC COMP": {
@@ -414,7 +416,7 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. INTERFACCIA UTENTE (v9.3 - Universal Woodcomp & Assembly)
+# 2. INTERFACCIA UTENTE (v9.4 - Pill-Linked Woodcomp)
 # =========================================================
 
 # --- INIZIALIZZAZIONE VARIABILI DI STATO ---
@@ -464,7 +466,6 @@ with col_workarea:
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
-                # Nota: la chiave del radio è dinamica per resettarsi al cambio categoria
                 mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"mat_rad_{macro_it}")
                 mat_en = materiali_disponibili[mat_it]
 
@@ -498,24 +499,24 @@ with col_workarea:
         part_en = dati_part[0]
         extra_dedicati_dict = dati_part[1]
         
-        # 1. Pills delle caratteristiche
+        # 1. Visualizzazione Pills
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
             extra_selezionati = st.pills("Caratteristiche/Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-        # --- LOGICA FINITURE WOODCOMP SEMPRE PRESENTE ---
-        if macro_it == "WOODCOMP":
-            st.markdown("###### 🎨 Finitura Componente")
-            # Creiamo il catalogo universale unendo Laminato, Nobilitato e Truciolare
-            catalogo_completo_legno = {}
+        # --- LOGICA FINITURE WOOD COMP (LEGATA AL PILL) ---
+        if macro_it == "WOOD COMP" and "FINITURA (+)" in (extra_selezionati or []):
+            st.info("🎨 Catalogo Finiture Legno")
+            # Creiamo il catalogo universale
+            catalogo_legno = {}
             for sub_cat in FINITURE_LEGNO.values():
-                catalogo_completo_legno.update(sub_cat)
+                catalogo_legno.update(sub_cat)
             
             st.selectbox(
-                "Seleziona finitura dal catalogo completo:",
-                options=["-"] + sorted(list(catalogo_completo_legno.keys())),
+                "Scegli la finitura specifica:",
+                options=["-"] + sorted(list(catalogo_legno.keys())),
                 key="fin_wood_select",
-                help="Cerca per sigla o descrizione. Include tutte le tipologie di legno."
+                help="Seleziona una sigla dal catalogo unico."
             )
 
         # 2. Gestione Conflitti
@@ -533,10 +534,9 @@ with col_workarea:
             elif ex in EXTRA_CON_INPUT_MANUALE:
                 st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
 
-    # --- LOGICA FINITURE MULTIPLE ASSEMBLY ---
+    # --- LOGICA FINITURE MULTIPLE ASSEMBLY (INVARIATA) ---
     if macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi"):
         st.info("🎨 Configurazione Finiture Multiple (Max 3)")
-        # Catalogo universale anche per Assembly
         catalogo_ass = {}
         for cat in FINITURE_LEGNO.values(): catalogo_ass.update(cat)
         
