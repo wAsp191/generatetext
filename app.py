@@ -324,8 +324,7 @@ DATABASE = {
             "Coprimontante": ["WOODEN UPRIGHT-COVER", {"FINITURA (+)": "", "Minirack": "MINIRACK", "Con lati bordati": "WITH EDGED SIDES", "Con viteria": "WITH SCREWS"}, "COVER"],
             "Compensazione": ["WOODEN FILLER PIECE", {"FINITURA (+)": "", "Per Top legno": "FOR TOP SHELF"}, "SPACER"]
         }
-    }
-        }
+    
     },
     "PLASTIC COMP": {
         "macro_en": "PLASTIC COMPONENT",
