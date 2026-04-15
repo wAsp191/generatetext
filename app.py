@@ -490,20 +490,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             except:
                 note_tradotte = extra_libero.upper()
 
-        # --- NUOVA LOGICA DI SMISTAMENTO (MATCH PAROLA INTERA) ---
-pre = []
-suf = []
-
-for p in pills_tradotte:
-    # Dividiamo la frase del Pill in singole parole (rimuovendo eventuale punteggiatura se necessario)
-    # Trasformiamo in set per una ricerca O(1) e case-insensitive
-    parole_nel_pill = set(p.upper().split())
-    
-    # Controlliamo se almeno una parola esatta è presente nella lista TERMINI_ANTICIPATI
-    if any(term.upper() in parole_nel_pill for term in TERMINI_ANTICIPATI):
-        pre.append(p)
-    else:
-        suf.append(p)
+        # 4. ASSEMBLAGGIO LOGICO
+        # Divisione tra prefissi (TERMINI_ANTICIPATI) e suffissi
+        pre = [ex for ex in extra_pills_final if any(term in ex for term in TERMINI_ANTICIPATI)]
+        suf = [ex for ex in extra_pills_final if ex not in pre]
         
         pre_str = " ".join(pre)
         suf_str = " ".join(suf)
