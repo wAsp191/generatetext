@@ -458,27 +458,25 @@ with col_workarea:
     c_mat, c_comp = st.columns([1, 1.5])
     
     with c_mat:
-        # --- SEZIONE ASSEMBLY ---
+        # --- LOGICA TOGGLE (STONDATI) ---
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
-            # Trasformato in toggle (stondato) come richiesto
-            st.toggle("🎨 ATTIVA FINITURE", key="check_fin_multi")
+            # Usiamo una chiave univoca 'multi_fin_toggle'
+            st.toggle("🎨 ATTIVA FINITURE", key="check_fin_multi_toggle")
         
-        # --- SEZIONE WOODCOMP ---
         elif macro_it == "WOODCOMP":
-            # Inserito qui per essere sempre visibile quando selezioni WOODCOMP
-            st.toggle("🎨 SPECIFICA FINITURE", key="check_fin_multi")
+            # Chiave univoca per Woodcomp
+            st.toggle("🎨 SPECIFICA FINITURE", key="check_fin_multi_toggle")
             
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
-                mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
+                mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key="radio_mat_wood")
                 mat_en = materiali_disponibili[mat_it]
         
-        # --- ALTRE CATEGORIE ---
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
-                mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
+                mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key="radio_mat_gen")
                 mat_en = materiali_disponibili[mat_it]
 
     with c_comp:
@@ -488,12 +486,11 @@ with col_workarea:
             
             if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
                 st.warning("⚡ Strutturale")
-                # Anche questo reso toggle per coerenza estetica
                 uni_en_1090_active = st.toggle("Certificazione UNI EN-1090", key="check_1090")
 
     st.markdown("---")
     
-    # SELEZIONE PARTICOLARE (Sempre visibile)
+    # SELEZIONE PARTICOLARE
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.selectbox(
         "Cerca o seleziona dettaglio:", 
@@ -504,21 +501,25 @@ with col_workarea:
         key="selectbox_part"
     )
 
-    # --- LOGICA DINAMICA FINITURE (SPOSTATA FUORI PER SICUREZZA) ---
-    # Appare subito dopo la selezione del particolare se il toggle è attivo
-    if st.session_state.get("check_fin_multi") and scelta_part_it:
-        st.info("🎨 Configurazione Finiture Attiva")
+    # --- NUOVA LOGICA FINITURE UNIFICATA (Anti-Errore Duplicate Key) ---
+    # Usiamo il riferimento al nuovo key del toggle
+    if st.session_state.get("check_fin_multi_toggle"):
+        st.info("🎨 Configurazione Finiture")
         if macro_it == "WOODCOMP":
             st.selectbox(
                 "Seleziona Finitura Legno:", 
                 options=["-"] + list(FINITURE_LEGNO.keys()),
-                key="fin_wood_select"
+                key="fin_wood_select_unique" # Chiave cambiata per evitare conflitti
             )
         elif macro_it == "ASSEMBLY":
             fa1, fa2, fa3 = st.columns(3)
-            with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1")
-            with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2")
-            with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3")
+            # Chiavi rinominate per sicurezza assoluta
+            with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1_new")
+            with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2_new")
+            with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3_new")
+
+    st.markdown("---")
+    # ... resto del codice (Extra e Note)
 
     st.markdown("---")
     st.subheader("✨ 3. Extra e Note")
@@ -642,19 +643,19 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             dim_final = " ".join(lph)
             if dia_v: dim_final += f" Ø{dia_v}"
 
-        # 2. GESTIONE FINITURE (LOGICA UNIFICATA)
+        # 2. GESTIONE FINITURE (LOGICA AGGIORNATA)
         sigle_finiture = []
         
-        # Ora controlliamo il flag unificato 'check_fin_multi'
-        if st.session_state.get("check_fin_multi"):
+        # Controlliamo il nuovo key del toggle
+        if st.session_state.get("check_fin_multi_toggle"):
             if macro_it == "WOODCOMP":
-                val_scelto = st.session_state.get("fin_wood_select")
+                val_scelto = st.session_state.get("fin_wood_select_unique") # Nuova key
                 if val_scelto and val_scelto != "-" and val_scelto in FINITURE_LEGNO:
                     sigle_finiture.append(FINITURE_LEGNO[val_scelto])
             
             elif macro_it == "ASSEMBLY":
                 for i in range(1, 4):
-                    f_val = st.session_state.get(f"ass_fin_{i}")
+                    f_val = st.session_state.get(f"ass_fin_{i}_new") # Nuova key
                     if f_val and f_val != "-" and f_val in FINITURE_LEGNO:
                         sigle_finiture.append(FINITURE_LEGNO[f_val])
         
