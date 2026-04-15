@@ -43,159 +43,157 @@ def activate_reset():
 # 1. DATABASE E CONFIGURAZIONI (v9.0 - Finiture Legno)
 # =========================================================
 
-# --- 1.1 CONFIGURAZIONE FINITURE LEGNO (CATEGORIZZATA) ---
-# Struttura: "MATERIALE": { "Nome Utente": "Sigla" }
-
+# --- 1.1 CONFIGURAZIONE FINITURE LEGNO ---
+# La chiave è ciò che vede l'utente, il valore è ciò che finisce nella stringa
 FINITURE_LEGNO = {
-    "LAMINATO": {
-        "LE04 - LAM R20064 ROVERE": "LE04",
-        "LE06 - LAM. PFLEIDERER U16002W TORTORA": "LE06",
-        "LE11 - LAM. KASTAMONU A847 ALASKA": "LE11",
-        "LE15 - LAM ANTIGR THERMOP U12231 PFLEDERER": "LE15",
-        "LE24 - LAM. ROV. MILANO R20095MO": "LE24",
-        "LE27 - CLEAF SHERWOOD S073SJP": "LE27",
-        "LE40 - LAM. KAINDL 37744 BIANCO": "LE40",
-        "LE42 - LAM. KAINDL 37777 FRASSINO COIMBRA": "LE42",
-        "LE63 - LAM. ROV. MILANO R20095 ML": "LE63",
-        "LE73 - LAM. ROVERE KRONO D4225 OV": "LE73",
-        "LE79 - LAM PFLEIDERER F76044 SD - GRIGIO": "LE79",
-        "LE86 - LAM EUREKA OAK DA1 FIN.EVO": "LE86",
-        "LH06 - LAM. FUNDER 0260 AREZZO": "LH06",
-        "LH23 - LAM. CLEAF SABLE' VALLEY LR22": "LH23",
-        "LH27 - LAM. CLEAF ARES FB11 BETON": "LH27",
-        "LH29 - LAM. PFLEIDERER R42033 ML": "LH29",
-        "LH37 - LAM. CLEAF MONTILLA FC 18": "LH37",
-        "LH38 - LAM. CLEAF MILLENIUM S083 NAGOLD": "LH38",
-        "LH40 - LAM. SAIB CH3013 GRIGIO GRAFITE": "LH40",
-        "LH62 - LAM. CLEAF PIOMBO HM07": "LH62",
-        "LH64 - LAM. EGGER W1000ST19 B.CO PREMIUM": "LH64",
-        "LH81 - LAM. EGGER H3331 ST15 HYDROFUGE": "LH81",
-        "LH83 - LAM. BIANCO TRAFFICO SDW10140": "LH83",
-        "LH95 - LAM. PFLEIDERER ROVERE R20099": "LH95",
-        "LH98 - LAM. PFLEIDERER BLU CRISTAL U18003": "LH98",
-        "LH99 - LAM. SM'ART 4565 OLMO MIELE": "LH99",
-        "LTH1 - LAM. THERMOPAL U506 ANTRHAZIT": "LTH1",
-        "LU51 - LAM. AMET.U504 ST BLU": "LU51",
-        "LU61 - LAM. EGGER H3303": "LU61",
-        "LU62 - LAM. ABET LAMINATI 1860PRINT": "LU62",
-        "LU63 - LAM. GREENLAM 5049 - SUEDE RED OAK": "LU63",
-        "LU64 - LAM. EGGER H3152 ROV VICEN SBIA ST19": "LU64",
-        "LU71 - LAM. KRONOSPAN D4823VL": "LU71",
-        "LU73 - LAM. ABET PRINT 1832 F. SEI": "LU73",
-        "LU74 - LAM. FORMICA K 1238 UN": "LU74",
-        "LU75 - LAM. LEGNOPAN 111 FIN ROV 19POR NAT": "LU75",
-        "L035 - LAM. PRINT 421 SEI NERO": "L035",
-        "L036 - LAM. ABET PRINT FIN. 460 SEI VERDE": "L036",
-        "L039 - LAM. PRINT 871 SEI GRIGIO CENE": "L039",
-        "L040 - LAM. PRINT 475 SEI GRIGIO SILICIO": "L040",
-        "L041 - LAM. PRINT 411 SEI BIANCO": "L041",
-        "L386 - LAM. OLMO LEONE PLEID.R37009 MO": "L386",
-        "L406 - LAM. PRINT 406 BIANCO": "L406",
-        "L410 - LAM. ABET PRINT 410 SEI BIANCO": "L410",
-        "L418 - LAM. PRINT 418 SEI BIANCO": "L418",
-        "L428 - LAM. PRINT 428 SEI BLU": "L428",
-        "L466 - LAM. PHOENIX F76026 MARRONE CR PFL": "L466",
-        "L469 - LAM. PRINT 469 SEI GIALLO": "L469",
-        "L559 - LAM. FUNDERMAX 0921 SU BROWN SILVER": "L559",
-        "L563 - LAM. PRINT 563 MANDARIN GRIGIO": "L563",
-        "L578 - LAM. ROVERE BARDOLINO": "L578",
-        "L579 - LAM. PFLEID.R20128 ROVERE SON.F.RU": "L579",
-        "L590 - LAM. EGGER U332 ARANCIO": "L590",
-        "L641 - LAM. THERMOPAL SR 209/01 B.LUC": "L641",
-        "L696 - LAM. THERM.F21/005 OLIVO SPAGN CHIA": "L696",
-        "L716 - LAM. THERMOPAL U018(47) GRIGIO": "L716",
-        "L745 - LAM. THERM R20031RU L745": "L745",
-        "L752 - LAM. PFLEIDERER W10003 MP BIANCO": "L752",
-        "L767 - LAM. EGGER ROV.HALIFAX H1180 ST37": "L767",
-        "L786 - LAM. PRINT 1677 ACERO EX PURICELLI": "L786",
-        "L814 - LAM. ABET 1666 FIN SEI DUE FAGGIO": "L814",
-        "L833 - LAM. PRINT 2810 CLIMB": "L833",
-        "L835 - LAM. PRINT 835 SEI ARANCIO": "L835",
-        "L852 - LAM. PRINT 852 SEI BLU": "L852",
-        "L873 - LAM. PRINT 873 FIN SATINATA": "L873",
-        "L879 - LAM. PRINT 879 SEI GRIGIO ANTRACITE": "L879",
-    },
-    "NOBILITATO": {
-        "LU70 - NOB. KRONO ABETE D79841": "LU70",
-        "NE05 - NOB. PFLEIDERER U16002W TORTORA": "NE05",
-        "NE12 - NOB. KASTAMONU A847 ALASKA": "NE12",
-        "NE19 - NOB. EGGER W911 BIANCO ST15": "NE19",
-        "NE28 - NOB. CLEAF SHERWOOD S073 S.J.P.": "NE28",
-        "NE38 - NOB. KAINDL 34140 RV ROV.SANREMO CL": "NE38",
-        "NE41 - NOB. KAINDL 37777 FRASSINO COIMBRA": "NE41",
-        "NE46 - NOB. PFLEIDERER U19008 VERDE SCURO": "NE46",
-        "NE62 - NOB. 256 H1145 ST10 CHENE BARDOLINO": "NE62",
-        "NE67 - NOB. ROVERE GLADST H3309 ST28": "NE67",
-        "NE70 - NOB. GRAPHITE U961 ST9": "NE70",
-        "NE74 - NOB. ROVERE KRONO D4225 OV A": "NE74",
-        "NE75 - NOB. EGGER H3156 ROV.CORB.GR": "NE75",
-        "NE88 - NOB. CLEAF UA32 TALCO GRIGIO": "NE88",
-        "NE91 - NOB. PFLEIDERER PHOENIX F76026": "NE91",
-        "NE99 - NOB. PFLEIDERER R20099": "NE99",
-        "NH01 - NOB. R20065 ROVERE MONTAGNA SCURO": "NH01",
-        "NH03 - NOB. EGGER GLADSTONE BIANCO H3335": "NH03",
-        "NH04 - NOB. FUNDER 0290 NA ROVERE SBIA": "NH04",
-        "NH07 - NOB. FUNDER 0260 AREZZO": "NH07",
-        "NH22 - NOB. CLEAF SABLE' VALLEY LR22": "NH22",
-        "NH26 - NOB. CLEAF ARES FB11 BETON": "NH26",
-        "NH28 - NOB. PFLEIDERER R42033 ML": "NH28",
-        "NH33 - NOB. KAINDL K4949 AT SPRUCE ANT EXP": "NH33",
-        "NH34 - NOB. PFLEIDERER U11209ML": "NH34",
-        "NH35 - NOB. LEGNOPAN 09 ROVERE SEGATO": "NH35",
-        "NH36 - NOB. NERO PFLEIDERER U12000 MP": "NH36",
-        "NH39 - NOB. CLEAF MILLENIUM S083 NAGOLD": "NH39",
-        "NH64 - NOB. EGGER W1000ST19 B.CO PREMIUM": "NH64",
-        "NH68 - NOB. FUNDERMAX 0921 SU BROWN SILVER": "NH68",
-        "NH69 - NOB. PFLEIDERER U12018SD GRIGIO B.": "NH69",
-        "NH82 - NOB. BIANCO TRAFFICO SDW10140": "NH82",
-        "NH85 - NOB. CLEAF S160 OKOBO": "NH85",
-        "NH92 - NOB. ROV.MILANO R20095 NW": "NH92",
-        "NH94 - NOB. FUNDERMAX VERDE MEDIO 0041": "NH94",
-        "NH97 - NOB. PFLEIDERER BLU CRISTAL U18003": "NH97",
-        "NU50 - NOB. EGGER U504 ST BLU": "NU50",
-        "NU60 - NOB. EGGER H3303": "NU60",
-        "NU65 - NOB. EGGER H3152 ROV VICEN SBIA ST19": "NU65",
-        "NU66 - NOB. PFLEIDERER U15190 SD-CUVO": "NU66",
-        "NU67 - NOB. PFLEIDERER U16000 SD-GR.TARTUFO": "NU67",
-        "NU68 - NOB. SM'ART 4565 OLMO MIELE": "NU68",
-        "NU69 - NOB. KRONO ABETE D79841": "NU69",
-        "NU71 - NOB. KRONOSPAN D4823VL": "NU71",
-        "NU76 - NOB. LEGNOPAN 111 FIN ROV 19POR NAT": "NU76",
-        "N001 - NOB. NOCE PADANO": "N001",
-        "N003 - NOB. GRIGIO CENERE O335": "N003",
-        "N004 - NOB. GRIGIO SILICIO 0357": "N004",
-        "N005 - NOB. GRIG ANTRACIT PFLEIDERER U12231": "N005",
-        "N006 - NOB. BIANCO": "N006",
-        "N013 - NOB. ACERO NATURALE": "N013",
-        "N018 - NOB. NERO FIN CERA": "N018",
-        "N391 - NOB. OLMO LEONE N391": "N391",
-        "N457 - NOB. PFLEIDERER U12115": "N457",
-        "N500 - NOB. PFLEIDERER R42006 ML CIL.HAVAN": "N500",
-        "N538 - NOB. PFLEID.R20128 ROVERE SON.F.RU": "N538",
-        "N554 - NOB. THERMOPAL U508 GRIGIO": "N554",
-        "N585 - NOB. THERMO U506 ANTR.MP CERA OPACO": "N585",
-        "N589 - NOB. EGGER U332 ARANCIO": "N589",
-        "N594 - NOB. EGGER H1145 ROVERE BARDOL": "N594",
-        "N640 - NOB. THERMOPAL SR 209/01 B.LUC": "N640",
-        "N656 - NOB. THERMOPAL SV 140 BIANCO LUCIDO": "N656",
-        "N675 - NOB. THERM.U018(47) GRIGIO": "N675",
-        "N698 - NOB. THERM.F21/005 OLIVO SPAGNA": "N698",
-        "N744 - NOB. THERM R20031 RU": "N744",
-        "N748 - NOB. PFLEIDERER U12179 GRIGIO": "N748",
-        "N750 - NOB. R20038 ROVERE CHALET NAT.P": "N750",
-        "N759 - NOB. EGGER ROV. HALIFAX H1180 ST37": "N759",
-        "N765 - NOB. EGGER H1487 ST22 ABETE": "N765",
-        "N768 - NOB. ROV. MILANO R20095MO": "N768",
-        "N769 - NOB. OLMO LEONE PLEID.R37009 MW": "N769",
-        "N897 - NOB. THERMOPAL U00059 BLU": "N897",
-        "N946 - NOB. TERMOPAL U00225 47 PERL ROSSO": "N946",
-        "N957 - NOB. MAGNOLIA LIGNOLUX 312 ANNOVATI": "N957",
-        "N963 - NOB. GRIGIO CHIARO THERM.U1131": "N963",
-    },
-    "TRUCIOLARE": {
-        "RAW - TRUCIOLARE GREZZO": "RAW",
-        "IDRO - TRUCIOLARE IDROFUGO": "IDRO"
-    }
+    # LAMINATO
+    "LE04 - LAM R20064 ROVERE": "LE04",
+    "LE06 - LAM. PFLEIDERER U16002W TORTORA": "LE06",
+    "LE11 - LAM. KASTAMONU A847 ALASKA": "LE11",
+    "LE15 - LAM ANTIGR THERMOP U12231 PFLEDERER": "LE15",
+    "LE24 - LAM. ROV. MILANO R20095MO": "LE24",
+    "LE27 - CLEAF SHERWOOD S073SJP": "LE27",
+    "LE40 - LAM. KAINDL 37744 BIANCO": "LE40",
+    "LE42 - LAM. KAINDL 37777 FRASSINO COIMBRA": "LE42",
+    "LE63 - LAM. ROV. MILANO R20095 ML": "LE63",
+    "LE73 - LAM. ROVERE KRONO D4225 OV": "LE73",
+    "LE79 - LAM PFLEIDERER F76044 SD - GRIGIO": "LE79",
+    "LE86 - LAM EUREKA OAK DA1 FIN.EVO": "LE86",
+    "LH06 - LAM. FUNDER 0260 AREZZO": "LH06",
+    "LH23 - LAM. CLEAF SABLE' VALLEY LR22": "LH23",
+    "LH27 - LAM. CLEAF ARES FB11 BETON": "LH27",
+    "LH29 - LAM. PFLEIDERER R42033 ML": "LH29",
+    "LH37 - LAM. CLEAF MONTILLA FC 18": "LH37",
+    "LH38 - LAM. CLEAF MILLENIUM S083 NAGOLD": "LH38",
+    "LH40 - LAM. SAIB CH3013 GRIGIO GRAFITE": "LH40",
+    "LH62 - LAM. CLEAF PIOMBO HM07": "LH62",
+    "LH64 - LAM. EGGER W1000ST19 B.CO PREMIUM": "LH64",
+    "LH81 - LAM. EGGER H3331 ST15 HYDROFUGE": "LH81",
+    "LH83 - LAM. BIANCO TRAFFICO SDW10140": "LH83",
+    "LH95 - LAM. PFLEIDERER ROVERE R20099": "LH95",
+    "LH98 - LAM. PFLEIDERER BLU CRISTAL U18003": "LH98",
+    "LH99 - LAM. SM'ART 4565 OLMO MIELE": "LH99",
+    "LTH1 - LAM. THERMOPAL U506 ANTRHAZIT": "LTH1",
+    "LU51 - LAM. AMET.U504 ST BLU": "LU51",
+    "LU61 - LAM. EGGER H3303": "LU61",
+    "LU62 - LAM. ABET LAMINATI 1860PRINT": "LU62",
+    "LU63 - LAM. GREENLAM 5049 - SUEDE RED OAK": "LU63",
+    "LU64 - LAM. EGGER H3152 ROV VICEN SBIA ST19": "LU64",
+    "LU71 - LAM. KRONOSPAN D4823VL": "LU71",
+    "LU73 - LAM. ABET PRINT 1832 F. SEI": "LU73",
+    "LU74 - LAM. FORMICA K 1238 UN": "LU74",
+    "LU75 - LAM. LEGNOPAN 111 FIN ROV 19POR NAT": "LU75",
+    "L035 - LAM. PRINT 421 SEI NERO": "L035",
+    "L036 - LAM. ABET PRINT FIN. 460 SEI VERDE": "L036",
+    "L039 - LAM. PRINT 871 SEI GRIGIO CENE": "L039",
+    "L040 - LAM. PRINT 475 SEI GRIGIO SILICIO": "L040",
+    "L041 - LAM. PRINT 411 SEI BIANCO": "L041",
+    "L386 - LAM. OLMO LEONE PLEID.R37009 MO": "L386",
+    "L406 - LAM. PRINT 406 BIANCO": "L406",
+    "L410 - LAM. ABET PRINT 410 SEI BIANCO": "L410",
+    "L418 - LAM. PRINT 418 SEI BIANCO": "L418",
+    "L428 - LAM. PRINT 428 SEI BLU": "L428",
+    "L466 - LAM. PHOENIX F76026 MARRONE CR PFL": "L466",
+    "L469 - LAM. PRINT 469 SEI GIALLO": "L469",
+    "L559 - LAM. FUNDERMAX 0921 SU BROWN SILVER": "L559",
+    "L563 - LAM. PRINT 563 MANDARIN GRIGIO": "L563",
+    "L578 - LAM. ROVERE BARDOLINO": "L578",
+    "L579 - LAM. PFLEID.R20128 ROVERE SON.F.RU": "L579",
+    "L590 - LAM. EGGER U332 ARANCIO": "L590",
+    "L641 - LAM. THERMOPAL SR 209/01 B.LUC": "L641",
+    "L696 - LAM. THERM.F21/005 OLIVO SPAGN CHIA": "L696",
+    "L716 - LAM. THERMOPAL U018(47) GRIGIO": "L716",
+    "L745 - LAM. THERM R20031RU L745": "L745",
+    "L752 - LAM. PFLEIDERER W10003 MP BIANCO": "L752",
+    "L767 - LAM. EGGER ROV.HALIFAX H1180 ST37": "L767",
+    "L786 - LAM. PRINT 1677 ACERO EX PURICELLI": "L786",
+    "L814 - LAM. ABET 1666 FIN SEI DUE FAGGIO": "L814",
+    "L833 - LAM. PRINT 2810 CLIMB": "L833",
+    "L835 - LAM. PRINT 835 SEI ARANCIO": "L835",
+    "L852 - LAM. PRINT 852 SEI BLU": "L852",
+    "L873 - LAM. PRINT 873 FIN SATINATA": "L873",
+    "L879 - LAM. PRINT 879 SEI GRIGIO ANTRACITE": "L879",
+
+    # NOBILITATO
+    "LU70 - NOB. KRONO ABETE D79841": "LU70",
+    "NE05 - NOB. PFLEIDERER U16002W TORTORA": "NE05",
+    "NE12 - NOB. KASTAMONU A847 ALASKA": "NE12",
+    "NE19 - NOB. EGGER W911 BIANCO ST15": "NE19",
+    "NE28 - NOB. CLEAF SHERWOOD S073 S.J.P.": "NE28",
+    "NE38 - NOB. KAINDL 34140 RV ROV.SANREMO CL": "NE38",
+    "NE41 - NOB. KAINDL 37777 FRASSINO COIMBRA": "NE41",
+    "NE46 - NOB. PFLEIDERER U19008 VERDE SCURO": "NE46",
+    "NE62 - NOB. 256 H1145 ST10 CHENE BARDOLINO": "NE62",
+    "NE67 - NOB. ROVERE GLADST H3309 ST28": "NE67",
+    "NE70 - NOB. GRAPHITE U961 ST9": "NE70",
+    "NE74 - NOB. ROVERE KRONO D4225 OV A": "NE74",
+    "NE75 - NOB. EGGER H3156 ROV.CORB.GR": "NE75",
+    "NE88 - NOB. CLEAF UA32 TALCO GRIGIO": "NE88",
+    "NE91 - NOB. PFLEIDERER PHOENIX F76026": "NE91",
+    "NE99 - NOB. PFLEIDERER R20099": "NE99",
+    "NH01 - NOB. R20065 ROVERE MONTAGNA SCURO": "NH01",
+    "NH03 - NOB. EGGER GLADSTONE BIANCO H3335": "NH03",
+    "NH04 - NOB. FUNDER 0290 NA ROVERE SBIA": "NH04",
+    "NH07 - NOB. FUNDER 0260 AREZZO": "NH07",
+    "NH22 - NOB. CLEAF SABLE' VALLEY LR22": "NH22",
+    "NH26 - NOB. CLEAF ARES FB11 BETON": "NH26",
+    "NH28 - NOB. PFLEIDERER R42033 ML": "NH28",
+    "NH33 - NOB. KAINDL K4949 AT SPRUCE ANT EXP": "NH33",
+    "NH34 - NOB. PFLEIDERER U11209ML": "NH34",
+    "NH35 - NOB. LEGNOPAN 09 ROVERE SEGATO": "NH35",
+    "NH36 - NOB. NERO PFLEIDERER U12000 MP": "NH36",
+    "NH39 - NOB. CLEAF MILLENIUM S083 NAGOLD": "NH39",
+    "NH64 - NOB. EGGER W1000ST19 B.CO PREMIUM": "NH64",
+    "NH68 - NOB. FUNDERMAX 0921 SU BROWN SILVER": "NH68",
+    "NH69 - NOB. PFLEIDERER U12018SD GRIGIO B.": "NH69",
+    "NH82 - NOB. BIANCO TRAFFICO SDW10140": "NH82",
+    "NH85 - NOB. CLEAF S160 OKOBO": "NH85",
+    "NH92 - NOB. ROV.MILANO R20095 NW": "NH92",
+    "NH94 - NOB. FUNDERMAX VERDE MEDIO 0041": "NH94",
+    "NH97 - NOB. PFLEIDERER BLU CRISTAL U18003": "NH97",
+    "NU50 - NOB. EGGER U504 ST BLU": "NU50",
+    "NU60 - NOB. EGGER H3303": "NU60",
+    "NU65 - NOB. EGGER H3152 ROV VICEN SBIA ST19": "NU65",
+    "NU66 - NOB. PFLEIDERER U15190 SD-CUVO": "NU66",
+    "NU67 - NOB. PFLEIDERER U16000 SD-GR.TARTUFO": "NU67",
+    "NU68 - NOB. SM'ART 4565 OLMO MIELE": "NU68",
+    "NU69 - NOB. KRONO ABETE D79841": "NU69",
+    "NU71 - NOB. KRONOSPAN D4823VL": "NU71",
+    "NU76 - NOB. LEGNOPAN 111 FIN ROV 19POR NAT": "NU76",
+    "N001 - NOB. NOCE PADANO": "N001",
+    "N003 - NOB. GRIGIO CENERE O335": "N003",
+    "N004 - NOB. GRIGIO SILICIO 0357": "N004",
+    "N005 - NOB. GRIG ANTRACIT PFLEIDERER U12231": "N005",
+    "N006 - NOB. BIANCO": "N006",
+    "N013 - NOB. ACERO NATURALE": "N013",
+    "N018 - NOB. NERO FIN CERA": "N018",
+    "N391 - NOB. OLMO LEONE N391": "N391",
+    "N457 - NOB. PFLEIDERER U12115": "N457",
+    "N500 - NOB. PFLEIDERER R42006 ML CIL.HAVAN": "N500",
+    "N538 - NOB. PFLEID.R20128 ROVERE SON.F.RU": "N538",
+    "N554 - NOB. THERMOPAL U508 GRIGIO": "N554",
+    "N585 - NOB. THERMO U506 ANTR.MP CERA OPACO": "N585",
+    "N589 - NOB. EGGER U332 ARANCIO": "N589",
+    "N594 - NOB. EGGER H1145 ROVERE BARDOL": "N594",
+    "N640 - NOB. THERMOPAL SR 209/01 B.LUC": "N640",
+    "N656 - NOB. THERMOPAL SV 140 BIANCO LUCIDO": "N656",
+    "N675 - NOB. THERM.U018(47) GRIGIO": "N675",
+    "N698 - NOB. THERM.F21/005 OLIVO SPAGNA": "N698",
+    "N744 - NOB. THERM R20031 RU": "N744",
+    "N748 - NOB. PFLEIDERER U12179 GRIGIO": "N748",
+    "N750 - NOB. R20038 ROVERE CHALET NAT.P": "N750",
+    "N759 - NOB. EGGER ROV. HALIFAX H1180 ST37": "N759",
+    "N765 - NOB. EGGER H1487 ST22 ABETE": "N765",
+    "N768 - NOB. ROV. MILANO R20095MO": "N768",
+    "N769 - NOB. OLMO LEONE PLEID.R37009 MW": "N769",
+    "N897 - NOB. THERMOPAL U00059 BLU": "N897",
+    "N946 - NOB. TERMOPAL U00225 47 PERL ROSSO": "N946",
+    "N957 - NOB. MAGNOLIA LIGNOLUX 312 ANNOVATI": "N957",
+    "N963 - NOB. GRIGIO CHIARO THERM.U1131": "N963",
+
+    # TRUCIOLARE
+    "RAW - TRUCIOLARE GREZZO": "RAW",
+    "IDRO - TRUCIOLARE IDROFUGO": "IDRO"
 }
 
 # --- REGOLE DI INCOMPATIBILITÀ (FILTRO SOFT) ---
@@ -415,95 +413,53 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. INTERFACCIA UTENTE (v9.5 - Ragionamento Ragionato)
+# 2. INTERFACCIA UTENTE (v9.1 - Fix Dinamismo Finiture)
 # =========================================================
 
-# --- INIZIALIZZAZIONE VARIABILI DI STATO ---
+# --- INIZIALIZZAZIONE VARIABILI DI STATO (Prevenzione NameError) ---
 uni_en_1090_active = False 
 mat_en, part_en, normativa, tag_suggerimento = "", "", "", ""
 extra_dedicati_dict = {}
 extra_selezionati = []
 blocco_incompatibilita = False 
-mat_it = None # Inizializzazione di sicurezza
 
-# Configurazione Immagine e Testo
+# Variabili di configurazione rapida
 LARGHEZZA_IMMAGINE = 600 
 TESTO_MANUALE = """
 **PROCEDURA STANDARD:**
-1. **CATEGORIA**: Scegli a sinistra.
-2. **MATERIALE/COMP**: Scegli i parametri tecnici.
-3. **DETTAGLIO**: Scegli il pezzo e le finiture (Dinamiche).
-4. **QUOTE**: Inserisci i valori.
-5. **GENERA**: Crea la stringa finale.
+1. **CATEGORIA**: Seleziona il gruppo a sinistra.
+2. **MODELLO**: Scegli tipologia materiale e la compatibilità (F25, Fortissimo, ecc.).
+3. **PARTICOLARE**: Cerca il componente specifico e aggiungi le varie caratteristiche
+4. **QUOTE**: Inserisci i valori in millimetri.
+5. **GENERA**: Clicca il tasto rosso in fondo.
+
+---
+**NOTE TECNICHE:**
+* I prefissi L-P-H sono automatici.
+* Le note libere vengono tradotte in inglese.
+* Lunghezza max stringa: 100 caratteri.
 """
+
 
 st.title("⚙️ REG - Title Generator & Classification")
 
 # --- TASTO AZZERA SUPERIORE ---
 c1, c2, c3 = st.columns([2, 1, 2])
 with c2:
-    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_top_global")
+    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_top")
 
 st.markdown("---")
 
-# --- LAYOUT PRINCIPALE ---
+# LAYOUT SIDEBAR / AREA LAVORO
 col_left, col_workarea = st.columns([1, 3], gap="large")
 
 with col_left:
     st.subheader("📂 1. Categoria")
-    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro_main", label_visibility="collapsed")
+    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro", label_visibility="collapsed")
+    
     st.markdown("---")
     st.info(TESTO_MANUALE)
 
-# =========================================================
-# 2. INTERFACCIA UTENTE (v9.7 - INTEGRALE & STABILE)
-# =========================================================
-
-# --- 2.1 FUNZIONI DI SUPPORTO & STATO ---
-def activate_reset():
-    for key in list(st.session_state.keys()):
-        del st.session_state[key]
-    st.rerun()
-
-# Inizializzazione variabili di sicurezza
-uni_en_1090_active = False 
-mat_en, part_en, normativa = "", "", ""
-extra_selezionati = []
-blocco_incompatibilita = False 
-LARGHEZZA_IMMAGINE = 600 
-
-st.title("⚙️ REG - Title Generator & Classification")
-
-# --- 2.2 TASTO AZZERA ---
-c1, c2, c3 = st.columns([2, 1, 2])
-with c2:
-    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="global_reset_btn")
-
-st.markdown("---")
-
-# --- 2.3 LAYOUT SIDEBAR / AREA LAVORO ---
-# Definiamo le colonne che prima mancavano nel tuo codice
-col_left, col_workarea = st.columns([1, 3], gap="large")
-
-with col_left:
-    st.subheader("📂 1. Categoria")
-    macro_it = st.radio(
-        "Seleziona categoria:", 
-        options=list(DATABASE.keys()), 
-        key="radio_macro_main", 
-        label_visibility="collapsed"
-    )
-    st.markdown("---")
-    st.info("""
-    **ISTRUZIONI:**
-    1. Scegli Categoria.
-    2. Definisci il Materiale.
-    3. Seleziona il Pezzo.
-    4. Scegli la Finitura.
-    5. Inserisci le Quote.
-    """)
-
-# --- 2.4 AREA DI LAVORO CENTRALE ---
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Compatibilità")
     
@@ -512,34 +468,25 @@ with col_workarea:
     with c_mat:
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
-            st.toggle("🎨 ATTIVA FINITURE MULTIPLE", key="check_fin_multi_toggle")
-            mat_it = "ASSEMBLY"
+            st.checkbox("Aggiungi Finiture Multiple", key="check_fin_multi")
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
-                # Key dinamica per evitare conflitti tra categorie
-                mat_it = st.radio(
-                    f"Materiale {macro_it}:", 
-                    options=list(materiali_disponibili.keys()), 
-                    horizontal=True, 
-                    key=f"radio_mat_{macro_it}"
-                )
+                mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
                 mat_en = materiali_disponibili[mat_it]
 
     with c_comp:
         if macro_it != "FASTENER":
-            pills_opts = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-            comp_selezionata = st.pills("Modello Compatibilità:", options=pills_opts, selection_mode="single", key="comp_tags_pills")
+            pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+            comp_selezionata = st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
             
             if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
                 st.warning("⚡ Strutturale")
-                uni_en_1090_active = st.toggle("Certificazione UNI EN-1090", key="check_1090_toggle")
+                uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
 
     st.markdown("---")
     
-    # --- SEZIONE 3: SELEZIONE PARTICOLARE E FINITURE ---
-    st.subheader("🔧 3. Dettaglio e Caratteristiche")
-    
+    # SELEZIONE PARTICOLARE
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.selectbox(
         "Cerca o seleziona dettaglio:", 
@@ -547,60 +494,67 @@ with col_workarea:
         index=None,
         placeholder="Scrivi qui per cercare il componente...",
         format_func=lambda x: f"🔧 {x} ({part_dict[x][0]})" if x else "Seleziona...",
-        key="selectbox_part_final"
+        key="selectbox_part"
     )
 
-    # --- LOGICA FINITURE UNIVERSALE ---
+    st.markdown("---")
+    st.subheader("✨ 3. Extra e Note")
+    
     if scelta_part_it:
-        if macro_it == "WOODCOMP":
-            # Uniamo tutte le finiture in una lista unica
-            tutte_le_finiture = {}
-            for categoria in FINITURE_LEGNO.values():
-                tutte_le_finiture.update(categoria)
-            
-            st.markdown("---")
-            st.selectbox(
-                "🎨 Catalogo Finiture (Laminati / Nobilitati / Truciolati):",
-                options=["-"] + sorted(list(tutte_le_finiture.keys())),
-                key="fin_wood_select",
-                index=0,
-                help="Cerca qui la finitura."
-            )
-
-        elif macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi_toggle"):
-            st.markdown("---")
-            st.info("🎨 Configurazione Finiture Multiple")
-            all_fin_ass = {}
-            for sub in FINITURE_LEGNO.values(): all_fin_ass.update(sub)
-            
-            fa1, fa2, fa3 = st.columns(3)
-            with fa1: st.selectbox("Finitura 1", ["-"] + sorted(list(all_fin_ass.keys())), key="ass_fin_1")
-            with fa2: st.selectbox("Finitura 2", ["-"] + sorted(list(all_fin_ass.keys())), key="ass_fin_2")
-            with fa3: st.selectbox("Finitura 3", ["-"] + sorted(list(all_fin_ass.keys())), key="ass_fin_3")
-
-        st.markdown("---")
-        
-        # --- GESTIONE EXTRA ---
         dati_part = part_dict[scelta_part_it]
         part_en = dati_part[0]
         extra_dedicati_dict = dati_part[1]
+        tag_suggerimento = " - ".join(dati_part[2:]) if len(dati_part) > 2 else ""
         
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
-            extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags_final")
+            extra_selezionati = st.pills("Caratteristiche/Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
             
+            # --- LOGICA DINAMICA FINITURE WOODCOMP ---
+            if macro_it == "WOODCOMP":
+                # Verifichiamo se l'utente ha selezionato il tipo di pannello
+                lista_attivi = extra_selezionati if extra_selezionati else []
+                tipo_selezionato = [x for x in lista_attivi if x in ["LAMINATO", "NOBILITATO", "TRUCIOLARE"]]
+                
+                if tipo_selezionato:
+                    st.selectbox(
+                        f"🎨 Catalogo Finiture ({tipo_selezionato[0]}):", 
+                        options=list(FINITURE_LEGNO.keys()),
+                        key="fin_wood_select",
+                        index=None,
+                        placeholder="Cerca sigla o descrizione finitura..."
+                    )
+                else:
+                    st.caption("ℹ️ Seleziona 'LAMINATO' o 'NOBILITATO' nei Pills sopra per scegliere la finitura.")
+
+            # Gestione Incompatibilità
+            tags_attivi_set = set(extra_selezionati) if extra_selezionati else set()
+            for gruppo in COPPIE_INCOMPATIBILI:
+                intersezione = set(gruppo).intersection(tags_attivi_set)
+                if len(intersezione) >= 2:
+                    st.error(f"⚠️ **CONFLITTO:** {', '.join(intersezione)}")
+                    blocco_incompatibilita = True
+
+            # Sotto-varianti e input manuali
             for ex in (extra_selezionati or []):
                 if ex in SUB_OPTIONS_CONFIG:
                     st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
                 elif ex in EXTRA_CON_INPUT_MANUALE:
                     st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
 
-    st.text_input("Note libere (Traduzione automatica):", key="extra_text_input").strip()
+    # --- LOGICA FINITURE MULTIPLE ASSEMBLY ---
+    if macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi"):
+        st.markdown("###### 🎨 Configurazione Finiture Multiple (Max 3)")
+        fa1, fa2, fa3 = st.columns(3)
+        with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1")
+        with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2")
+        with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3")
+
+    st.text_input("Note libere (Traduzione automatica):", key="extra_text").strip()
 
     st.markdown("---")
-    
-    # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento")
+    
     col_campi, col_immagine = st.columns([1, 1.5], gap="medium")
 
     with col_campi:
@@ -608,7 +562,7 @@ with col_workarea:
             st.text_input("Lunghezza (L)", key="dim_l")
             st.text_input("Diametro (D/M)", key="dim_dia")
             opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-            norma_scelta = st.selectbox("Normativa", options=list(opzioni_norm.keys()), key="norm_fast")
+            norma_scelta = st.selectbox("Normativa", options=list(opzioni_norm.keys()))
             normativa = opzioni_norm[norma_scelta] if norma_scelta else ""
         else:
             st.text_input("Lunghezza (L)", key="dim_l")
@@ -624,7 +578,7 @@ with col_workarea:
         )
         
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.2 - Fix Finiture)
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.0 - Fin. Wood)
 # =========================================================
 
 st.divider()
@@ -674,29 +628,32 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             dim_final = " ".join(lph)
             if dia_v: dim_final += f" Ø{dia_v}"
 
-        # 2. GESTIONE FINITURE (LOGICA AGGIORNATA)
+        # 2. GESTIONE FINITURE (LOGICA RICHIESTA)
         sigle_finiture = []
         
-        # Controlliamo il nuovo key del toggle
-        if st.session_state.get("check_fin_multi_toggle"):
-            if macro_it == "WOODCOMP":
-                val_scelto = st.session_state.get("fin_wood_select_unique") # Nuova key
-                if val_scelto and val_scelto != "-" and val_scelto in FINITURE_LEGNO:
-                    sigle_finiture.append(FINITURE_LEGNO[val_scelto])
-            
-            elif macro_it == "ASSEMBLY":
-                for i in range(1, 4):
-                    f_val = st.session_state.get(f"ass_fin_{i}_new") # Nuova key
-                    if f_val and f_val != "-" and f_val in FINITURE_LEGNO:
-                        sigle_finiture.append(FINITURE_LEGNO[f_val])
+        # Caso WOODCOMP: Finitura singola
+        if macro_it == "WOODCOMP":
+            val_scelto = st.session_state.get("fin_wood_select")
+            if val_scelto and val_scelto in FINITURE_LEGNO:
+                sigle_finiture.append(FINITURE_LEGNO[val_scelto])
+        
+        # Caso ASSEMBLY: Finiture multiple (max 3)
+        elif macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi"):
+            for i in range(1, 4):
+                f_key = f"ass_fin_{i}"
+                f_val = st.session_state.get(f_key)
+                if f_val and f_val != "-" and f_val in FINITURE_LEGNO:
+                    sigle_finiture.append(FINITURE_LEGNO[f_val])
         
         stringa_finiture = "/".join(sigle_finiture) if sigle_finiture else ""
 
-        # 3. EXTRA (PILLS)
+        # 3. EXTRA (PILLS) - Ordine prefissi/suffissi
         pills_tradotte = []
+        # Seguiamo l'ordine del database per coerenza
         for ex in list(extra_dedicati_dict.keys()):
             if extra_selezionati and ex in extra_selezionati:
                 base = extra_dedicati_dict.get(ex, ex.upper())
+                # Sub-opzioni
                 if ex in SUB_OPTIONS_CONFIG:
                     sub_v = st.session_state.get(f"sub_{ex}", "")
                     trad = SUB_OPTIONS_CONFIG[ex].get(sub_v, "")
@@ -720,25 +677,26 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             for ita, eng in GLOSSARIO_TECNICO.items():
                 note_it = note_it.replace(ita, eng)
             try:
-                from deep_translator import GoogleTranslator
                 note_en = GoogleTranslator(source='it', target='en').translate(note_it).upper()
             except:
                 note_en = note_it.upper()
 
         # 5. ASSEMBLAGGIO FINALE
+        # Evitiamo "METAL METAL"
         m_pfx = mat_en if not (mat_en == "METAL" and "METAL" in part_en.upper()) else ""
         
-        # Schema: MATERIALE + PREFISSI + NOME + MISURE + SUFFISSI + FINITURE
+        # Schema: MATERIALE + PREFISSI + NOME + MISURE + SUFFISSI + FINITURE_LEGNO
         parti_corpo = [m_pfx, pre_str, part_en, dim_final, suf_str, stringa_finiture]
-        corpo = " ".join([p for p in parti_corpo if p and p.strip()]).replace("  ", " ").strip()
+        corpo = " ".join([p for p in parti_corpo if p.strip()]).replace("  ", " ").strip()
         
         if note_en:
             corpo = f"{corpo}, {note_en}"
 
+        # Aggiunta Modello (Trattino)
         comp_tags = st.session_state.get("comp_tags", "")
         res = f"{corpo} - {comp_tags}" if comp_tags else corpo
 
-        # Pulizia Grammaticale
+        # Pulizia Grammaticale (WITH/AND)
         res = res.upper().replace("WITH WITH", "WITH")
         if res.count("WITH") > 1:
             bits = res.split("WITH")
