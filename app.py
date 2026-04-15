@@ -674,8 +674,18 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
                 else:
                     pills_tradotte.append(base)
 
-        pre = [p for p in pills_tradotte if any(term in p for term in TERMINI_ANTICIPATI)]
-        suf = [p for p in pills_tradotte if p not in pre]
+        # --- NUOVA LOGICA DI SMISTAMENTO (MATCH PAROLA INTERA) ---
+        pre = []
+        suf = []
+        for p in pills_tradotte:
+            # Dividiamo la frase del Pill in singole parole
+            parole_nel_pill = set(p.upper().split())
+            
+            # Controlliamo se almeno una parola esatta è nella lista TERMINI_ANTICIPATI
+            if any(term.upper() in parole_nel_pill for term in TERMINI_ANTICIPATI):
+                pre.append(p)
+            else:
+                suf.append(p)
         
         pre_str = " ".join(pre)
         suf_str = " ".join(suf)
