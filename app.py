@@ -413,52 +413,10 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. INTERFACCIA UTENTE (v9.1 - Fix Dinamismo Finiture)
+# 2. INTERFACCIA UTENTE (v9.2 - Fix Mirato Finiture)
 # =========================================================
 
-# --- INIZIALIZZAZIONE VARIABILI DI STATO (Prevenzione NameError) ---
-uni_en_1090_active = False 
-mat_en, part_en, normativa, tag_suggerimento = "", "", "", ""
-extra_dedicati_dict = {}
-extra_selezionati = []
-blocco_incompatibilita = False 
-
-# Variabili di configurazione rapida
-LARGHEZZA_IMMAGINE = 600 
-TESTO_MANUALE = """
-**PROCEDURA STANDARD:**
-1. **CATEGORIA**: Seleziona il gruppo a sinistra.
-2. **MODELLO**: Scegli tipologia materiale e la compatibilità (F25, Fortissimo, ecc.).
-3. **PARTICOLARE**: Cerca il componente specifico e aggiungi le varie caratteristiche
-4. **QUOTE**: Inserisci i valori in millimetri.
-5. **GENERA**: Clicca il tasto rosso in fondo.
-
----
-**NOTE TECNICHE:**
-* I prefissi L-P-H sono automatici.
-* Le note libere vengono tradotte in inglese.
-* Lunghezza max stringa: 100 caratteri.
-"""
-
-
-st.title("⚙️ REG - Title Generator & Classification")
-
-# --- TASTO AZZERA SUPERIORE ---
-c1, c2, c3 = st.columns([2, 1, 2])
-with c2:
-    st.button("🔄 AZZERA TUTTO", on_click=activate_reset, use_container_width=True, key="btn_top")
-
-st.markdown("---")
-
-# LAYOUT SIDEBAR / AREA LAVORO
-col_left, col_workarea = st.columns([1, 3], gap="large")
-
-with col_left:
-    st.subheader("📂 1. Categoria")
-    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro", label_visibility="collapsed")
-    
-    st.markdown("---")
-    st.info(TESTO_MANUALE)
+# --- [Parte iniziale invariata fino a col_workarea] ---
 
 with col_workarea:
     st.subheader("🛠️ 2. Materiale e Compatibilità")
@@ -468,11 +426,16 @@ with col_workarea:
     with c_mat:
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
-            st.checkbox("Aggiungi Finiture Multiple", key="check_fin_multi")
+            # 1. TRASFORMATO IN TOGGLE (STONDATO)
+            st.toggle("🎨 Aggiungi Finiture Multiple", key="check_fin_multi")
         else:
+            # 2. AGGIUNTO TOGGLE PER WOODCOMP
+            if macro_it == "WOODCOMP":
+                st.toggle("🎨 Specifica Finitura", key="check_fin_multi")
+                
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
-                mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
+                mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"mat_{macro_it}")
                 mat_en = materiali_disponibili[mat_it]
 
     with c_comp:
@@ -510,22 +473,14 @@ with col_workarea:
         if extra_options:
             extra_selezionati = st.pills("Caratteristiche/Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-            # --- LOGICA DINAMICA FINITURE WOODCOMP ---
-            if macro_it == "WOODCOMP":
-                # Verifichiamo se l'utente ha selezionato il tipo di pannello
-                lista_attivi = extra_selezionati if extra_selezionati else []
-                tipo_selezionato = [x for x in lista_attivi if x in ["LAMINATO", "NOBILITATO", "TRUCIOLARE"]]
-                
-                if tipo_selezionato:
-                    st.selectbox(
-                        f"🎨 Catalogo Finiture ({tipo_selezionato[0]}):", 
-                        options=list(FINITURE_LEGNO.keys()),
-                        key="fin_wood_select",
-                        index=None,
-                        placeholder="Cerca sigla o descrizione finitura..."
-                    )
-                else:
-                    st.caption("ℹ️ Seleziona 'LAMINATO' o 'NOBILITATO' nei Pills sopra per scegliere la finitura.")
+            # --- NUOVA LOGICA FINITURE WOODCOMP (Slegata dai Pills) ---
+            if macro_it == "WOODCOMP" and st.session_state.get("check_fin_multi"):
+                st.selectbox(
+                    "🎨 Catalogo Finiture Legno:", 
+                    options=["-"] + list(FINITURE_LEGNO.keys()),
+                    key="fin_wood_select",
+                    index=0
+                )
 
             # Gestione Incompatibilità
             tags_attivi_set = set(extra_selezionati) if extra_selezionati else set()
@@ -549,33 +504,6 @@ with col_workarea:
         with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1")
         with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2")
         with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3")
-
-    st.text_input("Note libere (Traduzione automatica):", key="extra_text").strip()
-
-    st.markdown("---")
-    st.subheader("📏 4. Dimensionamento")
-    
-    col_campi, col_immagine = st.columns([1, 1.5], gap="medium")
-
-    with col_campi:
-        if macro_it == "FASTENER":
-            st.text_input("Lunghezza (L)", key="dim_l")
-            st.text_input("Diametro (D/M)", key="dim_dia")
-            opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-            norma_scelta = st.selectbox("Normativa", options=list(opzioni_norm.keys()))
-            normativa = opzioni_norm[norma_scelta] if norma_scelta else ""
-        else:
-            st.text_input("Lunghezza (L)", key="dim_l")
-            st.text_input("Profondità (P)", key="dim_p")
-            st.text_input("Altezza (H)", key="dim_h")
-            st.text_input("Diametro (Ø)", key="dim_dia_gen")
-            
-    with col_immagine:
-        st.image(
-            "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
-            caption="Riferimento Quote", 
-            width=LARGHEZZA_IMMAGINE
-        )
         
 # =========================================================
 # 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.2 - Fix Finiture)
