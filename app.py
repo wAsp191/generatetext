@@ -413,10 +413,10 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. INTERFACCIA UTENTE (v9.1 - Fix Dinamismo Finiture)
+# 2. INTERFACCIA UTENTE (v9.2 - Unified Finishes Layout)
 # =========================================================
 
-# --- INIZIALIZZAZIONE VARIABILI DI STATO (Prevenzione NameError) ---
+# --- INIZIALIZZAZIONE VARIABILI DI STATO ---
 uni_en_1090_active = False 
 mat_en, part_en, normativa, tag_suggerimento = "", "", "", ""
 extra_dedicati_dict = {}
@@ -428,18 +428,11 @@ LARGHEZZA_IMMAGINE = 600
 TESTO_MANUALE = """
 **PROCEDURA STANDARD:**
 1. **CATEGORIA**: Seleziona il gruppo a sinistra.
-2. **MODELLO**: Scegli tipologia materiale e la compatibilità (F25, Fortissimo, ecc.).
-3. **PARTICOLARE**: Cerca il componente specifico e aggiungi le varie caratteristiche
-4. **QUOTE**: Inserisci i valori in millimetri.
-5. **GENERA**: Clicca il tasto rosso in fondo.
-
----
-**NOTE TECNICHE:**
-* I prefissi L-P-H sono automatici.
-* Le note libere vengono tradotte in inglese.
-* Lunghezza max stringa: 100 caratteri.
+2. **MODELLO**: Scegli materiale e compatibilità.
+3. **PARTICOLARE**: Cerca il componente e aggiungi extra.
+4. **QUOTE**: Inserisci i valori in mm.
+5. **GENERA**: Clicca il tasto rosso.
 """
-
 
 st.title("⚙️ REG - Title Generator & Classification")
 
@@ -456,7 +449,6 @@ col_left, col_workarea = st.columns([1, 3], gap="large")
 with col_left:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro", label_visibility="collapsed")
-    
     st.markdown("---")
     st.info(TESTO_MANUALE)
 
@@ -466,13 +458,22 @@ with col_workarea:
     c_mat, c_comp = st.columns([1, 1.5])
     
     with c_mat:
+        # LOGICA UNIFICATA: Checkbox finiture visibile per ASSEMBLY e WOODCOMP
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
-            st.checkbox("Aggiungi Finiture Multiple", key="check_fin_multi")
+            st.checkbox("🎨 Aggiungi Finiture", key="check_fin_multi")
+        
+        elif macro_it == "WOODCOMP":
+            st.checkbox("🎨 Specifica Finitura Legno", key="check_fin_multi")
+            materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
+            if materiali_disponibili:
+                mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
+                mat_en = materiali_disponibili[mat_it]
+        
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
-                mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
+                mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
                 mat_en = materiali_disponibili[mat_it]
 
     with c_comp:
@@ -510,23 +511,6 @@ with col_workarea:
         if extra_options:
             extra_selezionati = st.pills("Caratteristiche/Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-            # --- LOGICA DINAMICA FINITURE WOODCOMP ---
-            if macro_it == "WOODCOMP":
-                # Verifichiamo se l'utente ha selezionato il tipo di pannello
-                lista_attivi = extra_selezionati if extra_selezionati else []
-                tipo_selezionato = [x for x in lista_attivi if x in ["LAMINATO", "NOBILITATO", "TRUCIOLARE"]]
-                
-                if tipo_selezionato:
-                    st.selectbox(
-                        f"🎨 Catalogo Finiture ({tipo_selezionato[0]}):", 
-                        options=list(FINITURE_LEGNO.keys()),
-                        key="fin_wood_select",
-                        index=None,
-                        placeholder="Cerca sigla o descrizione finitura..."
-                    )
-                else:
-                    st.caption("ℹ️ Seleziona 'LAMINATO' o 'NOBILITATO' nei Pills sopra per scegliere la finitura.")
-
             # Gestione Incompatibilità
             tags_attivi_set = set(extra_selezionati) if extra_selezionati else set()
             for gruppo in COPPIE_INCOMPATIBILI:
@@ -542,13 +526,21 @@ with col_workarea:
                 elif ex in EXTRA_CON_INPUT_MANUALE:
                     st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
 
-    # --- LOGICA FINITURE MULTIPLE ASSEMBLY ---
-    if macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi"):
-        st.markdown("###### 🎨 Configurazione Finiture Multiple (Max 3)")
-        fa1, fa2, fa3 = st.columns(3)
-        with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1")
-        with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2")
-        with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3")
+    # --- LOGICA DINAMICA FINITURE (UNIFICATA) ---
+    if st.session_state.get("check_fin_multi"):
+        st.markdown("###### 🎨 Configurazione Finiture")
+        if macro_it == "WOODCOMP":
+            st.selectbox(
+                "🎨 Catalogo Finiture Legno:", 
+                options=["-"] + list(FINITURE_LEGNO.keys()),
+                key="fin_wood_select",
+                index=0
+            )
+        elif macro_it == "ASSEMBLY":
+            fa1, fa2, fa3 = st.columns(3)
+            with fa1: st.selectbox("Finitura 1", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_1")
+            with fa2: st.selectbox("Finitura 2", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_2")
+            with fa3: st.selectbox("Finitura 3", options=["-"] + list(FINITURE_LEGNO.keys()), key="ass_fin_3")
 
     st.text_input("Note libere (Traduzione automatica):", key="extra_text").strip()
 
@@ -578,7 +570,7 @@ with col_workarea:
         )
         
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.0 - Fin. Wood)
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.2 - Fix Finiture)
 # =========================================================
 
 st.divider()
@@ -628,32 +620,29 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             dim_final = " ".join(lph)
             if dia_v: dim_final += f" Ø{dia_v}"
 
-        # 2. GESTIONE FINITURE (LOGICA RICHIESTA)
+        # 2. GESTIONE FINITURE (LOGICA UNIFICATA)
         sigle_finiture = []
         
-        # Caso WOODCOMP: Finitura singola
-        if macro_it == "WOODCOMP":
-            val_scelto = st.session_state.get("fin_wood_select")
-            if val_scelto and val_scelto in FINITURE_LEGNO:
-                sigle_finiture.append(FINITURE_LEGNO[val_scelto])
-        
-        # Caso ASSEMBLY: Finiture multiple (max 3)
-        elif macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi"):
-            for i in range(1, 4):
-                f_key = f"ass_fin_{i}"
-                f_val = st.session_state.get(f_key)
-                if f_val and f_val != "-" and f_val in FINITURE_LEGNO:
-                    sigle_finiture.append(FINITURE_LEGNO[f_val])
+        # Ora controlliamo il flag unificato 'check_fin_multi'
+        if st.session_state.get("check_fin_multi"):
+            if macro_it == "WOODCOMP":
+                val_scelto = st.session_state.get("fin_wood_select")
+                if val_scelto and val_scelto != "-" and val_scelto in FINITURE_LEGNO:
+                    sigle_finiture.append(FINITURE_LEGNO[val_scelto])
+            
+            elif macro_it == "ASSEMBLY":
+                for i in range(1, 4):
+                    f_val = st.session_state.get(f"ass_fin_{i}")
+                    if f_val and f_val != "-" and f_val in FINITURE_LEGNO:
+                        sigle_finiture.append(FINITURE_LEGNO[f_val])
         
         stringa_finiture = "/".join(sigle_finiture) if sigle_finiture else ""
 
-        # 3. EXTRA (PILLS) - Ordine prefissi/suffissi
+        # 3. EXTRA (PILLS)
         pills_tradotte = []
-        # Seguiamo l'ordine del database per coerenza
         for ex in list(extra_dedicati_dict.keys()):
             if extra_selezionati and ex in extra_selezionati:
                 base = extra_dedicati_dict.get(ex, ex.upper())
-                # Sub-opzioni
                 if ex in SUB_OPTIONS_CONFIG:
                     sub_v = st.session_state.get(f"sub_{ex}", "")
                     trad = SUB_OPTIONS_CONFIG[ex].get(sub_v, "")
@@ -677,26 +666,25 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             for ita, eng in GLOSSARIO_TECNICO.items():
                 note_it = note_it.replace(ita, eng)
             try:
+                from deep_translator import GoogleTranslator
                 note_en = GoogleTranslator(source='it', target='en').translate(note_it).upper()
             except:
                 note_en = note_it.upper()
 
         # 5. ASSEMBLAGGIO FINALE
-        # Evitiamo "METAL METAL"
         m_pfx = mat_en if not (mat_en == "METAL" and "METAL" in part_en.upper()) else ""
         
-        # Schema: MATERIALE + PREFISSI + NOME + MISURE + SUFFISSI + FINITURE_LEGNO
+        # Schema: MATERIALE + PREFISSI + NOME + MISURE + SUFFISSI + FINITURE
         parti_corpo = [m_pfx, pre_str, part_en, dim_final, suf_str, stringa_finiture]
-        corpo = " ".join([p for p in parti_corpo if p.strip()]).replace("  ", " ").strip()
+        corpo = " ".join([p for p in parti_corpo if p and p.strip()]).replace("  ", " ").strip()
         
         if note_en:
             corpo = f"{corpo}, {note_en}"
 
-        # Aggiunta Modello (Trattino)
         comp_tags = st.session_state.get("comp_tags", "")
         res = f"{corpo} - {comp_tags}" if comp_tags else corpo
 
-        # Pulizia Grammaticale (WITH/AND)
+        # Pulizia Grammaticale
         res = res.upper().replace("WITH WITH", "WITH")
         if res.count("WITH") > 1:
             bits = res.split("WITH")
