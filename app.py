@@ -414,7 +414,7 @@ TERMINI_ANTICIPATI = [
 ]
 
 # =========================================================
-# 2. INTERFACCIA UTENTE (v9.2 - Toggle & Woodcomp Fix)
+# 2. INTERFACCIA UTENTE (v9.3 - Universal Woodcomp & Assembly)
 # =========================================================
 
 # --- INIZIALIZZAZIONE VARIABILI DI STATO ---
@@ -460,11 +460,11 @@ with col_workarea:
     with c_mat:
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
-            # --- CORREZIONE: TASTO STONDATO PER ASSEMBLY ---
             st.toggle("🎨 AGGIUNGI FINITURE MULTIPLE", key="check_fin_multi")
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
+                # Nota: la chiave del radio è dinamica per resettarsi al cambio categoria
                 mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"mat_rad_{macro_it}")
                 mat_en = materiali_disponibili[mat_it]
 
@@ -498,52 +498,52 @@ with col_workarea:
         part_en = dati_part[0]
         extra_dedicati_dict = dati_part[1]
         
+        # 1. Pills delle caratteristiche
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
             extra_selezionati = st.pills("Caratteristiche/Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-            # --- LOGICA FINITURE WOODCOMP (PULITA) ---
-            if macro_it == "WOODCOMP":
-                # Recuperiamo il tipo (LAMINATO/NOBILITATO/TRUCIOLARE) dal radio button in alto
-                tipo_scelto = st.session_state.get(f"mat_rad_{macro_it}")
-                
-                if tipo_scelto in FINITURE_LEGNO:
-                    finiture_filtrate = FINITURE_LEGNO[tipo_scelto]
-                    st.selectbox(
-                        f"🎨 Catalogo Finiture {tipo_scelto}:",
-                        options=["-"] + sorted(list(finiture_filtrate.keys())),
-                        key="fin_wood_select",
-                        help="La lista cambia in base al materiale scelto nel punto 2."
-                    )
-                else:
-                    st.warning("Seleziona un materiale al punto 2 per vedere le finiture.")
+        # --- LOGICA FINITURE WOODCOMP SEMPRE PRESENTE ---
+        if macro_it == "WOODCOMP":
+            st.markdown("###### 🎨 Finitura Componente")
+            # Creiamo il catalogo universale unendo Laminato, Nobilitato e Truciolare
+            catalogo_completo_legno = {}
+            for sub_cat in FINITURE_LEGNO.values():
+                catalogo_completo_legno.update(sub_cat)
+            
+            st.selectbox(
+                "Seleziona finitura dal catalogo completo:",
+                options=["-"] + sorted(list(catalogo_completo_legno.keys())),
+                key="fin_wood_select",
+                help="Cerca per sigla o descrizione. Include tutte le tipologie di legno."
+            )
 
-            # Gestione Incompatibilità
-            tags_attivi_set = set(extra_selezionati) if extra_selezionati else set()
-            for gruppo in COPPIE_INCOMPATIBILI:
-                intersezione = set(gruppo).intersection(tags_attivi_set)
-                if len(intersezione) >= 2:
-                    st.error(f"⚠️ **CONFLITTO:** {', '.join(intersezione)}")
-                    blocco_incompatibilita = True
+        # 2. Gestione Conflitti
+        tags_attivi_set = set(extra_selezionati) if extra_selezionati else set()
+        for gruppo in COPPIE_INCOMPATIBILI:
+            intersezione = set(gruppo).intersection(tags_attivi_set)
+            if len(intersezione) >= 2:
+                st.error(f"⚠️ **CONFLITTO:** {', '.join(intersezione)}")
+                blocco_incompatibilita = True
 
-            # Sotto-varianti e input manuali
-            for ex in (extra_selezionati or []):
-                if ex in SUB_OPTIONS_CONFIG:
-                    st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
-                elif ex in EXTRA_CON_INPUT_MANUALE:
-                    st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
+        # 3. Sotto-varianti e input manuali
+        for ex in (extra_selezionati or []):
+            if ex in SUB_OPTIONS_CONFIG:
+                st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
+            elif ex in EXTRA_CON_INPUT_MANUALE:
+                st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
 
     # --- LOGICA FINITURE MULTIPLE ASSEMBLY ---
     if macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi"):
         st.info("🎨 Configurazione Finiture Multiple (Max 3)")
-        # Creiamo un catalogo universale per Assembly unendo tutti i tipi di legno
-        catalogo_completo = {}
-        for cat in FINITURE_LEGNO.values(): catalogo_completo.update(cat)
+        # Catalogo universale anche per Assembly
+        catalogo_ass = {}
+        for cat in FINITURE_LEGNO.values(): catalogo_ass.update(cat)
         
         fa1, fa2, fa3 = st.columns(3)
-        with fa1: st.selectbox("Finitura 1", options=["-"] + sorted(list(catalogo_completo.keys())), key="ass_fin_1")
-        with fa2: st.selectbox("Finitura 2", options=["-"] + sorted(list(catalogo_completo.keys())), key="ass_fin_2")
-        with fa3: st.selectbox("Finitura 3", options=["-"] + sorted(list(catalogo_completo.keys())), key="ass_fin_3")
+        with fa1: st.selectbox("Finitura 1", options=["-"] + sorted(list(catalogo_ass.keys())), key="ass_fin_1")
+        with fa2: st.selectbox("Finitura 2", options=["-"] + sorted(list(catalogo_ass.keys())), key="ass_fin_2")
+        with fa3: st.selectbox("Finitura 3", options=["-"] + sorted(list(catalogo_ass.keys())), key="ass_fin_3")
 
     st.text_input("Note libere (Traduzione automatica):", key="extra_text").strip()
 
