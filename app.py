@@ -1,8 +1,6 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
 
-import streamlit as st
-
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
@@ -11,26 +9,27 @@ st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 def activate_reset():
     """Reset centralizzato e robusto dello stato dell'interfaccia"""
     
-    # Mappatura dei valori di default per tipo di componente
-    # Questo elimina i vari if/elif rendendo il codice compatto
+    # Valori di default per tipo di componente
     defaults = {
-        'comp_tags': None,         # Pills single
-        'selectbox_part': None,    # Selectbox
-        'extra_tags': [],          # Pills multi
-        'check_1090': False,       # Checkbox/Toggle
-        'check_assembled': False,  # Checkbox/Toggle
+        'comp_tags': None,       # Pills single
+        'selectbox_part': None,  # Selectbox
+        'extra_tags': [],        # Pills multi
+        'check_1090': False,     # Checkbox
+        'check_assembled': False # Toggle
     }
 
-    # Chiavi che devono essere resettate a stringa vuota
+    # Chiavi che devono essere sempre stringhe vuote
     text_keys = [
         'dim_l', 'dim_p', 'dim_h', 'dim_dia', 'dim_dia_gen', 
         'dim_s', 'extra_text', 'stringa_editabile'
     ]
 
-    # 1. Reset chiavi fisse
-    for key in (list(defaults.keys()) + text_keys):
-        if key in st.session_state:
-            st.session_state[key] = defaults.get(key, "")
+    # 1. Reset chiavi fisse (Priorità ai valori del dizionario defaults)
+    for key in defaults:
+        st.session_state[key] = defaults[key]
+        
+    for key in text_keys:
+        st.session_state[key] = ""
 
     # 2. Reset dinamico (campi generati a runtime)
     for key in list(st.session_state.keys()):
