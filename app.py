@@ -573,7 +573,7 @@ with col_workarea:
         )
         
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.2 - Integrale)
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.3 - Finale)
 # =========================================================
 
 st.divider()
@@ -623,22 +623,22 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             dim_final = " ".join(lph)
             if dia_v: dim_final += f" Ø{dia_v}"
 
-        # 2. GESTIONE FINITURE (LOGICA CORRETTA PER DATABASE NIDIFICATO)
+        # 2. GESTIONE FINITURE (LOGICA UNIFICATA WOODCOMP / ASSEMBLY)
         sigle_finiture = []
         
-        # Creiamo un dizionario "piatto" per trovare la sigla partendo dal nome, 
-        # cercando in tutte le sottocategorie (Laminato, Nobilitato, ecc.)
+        # Creiamo il lookup universale per tradurre Nome -> Sigla
+        # Naviga attraverso tutte le sottocategorie (Laminato, Nobilitato, ecc.)
         lookup_finiture_unificato = {}
         for sub_cat in FINITURE_LEGNO.values():
             lookup_finiture_unificato.update(sub_cat)
         
-        # Caso WOODCOMP: Finitura singola
+        # Caso WOODCOMP: Finitura singola dal menù statico
         if macro_it == "WOODCOMP":
-            val_scelto = st.session_state.get("fin_wood_select")
-            if val_scelto and val_scelto in lookup_finiture_unificato:
-                sigle_finiture.append(lookup_finiture_unificato[val_scelto])
+            val_wood = st.session_state.get("fin_wood_select")
+            if val_wood and val_wood != "-" and val_wood in lookup_finiture_unificato:
+                sigle_finiture.append(lookup_finiture_unificato[val_wood])
         
-        # Caso ASSEMBLY: Finiture multiple (max 3)
+        # Caso ASSEMBLY: Finiture multiple (max 3) se il toggle è attivo
         elif macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi"):
             for i in range(1, 4):
                 f_key = f"ass_fin_{i}"
@@ -682,26 +682,32 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
                 note_en = note_it.upper()
 
         # 5. ASSEMBLAGGIO FINALE
+        # Evitiamo ripetizioni del materiale (es. METAL METAL)
         m_pfx = mat_en if not (mat_en == "METAL" and "METAL" in part_en.upper()) else ""
         
+        # Schema: MATERIALE + PREFISSI + NOME + MISURE + SUFFISSI + FINITURE
         parti_corpo = [m_pfx, pre_str, part_en, dim_final, suf_str, stringa_finiture]
         corpo = " ".join([p for p in parti_corpo if p.strip()]).replace("  ", " ").strip()
         
         if note_en:
             corpo = f"{corpo}, {note_en}"
 
+        # Aggiunta Modello Compatibilità (Trattino)
         comp_tags = st.session_state.get("comp_tags", "")
         res = f"{corpo} - {comp_tags}" if comp_tags else corpo
 
+        # Pulizia Grammaticale (WITH/AND) e duplicati
         res = res.upper().replace("WITH WITH", "WITH")
         if res.count("WITH") > 1:
             bits = res.split("WITH")
             res = bits[0] + "WITH" + " AND".join(bits[1:])
 
+        # Prefissi Speciali (Strutturale e Stato Assemblaggio)
         if uni_en_1090_active: res = f"UNI EN-1090 - {res}"
         if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled"):
             res = f"ASSEMBLED - {res}"
 
+        # Salvataggio in session_state con pulizia finale spazi
         st.session_state['stringa_editabile'] = res.replace("  ", " ").strip()
         
 # =========================================================
