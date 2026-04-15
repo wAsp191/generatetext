@@ -491,30 +491,25 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
                 note_tradotte = extra_libero.upper()
 
         # 4. ASSEMBLAGGIO LOGICO
-        # Divisione tra prefissi (TERMINI_ANTICIPATI) e suffissi
+        # --- NUOVA LOGICA DI SMISTAMENTO (MATCH PAROLA INTERA) ---
         pre = []
         suf = []
-
-# Trasformiamo TERMINI_ANTICIPATI in un set di maiuscole per lookup veloce O(1)
-SET_ANTICIPATI = {term.upper() for term in TERMINI_ANTICIPATI}
-
-for p in extra_pills_final:
-    # Pulizia rapida per il confronto: rimuoviamo caratteri che potrebbero "sporcare" la parola
-    # Es: "L-SHAPED" rimane "L-SHAPED", ma "ROUNDED," diventa "ROUNDED"
-    clean_p = p.upper().replace(",", "").replace(";", "")
-    parole_nel_pill = set(clean_p.split())
-    
-    # Check intersezione tra i set: basta che una parola coincida
-    if not parole_nel_pill.isdisjoint(SET_ANTICIPATI):
-        pre.append(p)
-    else:
-        suf.append(p)
-
-# Costruzione stringhe
-pre_str = " ".join(pre)
-suf_str = " ".join(suf)
+        
+        # Rendiamo i termini anticipati un set per confronto rapido
+        set_anticipati = {term.upper() for term in TERMINI_ANTICIPATI}
+        
+        for p in extra_pills_final:
+            parole_nel_pill = set(p.upper().split())
+            if not parole_nel_pill.isdisjoint(set_anticipati):
+                pre.append(p)
+            else:
+                suf.append(p)
+        
+        pre_str = " ".join(pre)
+        suf_str = " ".join(suf)
         
         # Gestione Materiale: evito "METAL METAL"
+        # QUI C'ERA L'ERRORE DI INDENTAZIONE
         mat_prefix = mat_en if not (mat_en == "METAL" and "METAL" in part_en.upper()) else ""
         
         # Costruzione corpo centrale
