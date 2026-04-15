@@ -491,16 +491,18 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
                 note_tradotte = extra_libero.upper()
 
         # 4. ASSEMBLAGGIO LOGICO
-        # --- NUOVA LOGICA DI SMISTAMENTO (MATCH PAROLA INTERA) ---
+        # --- LOGICA DI SMISTAMENTO (MATCH ESATTO DELLA PILLOLA) ---
         pre = []
         suf = []
         
-        # Rendiamo i termini anticipati un set per confronto rapido
+        # Rendiamo i termini anticipati un set di maiuscole per il confronto
         set_anticipati = {term.upper() for term in TERMINI_ANTICIPATI}
         
         for p in extra_pills_final:
-            parole_nel_pill = set(p.upper().split())
-            if not parole_nel_pill.isdisjoint(set_anticipati):
+            # Confrontiamo l'intera stringa della pillola (p) con la lista
+            # Se la pillola è esattamente "TOP", andrà in 'pre'
+            # Se la pillola è "FOR TOP SHELF", NON corrisponde esattamente a "TOP" e andrà in 'suf'
+            if p.upper().strip() in set_anticipati:
                 pre.append(p)
             else:
                 suf.append(p)
