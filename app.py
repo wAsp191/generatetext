@@ -455,24 +455,26 @@ with col_left:
     st.markdown("---")
     st.info(TESTO_MANUALE)
 
+# =========================================================
+# 2. INTERFACCIA UTENTE (v9.6 - Soluzione Universale)
+# =========================================================
+
+# ... (Parte iniziale invariata fino a col_workarea) ...
+
 with col_workarea:
-    # --- SEZIONE 2: MATERIALE E COMPATIBILITÀ ---
     st.subheader("🛠️ 2. Materiale e Compatibilità")
+    
     c_mat, c_comp = st.columns([1, 1.5])
     
     with c_mat:
-        # Gestione Specifica ASSEMBLY
         if macro_it == "ASSEMBLY":
             st.toggle("ASSEMBLATO (Prefisso)", key="check_assembled")
             st.toggle("🎨 ATTIVA FINITURE MULTIPLE", key="check_fin_multi_toggle")
-            mat_it = "ASSEMBLY" # Valore di fallback
-        
-        # Gestione Altre Categorie (incluso WOODCOMP)
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
-                # La key dinamica impedisce i conflitti nel cambio categoria
-                mat_it = st.radio(f"Materiale {macro_it}:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"radio_mat_{macro_it}")
+                # Usiamo una key fissa per il radio del materiale
+                mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key=f"radio_mat_{macro_it}")
                 mat_en = materiali_disponibili[mat_it]
 
     with c_comp:
@@ -486,7 +488,7 @@ with col_workarea:
 
     st.markdown("---")
     
-   # --- SEZIONE 3: SELEZIONE PARTICOLARE E FINITURE ---
+    # --- SEZIONE 3: SELEZIONE PARTICOLARE E FINITURE ---
     st.subheader("🔧 3. Dettaglio e Caratteristiche")
     
     part_dict = DATABASE[macro_it]["Particolari"]
@@ -499,36 +501,37 @@ with col_workarea:
         key="selectbox_part_final"
     )
 
-    # --- LOGICA FINITURE (ALLINEAMENTO CORRETTO) ---
+    # --- LOGICA FINITURE SEMPLIFICATA (A PROVA DI BUG) ---
     if scelta_part_it:
-        # Se siamo in WOODCOMP, mostriamo la tendina filtrata
         if macro_it == "WOODCOMP":
-            materiale_scelto = st.session_state.get(f"radio_mat_{macro_it}")
+            # Creiamo una lista unica con TUTTE le finiture del database
+            tutte_le_finiture = {}
+            for categoria in FINITURE_LEGNO.values():
+                tutte_le_finiture.update(categoria)
             
-            if materiale_scelto in FINITURE_LEGNO:
-                opzioni_per_materiale = FINITURE_LEGNO[materiale_scelto]
-                st.selectbox(
-                    f"🎨 Finiture per {materiale_scelto}:",
-                    options=["-"] + list(opzioni_per_materiale.keys()),
-                    key="fin_wood_select"
-                )
-            else:
-                st.info("💡 Seleziona un materiale sopra per sbloccare le finiture.")
+            st.markdown("---")
+            st.selectbox(
+                "🎨 Catalogo Finiture (Laminati / Nobilitati):",
+                options=["-"] + sorted(list(tutte_le_finiture.keys())),
+                key="fin_wood_select",
+                index=0,
+                help="Cerca qui la finitura desiderata indipendentemente dal materiale scelto."
+            )
 
-        # Se siamo in ASSEMBLY, mostriamo il toggle per le 3 finiture
-        elif macro_it == "ASSEMBLY":
-            if st.toggle("🎨 Attiva Finiture Multiple", key="check_fin_multi_toggle"):
-                all_fin = {}
-                for sub in FINITURE_LEGNO.values(): all_fin.update(sub)
-                
-                f_c1, f_c2, f_c3 = st.columns(3)
-                with f_c1: st.selectbox("Finitura 1", ["-"] + list(all_fin.keys()), key="ass_fin_1")
-                with f_c2: st.selectbox("Finitura 2", ["-"] + list(all_fin.keys()), key="ass_fin_2")
-                with f_c3: st.selectbox("Finitura 3", ["-"] + list(all_fin.keys()), key="ass_fin_3")
+        elif macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi_toggle"):
+            st.markdown("---")
+            st.info("🎨 Configurazione Finiture Multiple")
+            all_fin_ass = {}
+            for sub in FINITURE_LEGNO.values(): all_fin_ass.update(sub)
+            
+            fa1, fa2, fa3 = st.columns(3)
+            with fa1: st.selectbox("Finitura 1", ["-"] + sorted(list(all_fin_ass.keys())), key="ass_fin_1")
+            with fa2: st.selectbox("Finitura 2", ["-"] + sorted(list(all_fin_ass.keys())), key="ass_fin_2")
+            with fa3: st.selectbox("Finitura 3", ["-"] + sorted(list(all_fin_ass.keys())), key="ass_fin_3")
 
         st.markdown("---")
         
-        # --- GESTIONE EXTRA (SOTTO LE FINITURE) ---
+        # --- GESTIONE EXTRA (PILLS) ---
         dati_part = part_dict[scelta_part_it]
         part_en = dati_part[0]
         extra_dedicati_dict = dati_part[1]
@@ -537,25 +540,17 @@ with col_workarea:
         if extra_options:
             extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags_final")
             
-            
-            # Incompatibilità
-            tags_attivi_set = set(extra_selezionati) if extra_selezionati else set()
-            for gruppo in COPPIE_INCOMPATIBILI:
-                intersezione = set(gruppo).intersection(tags_attivi_set)
-                if len(intersezione) >= 2:
-                    st.error(f"⚠️ **CONFLITTO:** {', '.join(intersezione)}")
-                    blocco_incompatibilita = True
-
-            # Sotto-varianti e input manuali
+            # Varianti e input manuali
             for ex in (extra_selezionati or []):
                 if ex in SUB_OPTIONS_CONFIG:
-                    st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}_{macro_it}")
+                    st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
                 elif ex in EXTRA_CON_INPUT_MANUALE:
-                    st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}_{macro_it}")
+                    st.text_input(f"↳ Valore {ex}:", key=f"manual_{ex}")
 
     st.text_input("Note libere (Traduzione automatica):", key="extra_text_input").strip()
 
     st.markdown("---")
+
     
     # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento")
