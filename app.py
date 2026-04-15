@@ -430,11 +430,18 @@ LARGHEZZA_IMMAGINE = 600
 TESTO_MANUALE = """
 **PROCEDURA STANDARD:**
 1. **CATEGORIA**: Seleziona il gruppo a sinistra.
-2. **MODELLO**: Scegli materiale e compatibilità.
-3. **PARTICOLARE**: Cerca il pezzo e aggiungi le caratteristiche.
-4. **QUOTE**: Inserisci i valori in mm.
+2. **MODELLO**: Scegli tipologia materiale e la compatibilità (F25, Fortissimo, ecc.).
+3. **PARTICOLARE**: Cerca il componente specifico e aggiungi le varie caratteristiche
+4. **QUOTE**: Inserisci i valori in millimetri.
 5. **GENERA**: Clicca il tasto rosso in fondo.
+
+---
+**NOTE TECNICHE:**
+* I prefissi L-P-H sono automatici.
+* Le note libere vengono tradotte in inglese.
+* Lunghezza max stringa: 100 caratteri.
 """
+
 
 st.title("⚙️ REG - Title Generator & Classification")
 
