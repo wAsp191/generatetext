@@ -486,10 +486,9 @@ with col_workarea:
 
     st.markdown("---")
     
-    # --- SEZIONE 3: SELEZIONE PARTICOLARE E FINITURE ---
+   # --- SEZIONE 3: SELEZIONE PARTICOLARE E FINITURE ---
     st.subheader("🔧 3. Dettaglio e Caratteristiche")
     
-    # Selezione del componente
     part_dict = DATABASE[macro_it]["Particolari"]
     scelta_part_it = st.selectbox(
         "Cerca o seleziona dettaglio:", 
@@ -500,45 +499,44 @@ with col_workarea:
         key="selectbox_part_final"
     )
 
-    # --- LOGICA FINITURE WOODCOMP (FORZATA) ---
+    # --- LOGICA FINITURE (ALLINEAMENTO CORRETTO) ---
+    if scelta_part_it:
+        # Se siamo in WOODCOMP, mostriamo la tendina filtrata
         if macro_it == "WOODCOMP":
-            # Andiamo a leggere direttamente il valore dal widget radio usando la sua chiave
-            materiale_scelto_stato = st.session_state.get(f"radio_mat_{macro_it}")
+            materiale_scelto = st.session_state.get(f"radio_mat_{macro_it}")
             
-            if materiale_scelto_stato in FINITURE_LEGNO:
-                opzioni_per_materiale = FINITURE_LEGNO[materiale_scelto_stato]
+            if materiale_scelto in FINITURE_LEGNO:
+                opzioni_per_materiale = FINITURE_LEGNO[materiale_scelto]
                 st.selectbox(
-                    f"🎨 Finiture disponibili per {materiale_scelto_stato}:",
+                    f"🎨 Finiture per {materiale_scelto}:",
                     options=["-"] + list(opzioni_per_materiale.keys()),
-                    key="fin_wood_select",
-                    index=0
+                    key="fin_wood_select"
                 )
             else:
-                # Se non ha ancora cliccato nulla, mostriamo un avviso
-                st.info("💡 Seleziona un materiale sopra (Laminato, Nobilitato, ecc.) per scegliere la finitura.")
+                st.info("💡 Seleziona un materiale sopra per sbloccare le finiture.")
 
-        # CASO B: ASSEMBLY (Visibile solo se toggle attivo)
-        elif macro_it == "ASSEMBLY" and st.session_state.get("check_fin_multi_toggle"):
-            st.info("🎨 Configurazione Finiture Multiple")
-            # Unifichiamo le finiture per permettere ogni scelta su Assembly
-            all_fin = {}
-            for sub_cat in FINITURE_LEGNO.values(): all_fin.update(sub_cat)
-            
-            fa1, fa2, fa3 = st.columns(3)
-            with fa1: st.selectbox("Finitura 1", options=["-"] + list(all_fin.keys()), key="ass_fin_1")
-            with fa2: st.selectbox("Finitura 2", options=["-"] + list(all_fin.keys()), key="ass_fin_2")
-            with fa3: st.selectbox("Finitura 3", options=["-"] + list(all_fin.keys()), key="ass_fin_3")
+        # Se siamo in ASSEMBLY, mostriamo il toggle per le 3 finiture
+        elif macro_it == "ASSEMBLY":
+            if st.toggle("🎨 Attiva Finiture Multiple", key="check_fin_multi_toggle"):
+                all_fin = {}
+                for sub in FINITURE_LEGNO.values(): all_fin.update(sub)
+                
+                f_c1, f_c2, f_c3 = st.columns(3)
+                with f_c1: st.selectbox("Finitura 1", ["-"] + list(all_fin.keys()), key="ass_fin_1")
+                with f_c2: st.selectbox("Finitura 2", ["-"] + list(all_fin.keys()), key="ass_fin_2")
+                with f_c3: st.selectbox("Finitura 3", ["-"] + list(all_fin.keys()), key="ass_fin_3")
 
         st.markdown("---")
         
-        # --- GESTIONE EXTRA (PILLS) ---
+        # --- GESTIONE EXTRA (SOTTO LE FINITURE) ---
         dati_part = part_dict[scelta_part_it]
         part_en = dati_part[0]
         extra_dedicati_dict = dati_part[1]
         
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
-            extra_selezionati = st.pills("Caratteristiche/Opzioni:", options=extra_options, selection_mode="multi", key="extra_tags_final")
+            extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags_final")
+            
             
             # Incompatibilità
             tags_attivi_set = set(extra_selezionati) if extra_selezionati else set()
