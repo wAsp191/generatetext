@@ -572,7 +572,7 @@ with col_workarea:
         )
         
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.3 - Finale)
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE (v9.4 - Pill-Linked)
 # =========================================================
 
 st.divider()
@@ -622,7 +622,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             dim_final = " ".join(lph)
             if dia_v: dim_final += f" Ø{dia_v}"
 
-        # 2. GESTIONE FINITURE (LOGICA UNIFICATA WOODCOMP / ASSEMBLY)
+        # 2. GESTIONE FINITURE (LOGICA UNIFICATA WOOD COMP / ASSEMBLY)
         sigle_finiture = []
         
         # Creiamo il lookup universale per tradurre Nome -> Sigla
@@ -631,8 +631,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
         for sub_cat in FINITURE_LEGNO.values():
             lookup_finiture_unificato.update(sub_cat)
         
-        # Caso WOODCOMP: Finitura singola dal menù statico
-        if macro_it == "WOODCOMP":
+        # Caso WOOD COMP: Finitura singola attivata dal Pill
+        if macro_it == "WOOD COMP" and extra_selezionati and "FINITURA (+)" in extra_selezionati:
             val_wood = st.session_state.get("fin_wood_select")
             if val_wood and val_wood != "-" and val_wood in lookup_finiture_unificato:
                 sigle_finiture.append(lookup_finiture_unificato[val_wood])
@@ -652,6 +652,11 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
         for ex in list(extra_dedicati_dict.keys()):
             if extra_selezionati and ex in extra_selezionati:
                 base = extra_dedicati_dict.get(ex, ex.upper())
+                
+                # Se la base è vuota (es. FINITURA (+)), la ignoriamo per non creare spazi vuoti doppi
+                if not base.strip():
+                    continue
+                    
                 if ex in SUB_OPTIONS_CONFIG:
                     sub_v = st.session_state.get(f"sub_{ex}", "")
                     trad = SUB_OPTIONS_CONFIG[ex].get(sub_v, "")
@@ -707,7 +712,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             res = f"ASSEMBLED - {res}"
 
         # Salvataggio in session_state con pulizia finale spazi
-        st.session_state['stringa_editabile'] = res.replace("  ", " ").strip()
+        # L'uso di stringhe vuote come "FINITURA (+)" non lascerà doppi spazi
+        st.session_state['stringa_editabile'] = " ".join(res.split())
         
 # =========================================================
 # 4. OUTPUT E CLASSIFICAZIONE (FINAL STEP)
