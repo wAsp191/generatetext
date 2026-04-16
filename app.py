@@ -369,9 +369,9 @@ with col_workarea:
                 if mat_it == "ZINCATO":
                     tipo_zinc = st.radio(
                         "Tipo zincatura:",
-                        ["A FREDDO", "A CALDO"],
+                        ["A FREDDO (Zinc Plated)", "A CALDO (Galvanized)"],
                         horizontal=True,
-                        help="A FREDDO = Zinc Plated | A CALDO = Galvanized"
+                        help="A FREDDO (Zinc Plated) = Zinc Plated | A CALDO (Galvanized) = Galvanized"
                     )
                     
                     # Sovrascriviamo il valore inglese in base alla scelta
