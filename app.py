@@ -310,7 +310,42 @@ col_left, col_workarea = st.columns([1, 4], gap="large")
 
 with col_left:
     st.subheader("📂 1. Categoria")
-    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro", label_visibility="collapsed")
+    
+    # --- PICCOLO BLOCCO CSS SICURO ---
+    st.markdown("""
+        <style>
+        /* Ingrandisce il font delle opzioni nel radio button */
+        div[data-testid="stRadio"] label p {
+            font-size: 20px !important;
+            font-weight: 500 !important;
+            margin-bottom: 10px !important; /* Distanza tra le opzioni */
+            padding: 5px 0px !important;
+        }
+        /* Aggiunge spazio tra un'opzione e l'altra */
+        div[data-testid="stWidgetLabel"] {
+            margin-bottom: 15px !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
+    # Mappa estetica (le tue icone)
+    mappa_estetica = {
+        "METAL": "⚙️ METAL COMP",
+        "WOOD": "🪵 WOOD COMP",
+        "PLASTIC": "🧪 PLASTIC COMP",
+        "GLASS": "🧊 GLASS COMP",
+        "FASTENER": "🔩 FASTENER",
+        "ASSEMBLY": "🔧 ASSEMBLY"
+    }
+
+    # Il widget radio con il font ora maggiorato dal CSS sopra
+    macro_it = st.radio(
+        "Seleziona categoria:", 
+        options=list(DATABASE.keys()), 
+        format_func=lambda x: mappa_estetica.get(x, x),
+        key="radio_macro", 
+        label_visibility="collapsed"
+    )
 
 with col_workarea:
     # --- SEZIONE 2: MATERIALE E RICERCA (AFFIANCATI) ---
