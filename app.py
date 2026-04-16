@@ -335,7 +335,7 @@ with col_left:
         "PLASTIC COMP": "🧪 PLASTIC COMP",
         "GLASS COMP": "🧊 GLASS COMP",
         "FASTENER": "🔩 FASTENER",
-        "ASSEMBLY": "🔧 ASSEMBLY"
+        "ASSEMBLY": "🏛️ ASSEMBLY"
     }
 
     # Il widget radio con il font ora maggiorato dal CSS sopra
