@@ -295,10 +295,8 @@ with col_t:
 
 with col_m:
     with st.expander("📖 Manuale d'uso"):
-        # Slider per regolare la dimensione del testo del manuale
-        font_size = st.slider("Dimensione testo manuale:", 10, 20, 13)
         st.markdown(f"""
-        <div style="font-size: {font_size}px; line-height: 1.4;">
+        <div style="font-size: 14px; line-height: 1.4;">
         {TESTO_MANUALE}
         </div>
         """, unsafe_allow_html=True)
