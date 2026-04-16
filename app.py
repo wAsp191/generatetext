@@ -348,26 +348,46 @@ with col_left:
     )
 
 with col_workarea:
-    # --- SEZIONE 2: MATERIALE E RICERCA (AFFIANCATI) ---
     st.subheader("🛠️ 2. Configurazione Base")
     c_mat, c_search = st.columns([1, 1.5])
     
     with c_mat:
-        if macro_it == "ASSEMBLY":
+        if macro_it == "🏗️ ASSEMBLY": # Usa il nome esatto che hai nel DB/Radio
             st.toggle("ASSEMBLATO", key="check_assembled", help="Attiva se il componente è fornito già montato")
+            mat_it, mat_en = "", "" # Gli assiemi solitamente non hanno materiale singolo
         else:
+            # Recuperiamo i materiali dal tuo dizionario (DATABASE o CONFIG)
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
+            
             if materiali_disponibili:
-                mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
+                # 1. Selezione Materiale Base
+                mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
                 mat_en = materiali_disponibili[mat_it]
+                
+                # 2. Logica Condizionale per Zincatura (SOLO se selezioni ZINCATO)
+                # NOTA: Controlla se nel tuo DB è "ZINCATO" o "ZINC"
+                if mat_it == "ZINCATO":
+                    tipo_zinc = st.radio(
+                        "Tipo zincatura:",
+                        ["A FREDDO", "A CALDO"],
+                        horizontal=True,
+                        help="A FREDDO = Zinc Plated | A CALDO = Galvanized"
+                    )
+                    
+                    # Sovrascriviamo il valore inglese in base alla scelta
+                    if tipo_zinc == "A FREDDO":
+                        mat_en = "ZINC PLATED"
+                    else:
+                        mat_en = "GALVANIZED"
 
     with c_search:
+        # Recupero dettagli dal Database
         part_dict = DATABASE[macro_it]["Particolari"]
         scelta_part_it = st.selectbox(
             "Cerca o seleziona dettaglio:", 
             options=sorted(list(part_dict.keys())), 
             index=None,
-            placeholder="Inizia a scrivere per cercare...",
+            placeholder="Cerca componente...",
             format_func=lambda x: f"🔧 {x} ({part_dict[x][0]})" if x else "Seleziona...",
             key="selectbox_part"
         )
