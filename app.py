@@ -521,20 +521,30 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
         res = f"{corpo} - {comp_str}" if comp_str else corpo
 
         # 5. PULIZIA FINALE E CERTIFICAZIONI
-        res = res.upper().replace("WITH WITH", "WITH")
+        res = res.upper()
         
-        # Gestione logica "WITH... AND"
+        # Sostituisce i "WITH WITH" e pulisce spazi doppi o strani ( \xa0 )
+        res = res.replace("WITH WITH", "WITH").replace("  ", " ")
+        
+        # Gestione logica "WITH... AND" (Riscritta per evitare doppi spazi)
         if " WITH " in f" {res} ":
-            parts = res.split("WITH ")
-            if len(parts) > 2:
-                res = parts[0] + "WITH " + " AND ".join(parts[1:])
-        
+            # Dividiamo e puliamo ogni parte da spazi extra ai bordi
+            parts = [p.strip() for p in res.split("WITH")]
+            # Eliminiamo eventuali stringhe vuote rimaste
+            parts = [p for p in parts if p]
+            
+            if len(parts) > 1:
+                # Ricostruiamo: Base + WITH + (Resto unito da AND)
+                res = f"{parts[0]} WITH {' AND '.join(parts[1:])}"
+
+        # Aggiunta prefissi
         if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled"):
             res = f"ASSEMBLED - {res}"
         if st.session_state.get("check_1090"):
             res = f"UNI EN-1090 - {res}"
 
-        st.session_state['stringa_editabile'] = res.strip()
+        # IL TOCCO FINALE: Regola d'oro per eliminare ogni spazio multiplo residuo
+        st.session_state['stringa_editabile'] = " ".join(res.split()).strip()
         
 # =========================================================
 # 4. OUTPUT E CLASSIFICAZIONE (FINAL STEP)
