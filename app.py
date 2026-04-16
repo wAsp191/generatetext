@@ -375,7 +375,7 @@ with col_workarea:
                     )
                     
                     # Sovrascriviamo il valore inglese in base alla scelta
-                    if tipo_zinc == "A FREDDO":
+                    if tipo_zinc == "A FREDDO (Zinc Plated)":
                         mat_en = "ZINC PLATED"
                     else:
                         mat_en = "GALVANIZED"
