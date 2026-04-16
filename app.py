@@ -298,7 +298,6 @@ with col_m:
         st.markdown(f"""
         <div style="font-size: 14px; line-height: 1.4;">
         {TESTO_MANUALE}
-        </div>
         """, unsafe_allow_html=True)
 
 with col_r:
