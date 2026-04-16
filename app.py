@@ -309,8 +309,29 @@ st.markdown("---")
 col_left, col_workarea = st.columns([1, 4], gap="large")
 
 with col_left:
-    st.subheader("📂 1. Categoria")
-    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro", label_visibility="collapsed")
+    st.subheader("📁 Categoria")
+    
+    # 1. Definiamo un dizionario che mappa il codice tecnico al nome visualizzato con Emoji
+    mappa_categorie = {
+        "METAL": "🔩 METAL COMP",
+        "WOOD": "🪵 WOOD COMP",
+        "PLASTIC": "🧪 PLASTIC COMP",
+        "GLASS": "🪞 GLASS COMP",
+        "FASTENER": "🔩 FASTENER",
+        "ASSEMBLY": "🏗️ ASSEMBLY"
+    }
+
+    # 2. Creiamo il radio button
+    # Il segreto è 'format_func': Streamlit legge "METAL", ma mostra "🔩 METAL COMP"
+    scelta_macro = st.radio(
+        "Seleziona la tipologia di componente:",
+        options=list(mappa_categorie.keys()),
+        format_func=lambda x: mappa_categorie[x],
+        help="Scegli la macro-categoria per filtrare i particolari."
+    )
+    
+    # La variabile macro_it per il resto del codice rimane pulita (es. "METAL")
+    macro_it = scelta_macro
 
 with col_workarea:
     # --- SEZIONE 2: MATERIALE E RICERCA (AFFIANCATI) ---
