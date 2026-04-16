@@ -273,17 +273,17 @@ blocco_incompatibilita = False
 LARGHEZZA_IMMAGINE = 600 
 TESTO_MANUALE = """
 **PROCEDURA STANDARD:**
-1. **CATEGORIA**: Seleziona il gruppo a sinistra.
-2. **MATERIALE**: Scegli il tipo di finitura.
-3. **PARTICOLARE**: Cerca il componente.
-4. **EXTRA & QUOTE**: Aggiungi varianti e dimensioni.
-5. **MODELLO**: Scegli la compatibilità (F25, ecc.).
-6. **GENERA**: Clicca il tasto rosso in fondo.
+1. **CATEGORIA 📂**: Seleziona una tipologia dal gruppo a sinistra.
+2. **CONFIGURAZIONE BASE 🛠️**: Scegli il tipo di finitura e il materiale.
+3. **EXTRA E NOTE ✨**: Seleziona i pills necessari.
+4. **DIMENSIONAMENTO E MORMATIVE 📏**: Aggiungi dimensioni ed eventuali normative.
+5. **COMPATIBILITA' 🔗**: Scegli la compatibilità (F25, F50, ecc.).
+6. **GENERA STRINGA 🚀**: Clicca il tasto rosso in fondo.
 
 ---
 **NOTE TECNICHE:**
-* Prefissi L-P-H automatici.
-* Note libere tradotte in inglese.
+* Prefissi L-P-H nel campo dimensionamento sono automatici.
+* Note libere tradotte in inglese e formattate in stampatello.
 * Max 100 caratteri totali.
 """
 
