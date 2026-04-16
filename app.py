@@ -274,8 +274,8 @@ LARGHEZZA_IMMAGINE = 600
 TESTO_MANUALE = """
 **PROCEDURA STANDARD:**
 1. **CATEGORIA 📂**: Seleziona una tipologia dal gruppo a sinistra.
-2. **CONFIGURAZIONE BASE 🛠️**: Scegli il tipo di finitura e il componente.
-3. **EXTRA E NOTE ✨**: Seleziona i pills necessari ed eventuali note aggiuntive.
+2. **CONFIGURAZIONE BASE 🛠️**: Scegli il tipo di materiale e componente.
+3. **EXTRA E NOTE ✨**: Seleziona i pills necessari aggiungendo eventuali note.
 4. **DIMENSIONAMENTO E MORMATIVE 📏**: Aggiungi dimensioni ed eventuali normative.
 5. **COMPATIBILITA' 🔗**: Scegli la compatibilità (F25, F50, ecc.).
 6. **GENERA STRINGA 🚀**: Clicca il tasto rosso in fondo.
