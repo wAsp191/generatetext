@@ -330,10 +330,10 @@ with col_left:
 
     # Mappa estetica (le tue icone)
     mappa_estetica = {
-        "METAL": "⚙️ METAL COMP",
-        "WOOD": "🪵 WOOD COMP",
-        "PLASTIC": "🧪 PLASTIC COMP",
-        "GLASS": "🧊 GLASS COMP",
+        "METAL COMP": "⚙️ METAL COMP",
+        "WOOD COMP": "🪵 WOOD COMP",
+        "PLASTIC COMP": "🧪 PLASTIC COMP",
+        "GLASS COMP": "🧊 GLASS COMP",
         "FASTENER": "🔩 FASTENER",
         "ASSEMBLY": "🔧 ASSEMBLY"
     }
