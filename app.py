@@ -440,7 +440,23 @@ for errore in errori_rilevati:
 blocco_genera = len(errori_rilevati) > 0
 
 # --- B. TASTO GENERAZIONE ---
-if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=blocco_genera):
+# --- LOGICA DINAMICA PER IL TASTO ---
+# Controlliamo se mancano dati essenziali per cambiare icona e testo
+mancano_dimensioni = not any([st.session_state.get(f"dim_{x}", "").strip() for x in ["l", "p", "h", "dia", "s"]])
+
+if not scelta_part_it:
+    label_tasto = "⚠️ SELEZIONA UN PARTICOLARE"
+    icona_toast = "❌"
+elif mancano_dimensioni and macro_it != "ASSEMBLY": 
+    # Per gli assemblaggi le dimensioni potrebbero non servire, per il resto sì
+    label_tasto = "📐 INSERISCI LE DIMENSIONI"
+    icona_toast = "📏"
+else:
+    label_tasto = "🚀 GENERA STRINGA FINALE"
+    icona_toast = "✅"
+
+# --- CREAZIONE DEL TASTO ---
+if st.button(label_tasto, use_container_width=True, disabled=blocco_genera or not scelta_part_it):
     if not scelta_part_it:
         st.error("⚠️ Seleziona un particolare prima di procedere!")
     else:
@@ -545,6 +561,11 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
 
         # IL TOCCO FINALE: Regola d'oro per eliminare ogni spazio multiplo residuo
         st.session_state['stringa_editabile'] = " ".join(res.split()).strip()
+
+        st.session_state['stringa_editabile'] = res.strip()
+        
+        # MESSAGGIO DI CONFERMA DINAMICO
+        st.toast(f"Stringa generata correttamente!", icon=icona_toast)
         
 # =========================================================
 # 4. OUTPUT E CLASSIFICAZIONE (FINAL STEP)
