@@ -414,26 +414,25 @@ with col_workarea:
         st.info("Nessuna compatibilità necessaria per la categoria FASTENER.")
 
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE - FIX NAMEERROR
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE (DEFINITIVA)
 # =========================================================
 
 st.divider()
 
 # --- RECUPERO SICURO DELLE VARIABILI ---
-# Recuperiamo i valori direttamente dallo stato per evitare NameError
 extra_libero = st.session_state.get("extra_text", "").strip()
-# comp_selezionate e extra_selezionati dovrebbero essere già definiti 
-# dai widget pills nel Modulo 2, ma per sicurezza:
-if 'extra_tags' not in st.session_state: st.session_state['extra_tags'] = []
-extra_selezionati = st.session_state['extra_tags']
+extra_selezionati = st.session_state.get("extra_tags", [])
+# Recupero normativa se esiste, altrimenti stringa vuota
+normativa_val = normativa if 'normativa' in locals() else ""
 
 # --- A. GESTIONE ERRORI E INCOMPATIBILITÀ ---
 errori_rilevati = []
 if extra_selezionati:
-    # ... resto del codice delle incompatibilità ...
+    tags_attivi = set(extra_selezionati)
     for coppia in COPPIE_INCOMPATIBILI:
-        if coppia.issubset(set(extra_selezionati)):
-            errori_rilevati.append(f"⚠️ **Incongruenza:** Non puoi usare '{list(coppia)[0]}' e '{list(coppia)[1]}' insieme.")
+        intersezione = coppia.intersection(tags_attivi)
+        if len(intersezione) >= 2:
+            errori_rilevati.append(f"⚠️ **Incongruenza:** {', '.join(intersezione)} non possono stare insieme.")
 
 for errore in errori_rilevati:
     st.error(errore)
@@ -455,9 +454,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
                 dim_parts.append(f"{prefix}{d_val}")
             if l_val: dim_parts.append(f"L{l_val}")
             dim_final = "X".join(dim_parts)
-            if normativa: dim_final += f" {normativa}"
+            if normativa_val: dim_final += f" {normativa_val}"
         else:
-            # Recupero valori da session_state
             for p, label in [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H")]:
                 val = st.session_state.get(p, "").strip().upper()
                 if val: dim_parts.append(f"{label}{val}")
@@ -468,10 +466,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
             
             dim_final = " ".join(filter(None, [lph_str, f"Ø{dia_val}" if dia_val else None, f"S{s_val}" if s_val else None]))
 
-        # 2. ELABORAZIONE EXTRA (PILLS) - Mantenendo ordine DB
+        # 2. ELABORAZIONE EXTRA (PILLS)
         extra_pills_final = []
         for opt in list(extra_dedicati_dict.keys()):
-            if extra_selezionati and opt in extra_selezionati:
+            if opt in extra_selezionati:
                 base_t = extra_dedicati_dict.get(opt, opt.upper())
                 # Gestione Sotto-Opzioni (+)
                 if opt in SUB_OPTIONS_CONFIG:
@@ -497,17 +495,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
                 note_tradotte = extra_libero.upper()
 
         # 4. ASSEMBLAGGIO LOGICO
-        # --- LOGICA DI SMISTAMENTO (MATCH ESATTO DELLA PILLOLA) ---
-        pre = []
-        suf = []
-        
-        # Rendiamo i termini anticipati un set di maiuscole per il confronto
+        pre, suf = [], []
         set_anticipati = {term.upper() for term in TERMINI_ANTICIPATI}
         
         for p in extra_pills_final:
-            # Confrontiamo l'intera stringa della pillola (p) con la lista
-            # Se la pillola è esattamente "TOP", andrà in 'pre'
-            # Se la pillola è "FOR TOP SHELF", NON corrisponde esattamente a "TOP" e andrà in 'suf'
             if p.upper().strip() in set_anticipati:
                 pre.append(p)
             else:
@@ -517,33 +508,33 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=bl
         suf_str = " ".join(suf)
         
         # Gestione Materiale: evito "METAL METAL"
-        # QUI C'ERA L'ERRORE DI INDENTAZIONE
         mat_prefix = mat_en if not (mat_en == "METAL" and "METAL" in part_en.upper()) else ""
         
-        # Costruzione corpo centrale
-        corpo = f"{mat_prefix} {pre_str} {part_en} {dim_final} {suf_str}".replace("  ", " ").strip()
+        # Costruzione corpo
+        corpo = f"{mat_prefix} {pre_str} {part_en} {dim_final} {suf_str}".strip()
+        corpo = " ".join(corpo.split()) # Rimuove doppi spazi interni
         
-        # Aggiunta Note con virgola
         if note_tradotte:
             corpo = f"{corpo}, {note_tradotte}"
 
-        # Unione con Modello/Compatibilità
         comp_str = st.session_state.get("comp_tags", "")
         res = f"{corpo} - {comp_str}" if comp_str else corpo
 
-        # 5. PULIZIA FINALE (GRAMMATICA AI)
+        # 5. PULIZIA FINALE E CERTIFICAZIONI
         res = res.upper().replace("WITH WITH", "WITH")
-        if res.count("WITH") > 1:
-            parts = res.split("WITH")
-            res = parts[0] + "WITH" + " AND".join(parts[1:])
         
-        # Prefissi di certificazione
+        # Gestione logica "WITH... AND"
+        if " WITH " in f" {res} ":
+            parts = res.split("WITH ")
+            if len(parts) > 2:
+                res = parts[0] + "WITH " + " AND ".join(parts[1:])
+        
         if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled"):
             res = f"ASSEMBLED - {res}"
-        if uni_en_1090_active:
+        if st.session_state.get("check_1090"):
             res = f"UNI EN-1090 - {res}"
 
-        st.session_state['stringa_editabile'] = res.replace("  ", " ").strip()
+        st.session_state['stringa_editabile'] = res.strip()
         
 # =========================================================
 # 4. OUTPUT E CLASSIFICAZIONE (FINAL STEP)
