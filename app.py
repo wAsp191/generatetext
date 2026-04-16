@@ -274,10 +274,11 @@ LARGHEZZA_IMMAGINE = 600
 TESTO_MANUALE = """
 **PROCEDURA STANDARD:**
 1. **CATEGORIA**: Seleziona il gruppo a sinistra.
-2. **MODELLO**: Scegli materiale e compatibilità (F25, ecc.).
-3. **PARTICOLARE**: Cerca il componente e aggiungi varianti.
-4. **QUOTE**: Inserisci i valori in millimetri.
-5. **GENERA**: Clicca il tasto rosso in fondo.
+2. **MATERIALE**: Scegli il tipo di finitura.
+3. **PARTICOLARE**: Cerca il componente.
+4. **EXTRA & QUOTE**: Aggiungi varianti e dimensioni.
+5. **MODELLO**: Scegli la compatibilità (F25, ecc.).
+6. **GENERA**: Clicca il tasto rosso in fondo.
 
 ---
 **NOTE TECNICHE:**
@@ -286,31 +287,38 @@ TESTO_MANUALE = """
 * Max 100 caratteri totali.
 """
 
-st.title("⚙️ REG - Title Generator & Classification")
+# --- HEADER: TITOLO | MANUALE | RESET ---
+col_t, col_m, col_r = st.columns([2.5, 1.5, 1], vertical_alignment="bottom")
 
-# --- TASTO AZZERA (Sempre visibile) ---
-col_a, col_b, col_c = st.columns([2, 1, 2])
-with col_b:
-    st.button("🔄 AZZERA INTERFACCIA", on_click=activate_reset, use_container_width=True, key="btn_top")
+with col_t:
+    st.title("⚙️ REG - Title Generator")
+
+with col_m:
+    with st.expander("📖 Manuale d'uso"):
+        # Slider per regolare la dimensione del testo del manuale
+        font_size = st.slider("Dimensione testo manuale:", 10, 20, 13)
+        st.markdown(f"""
+        <div style="font-size: {font_size}px; line-height: 1.4;">
+        {TESTO_MANUALE}
+        </div>
+        """, unsafe_allow_html=True)
+
+with col_r:
+    st.button("🔄 AZZERA", on_click=activate_reset, use_container_width=True, key="btn_top")
 
 st.markdown("---")
 
-# LAYOUT: Sidebar (SX) | Area Lavoro (DX)
-col_left, col_workarea = st.columns([1, 3], gap="large")
+# LAYOUT PRINCIPALE: Sidebar (SX) | Area Lavoro (DX)
+col_left, col_workarea = st.columns([1, 4], gap="large")
 
 with col_left:
     st.subheader("📂 1. Categoria")
     macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), key="radio_macro", label_visibility="collapsed")
-    
-    st.markdown("---")
-    st.subheader("📖 Manuale d'uso")
-    st.info(TESTO_MANUALE)
 
 with col_workarea:
-    st.subheader("🛠️ 2. Materiale e Compatibilità")
-    
-    # RIGA MATERIALE + COMPATIBILITÀ
-    c_mat, c_comp = st.columns([1, 1.5])
+    # --- SEZIONE 2: MATERIALE E RICERCA (AFFIANCATI) ---
+    st.subheader("🛠️ 2. Configurazione Base")
+    c_mat, c_search = st.columns([1, 1.5])
     
     with c_mat:
         if macro_it == "ASSEMBLY":
@@ -321,30 +329,20 @@ with col_workarea:
                 mat_it = st.radio(f"Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
                 mat_en = materiali_disponibili[mat_it]
 
-    with c_comp:
-        if macro_it != "FASTENER":
-            pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-            comp_selezionata = st.pills("Modello Compatibilità:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
-            
-            if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
-                st.warning("⚡ Componente Strutturale")
-                uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
-    
-    st.markdown("---")
-    
-    # SELEZIONE PARTICOLARE
-    part_dict = DATABASE[macro_it]["Particolari"]
-    
-    scelta_part_it = st.selectbox(
-        "Cerca o seleziona dettaglio:", 
-        options=sorted(list(part_dict.keys())), 
-        index=None,
-        placeholder="Inizia a scrivere per cercare...",
-        format_func=lambda x: f"🔧 {x} ({part_dict[x][0]})" if x else "Seleziona...",
-        key="selectbox_part"
-    )
+    with c_search:
+        part_dict = DATABASE[macro_it]["Particolari"]
+        scelta_part_it = st.selectbox(
+            "Cerca o seleziona dettaglio:", 
+            options=sorted(list(part_dict.keys())), 
+            index=None,
+            placeholder="Inizia a scrivere per cercare...",
+            format_func=lambda x: f"🔧 {x} ({part_dict[x][0]})" if x else "Seleziona...",
+            key="selectbox_part"
+        )
 
     st.markdown("---")
+    
+    # --- SEZIONE 3: EXTRA E NOTE ---
     st.subheader("✨ 3. Extra e Note")
     
     if scelta_part_it:
@@ -352,14 +350,12 @@ with col_workarea:
         part_en = dati_part[0]
         extra_dedicati_dict = dati_part[1]
         
-        # Gestione Tag Suggerimento
         tag_suggerimento = " - ".join(dati_part[2:]) if len(dati_part) > 2 else ""
         
         extra_options = list(extra_dedicati_dict.keys())
         if extra_options:
             extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-            # --- LOGICA INCOMPATIBILITÀ ---
             if extra_selezionati:
                 tags_attivi = set(extra_selezionati)
                 for gruppo in COPPIE_INCOMPATIBILI:
@@ -368,7 +364,6 @@ with col_workarea:
                         st.error(f"⚠️ **CONFLITTO:** {', '.join(intersezione)} non possono stare insieme.")
                         blocco_incompatibilita = True
 
-                # Visualizzazione Sub-Opzioni
                 for ex in extra_selezionati:
                     if ex in SUB_OPTIONS_CONFIG:
                         st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
@@ -381,8 +376,9 @@ with col_workarea:
     st.text_input("Note libere (Traduzione automatica):", key="extra_text", placeholder="es: con tappi in gomma...").strip()
 
     st.markdown("---")
-    st.subheader("📏 4. Dimensionamento e Normative")
     
+    # --- SEZIONE 4: DIMENSIONAMENTO ---
+    st.subheader("📏 4. Dimensionamento e Normative")
     col_campi, col_immagine = st.columns([1, 1.5], gap="medium")
 
     with col_campi:
@@ -405,6 +401,20 @@ with col_workarea:
             caption="Standard Quote Tecniche", 
             width=LARGHEZZA_IMMAGINE
         )
+
+    st.markdown("---")
+
+    # --- SEZIONE 5: COMPATIBILITÀ (L'ULTIMO STEP) ---
+    st.subheader("🔗 5. Compatibilità")
+    if macro_it != "FASTENER":
+        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
+        comp_selezionata = st.pills("Seleziona il Modello di destinazione:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
+        
+        if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
+            st.warning("⚡ Componente Strutturale")
+            uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
+    else:
+        st.info("Nessuna compatibilità necessaria per la categoria FASTENER.")
 
 # =========================================================
 # 3. LOGICA DI GENERAZIONE E TRADUZIONE - FIX NAMEERROR
