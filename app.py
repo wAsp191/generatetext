@@ -670,9 +670,3 @@ if st.session_state.get('stringa_editabile'):
         # Rimuoviamo eventuali duplicati mantenendo l'ordine
         all_tags = list(dict.fromkeys(all_tags))
         st.info(f"🔍 **TAGS CLASSIFICAZIONE:** {' | '.join(all_tags)}")
-
-# --- TASTO RESET INFERIORE ---
-st.markdown("<br>", unsafe_allow_html=True)
-cb1, cb2, cb3 = st.columns([2, 1, 2])
-with cb2:
-    st.button("🔄 NUOVA GENERAZIONE", on_click=activate_reset, use_container_width=True, key="btn_bottom")
