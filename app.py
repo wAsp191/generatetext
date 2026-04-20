@@ -143,7 +143,7 @@ DATABASE = {
             "Cassetto estraibile": ["PULL-OUT DRAWER", {"Compatibilità piede di base (+)": "", "Su ruote": "ON WHEELS", "Con serratura": "WITH LOCK", "Senza serratura": "WITHOUT LOCK"}, "DRAWER"],
             "Coprimontante": ["UPRIGHT-COVER", {"Per montante H70": "FOR H70 UPRIGHT", "Per montante H90": "FOR H90 UPRIGHT"}, "COVER"],
             "Pedana di base": ["BASE PLATFORM", {"Con rinforzi": "REINFORCED"}, "BASE"],
-            "Divisorio": ["DIVIDER", {"Tubolare": "TUBOLAR", "In filo": "WIRE", "Trapezoidale": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
+            "Divisorio": ["DIVIDER", {"In filo": "WIRE", "Trapezoidale": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
             "Frontalino": ["RISER", {"In filo": "WIRE", "Per ripiano": "FOR SHELF", "Cromato": "CHROMED", "Verniciato": "PAINTED"}, "RISER"],
             "Compensazione": ["FILLER PIECE", {"Per piede di base": "FOR BASE FOOT", "Per spalle L100/L120": "FOR L100/L120 FRAME"}, "SPACER"],
             "Controventatura": ["BRACING", {"Per montante": "FOR UPRIGHT", "Con mensole saldate": "WITH WELDING BRACKET", "Passo 25": "PITCH 25", "Passo 50": "PITCH 50"}, "BRACING"],
@@ -254,7 +254,7 @@ OPZIONI_SPESSORE_WOOD = ["", "10mm", "15mm", "18mm", "19mm", "20mm", "22mm", "24
 TERMINI_ANTICIPATI = [
     "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "STATIC", "ADJUSTABLE", "SEISMIC",
     "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "CONNECTING", "SHUTTER", "COUPLING",
-    "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING", "WIRE-BASKET", "TUBOLAR",
+    "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING", "WIRE-BASKET",
     "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "ROTATING", "CTR", "UPRIGHT-GRAFT"
 ]
 
@@ -469,16 +469,18 @@ with col_workarea:
         st.info("Nessuna compatibilità necessaria per la categoria FASTENER.")
 
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE (FIXED)
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE (DEFINITIVA)
 # =========================================================
 
 st.divider()
 
-# --- 1. RECUPERO DATI E CONTROLLO ERRORI ---
+# --- RECUPERO SICURO DELLE VARIABILI ---
 extra_libero = st.session_state.get("extra_text", "").strip()
 extra_selezionati = st.session_state.get("extra_tags", [])
+# Recupero normativa se esiste, altrimenti stringa vuota
 normativa_val = normativa if 'normativa' in locals() else ""
 
+# --- A. GESTIONE ERRORI E INCOMPATIBILITÀ ---
 errori_rilevati = []
 if extra_selezionati:
     tags_attivi = set(extra_selezionati)
@@ -490,74 +492,135 @@ if extra_selezionati:
 for errore in errori_rilevati:
     st.error(errore)
 
-disabilita_tasto = not scelta_part_it or len(errori_rilevati) > 0
-label_tasto = "🚀 GENERA STRINGA FINALE" if scelta_part_it else "⚠️ SELEZIONA UN PARTICOLARE"
+blocco_genera = len(errori_rilevati) > 0
 
-# --- 3. TASTO GENERAZIONE ---
-if st.button(label_tasto, use_container_width=True, disabled=disabilita_tasto):
-    
-    # --- RIGA FONDAMENTALE: Recuperiamo part_en prima di tutto ---
-    # Cerchiamo nel dizionario 'part_dict' (che deve essere definito nel Modulo 2)
-    part_en = part_dict[scelta_part_it][1] if (scelta_part_it and scelta_part_it in part_dict) else ""
-    
-    # A. ELABORAZIONE DIMENSIONI
-    dim_parts = []
-    if macro_it == "FASTENER":
-        d_val = st.session_state.get("dim_dia", "").strip().upper()
-        l_val = st.session_state.get("dim_l", "").strip().upper()
-        if d_val:
-            prefix = "" if d_val.startswith('M') else "D"
-            dim_parts.append(f"{prefix}{d_val}")
-        if l_val: dim_parts.append(f"L{l_val}")
-        dim_final = "X".join(dim_parts)
-        if normativa_val: dim_final += f" {normativa_val}"
+# --- B. TASTO GENERAZIONE ---
+# --- LOGICA DINAMICA PER IL TASTO ---
+# Controlliamo se mancano dati essenziali per cambiare icona e testo
+mancano_dimensioni = not any([st.session_state.get(f"dim_{x}", "").strip() for x in ["l", "p", "h", "dia", "s"]])
+
+if not scelta_part_it:
+    label_tasto = "⚠️ SELEZIONA UN PARTICOLARE"
+    icona_toast = "❌"
+elif mancano_dimensioni and macro_it != "ASSEMBLY": 
+    # Per gli assemblaggi le dimensioni potrebbero non servire, per il resto sì
+    label_tasto = "📐 INSERISCI LE DIMENSIONI"
+    icona_toast = "📏"
+else:
+    label_tasto = "🚀 GENERA STRINGA FINALE"
+    icona_toast = "✅"
+
+# --- CREAZIONE DEL TASTO ---
+if st.button(label_tasto, use_container_width=True, disabled=blocco_genera or not scelta_part_it):
+    if not scelta_part_it:
+        st.error("⚠️ Seleziona un particolare prima di procedere!")
     else:
-        for p, label in [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H")]:
-            val = st.session_state.get(p, "").strip().upper()
-            if val: dim_parts.append(f"{label}{val}")
-        
-        lph_str = " ".join(dim_parts)
-        dia_val = st.session_state.get("dim_dia_gen", "").strip().upper()
-        s_val = st.session_state.get("dim_s", "").strip().upper()
-        
-        comp_dim = []
-        if lph_str: comp_dim.append(lph_str)
-        if dia_val: comp_dim.append(f"Ø{dia_val}")
-        if s_val: comp_dim.append(f"S{s_val}")
-        dim_final = " ".join(comp_dim)
+        # 1. ELABORAZIONE DIMENSIONI
+        dim_parts = []
+        if macro_it == "FASTENER":
+            d_val = st.session_state.get("dim_dia", "").strip().upper()
+            l_val = st.session_state.get("dim_l", "").strip().upper()
+            if d_val:
+                prefix = "" if d_val.startswith('M') else "D"
+                dim_parts.append(f"{prefix}{d_val}")
+            if l_val: dim_parts.append(f"L{l_val}")
+            dim_final = "X".join(dim_parts)
+            if normativa_val: dim_final += f" {normativa_val}"
+        else:
+            for p, label in [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H")]:
+                val = st.session_state.get(p, "").strip().upper()
+                if val: dim_parts.append(f"{label}{val}")
+            
+            lph_str = " ".join(dim_parts)
+            dia_val = st.session_state.get("dim_dia_gen", "").strip().upper()
+            s_val = st.session_state.get("dim_s", "").strip().upper()
+            
+            dim_final = " ".join(filter(None, [lph_str, f"Ø{dia_val}" if dia_val else None, f"S{s_val}" if s_val else None]))
 
-    # B. ELABORAZIONE EXTRA E TRADUZIONE
-    extra_pills_final = []
-    for opt in list(extra_dedicati_dict.keys()):
-        if opt in extra_selezionati:
-            base_t = extra_dedicati_dict.get(opt, opt.upper())
-            if opt in SUB_OPTIONS_CONFIG:
-                val_sub = st.session_state.get(f"sub_{opt}", "")
-                trad_sub = SUB_OPTIONS_CONFIG[opt].get(val_sub, "")
-                extra_pills_final.append(f"{base_t} {trad_sub}".strip())
-            elif opt in EXTRA_CON_INPUT_MANUALE:
-                v_man = st.session_state.get(f"manual_{opt}", "").strip().upper()
-                extra_pills_final.append(f"{base_t} {v_man}" if v_man else base_t)
+        # 2. ELABORAZIONE EXTRA (PILLS)
+        extra_pills_final = []
+        for opt in list(extra_dedicati_dict.keys()):
+            if opt in extra_selezionati:
+                base_t = extra_dedicati_dict.get(opt, opt.upper())
+                # Gestione Sotto-Opzioni (+)
+                if opt in SUB_OPTIONS_CONFIG:
+                    val_sub = st.session_state.get(f"sub_{opt}", "")
+                    trad_sub = SUB_OPTIONS_CONFIG[opt].get(val_sub, "")
+                    extra_pills_final.append(f"{base_t} {trad_sub}".strip())
+                # Gestione Input Manuale
+                elif opt in EXTRA_CON_INPUT_MANUALE:
+                    v_man = st.session_state.get(f"manual_{opt}", "").strip().upper()
+                    extra_pills_final.append(f"{base_t} {v_man}" if v_man else base_t)
+                else:
+                    extra_pills_final.append(base_t)
+
+        # 3. TRADUZIONE NOTE LIBERE
+        note_tradotte = ""
+        if extra_libero:
+            testo_it = extra_libero.lower()
+            for ita, eng in GLOSSARIO_TECNICO.items():
+                testo_it = testo_it.replace(ita, eng)
+            try:
+                note_tradotte = GoogleTranslator(source='it', target='en').translate(testo_it).upper()
+            except:
+                note_tradotte = extra_libero.upper()
+
+        # 4. ASSEMBLAGGIO LOGICO
+        pre, suf = [], []
+        set_anticipati = {term.upper() for term in TERMINI_ANTICIPATI}
+        
+        for p in extra_pills_final:
+            if p.upper().strip() in set_anticipati:
+                pre.append(p)
             else:
-                extra_pills_final.append(base_t)
+                suf.append(p)
+        
+        pre_str = " ".join(pre)
+        suf_str = " ".join(suf)
+        
+        # Gestione Materiale: evito "METAL METAL"
+        mat_prefix = mat_en if not (mat_en == "METAL" and "METAL" in part_en.upper()) else ""
+        
+        # Costruzione corpo
+        corpo = f"{mat_prefix} {pre_str} {part_en} {dim_final} {suf_str}".strip()
+        corpo = " ".join(corpo.split()) # Rimuove doppi spazi interni
+        
+        if note_tradotte:
+            corpo = f"{corpo}, {note_tradotte}"
 
-    # C. ASSEMBLAGGIO (Qui part_en ora esiste e non darà errore)
-    pre, suf = [], []
-    set_anticipati = {term.upper() for term in TERMINI_ANTICIPATI}
-    for p in extra_pills_final:
-        if p.upper().strip() in set_anticipati: pre.append(p)
-        else: suf.append(p)
-    
-    # LOGICA ANTI-DUPLICAZIONE "METAL METAL"
-    mat_prefix = mat_en if not (mat_en == "METAL" and "METAL" in part_en.upper()) else ""
-    
-    corpo = f"{mat_prefix} {" ".join(pre)} {part_en} {dim_final} {" ".join(suf)}".strip()
-    corpo = " ".join(corpo.split())
-    
-    # ... (Il resto della pulizia stringa come prima) ...
-    res = corpo.upper()
-    st.session_state['stringa_editabile'] = res.strip()
-    st.toast("Generato!", icon="✅")
+        comp_str = st.session_state.get("comp_tags", "")
+        res = f"{corpo} - {comp_str}" if comp_str else corpo
+
+        # 5. PULIZIA FINALE E CERTIFICAZIONI
+        res = res.upper()
+        
+        # Sostituisce i "WITH WITH" e pulisce spazi doppi o strani ( \xa0 )
+        res = res.replace("WITH WITH", "WITH").replace("  ", " ")
+        
+        # Gestione logica "WITH... AND" (Riscritta per evitare doppi spazi)
+        if " WITH " in f" {res} ":
+            # Dividiamo e puliamo ogni parte da spazi extra ai bordi
+            parts = [p.strip() for p in res.split("WITH")]
+            # Eliminiamo eventuali stringhe vuote rimaste
+            parts = [p for p in parts if p]
+            
+            if len(parts) > 1:
+                # Ricostruiamo: Base + WITH + (Resto unito da AND)
+                res = f"{parts[0]} WITH {' AND '.join(parts[1:])}"
+
+        # Aggiunta prefissi
+        if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled"):
+            res = f"ASSEMBLED - {res}"
+        if st.session_state.get("check_1090"):
+            res = f"UNI EN-1090 - {res}"
+
+        # IL TOCCO FINALE: Regola d'oro per eliminare ogni spazio multiplo residuo
+        st.session_state['stringa_editabile'] = " ".join(res.split()).strip()
+
+        st.session_state['stringa_editabile'] = res.strip()
+        
+        # MESSAGGIO DI CONFERMA DINAMICO
+        st.toast(f"Stringa generata correttamente!", icon=icona_toast)
         
 # =========================================================
 # 4. OUTPUT E CLASSIFICAZIONE (FINAL STEP)
@@ -607,3 +670,9 @@ if st.session_state.get('stringa_editabile'):
         # Rimuoviamo eventuali duplicati mantenendo l'ordine
         all_tags = list(dict.fromkeys(all_tags))
         st.info(f"🔍 **TAGS CLASSIFICAZIONE:** {' | '.join(all_tags)}")
+
+# --- TASTO RESET INFERIORE ---
+st.markdown("<br>", unsafe_allow_html=True)
+cb1, cb2, cb3 = st.columns([2, 1, 2])
+with cb2:
+    st.button("🔄 NUOVA GENERAZIONE", on_click=activate_reset, use_container_width=True, key="btn_bottom")
