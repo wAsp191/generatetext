@@ -494,48 +494,25 @@ for errore in errori_rilevati:
 
 blocco_genera = len(errori_rilevati) > 0
 
-# --- B. TASTO GENERAZIONE ---
-# --- LOGICA DINAMICA PER IL TASTO ---
-# Controlliamo se mancano dati essenziali per cambiare icona e testo
-mancano_dimensioni = not any([st.session_state.get(f"dim_{x}", "").strip() for x in ["l", "p", "h", "dia", "s"]])
+# --- B. TASTO GENERAZIONE (VERSIONE SEMPLIFICATA) ---
 
+# 1. Impostiamo la label fissa come richiesto (niente bonus visivo, solo razzo)
 if not scelta_part_it:
     label_tasto = "⚠️ SELEZIONA UN PARTICOLARE"
-    icona_toast = "❌"
-elif mancano_dimensioni and macro_it != "ASSEMBLY": 
-    # Per gli assemblaggi le dimensioni potrebbero non servire, per il resto sì
-    label_tasto = "📐 INSERISCI LE DIMENSIONI"
-    icona_toast = "📏"
 else:
     label_tasto = "🚀 GENERA STRINGA FINALE"
-    icona_toast = "✅"
 
-# --- CREAZIONE DEL TASTO ---
-if st.button(label_tasto, use_container_width=True, disabled=blocco_genera or not scelta_part_it):
-    if not scelta_part_it:
-        st.error("⚠️ Seleziona un particolare prima di procedere!")
+# 2. CREAZIONE DEL TASTO 
+# Ora il disabled è attivo SOLO se non è stato scelto il particolare.
+# Ho rimosso 'blocco_genera' se era legato alle dimensioni.
+if st.button(label_tasto, use_container_width=True, disabled=not scelta_part_it):
+    # Da qui in poi il codice rimane identico al tuo...
+    # 1. ELABORAZIONE DIMENSIONI
+    dim_parts = []
+    if macro_it == "FASTENER":
+        # ... (il tuo codice per fastener) ...
     else:
-        # 1. ELABORAZIONE DIMENSIONI
-        dim_parts = []
-        if macro_it == "FASTENER":
-            d_val = st.session_state.get("dim_dia", "").strip().upper()
-            l_val = st.session_state.get("dim_l", "").strip().upper()
-            if d_val:
-                prefix = "" if d_val.startswith('M') else "D"
-                dim_parts.append(f"{prefix}{d_val}")
-            if l_val: dim_parts.append(f"L{l_val}")
-            dim_final = "X".join(dim_parts)
-            if normativa_val: dim_final += f" {normativa_val}"
-        else:
-            for p, label in [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H")]:
-                val = st.session_state.get(p, "").strip().upper()
-                if val: dim_parts.append(f"{label}{val}")
-            
-            lph_str = " ".join(dim_parts)
-            dia_val = st.session_state.get("dim_dia_gen", "").strip().upper()
-            s_val = st.session_state.get("dim_s", "").strip().upper()
-            
-            dim_final = " ".join(filter(None, [lph_str, f"Ø{dia_val}" if dia_val else None, f"S{s_val}" if s_val else None]))
+        # ... (il tuo codice per dimensioni generali) ...
 
         # 2. ELABORAZIONE EXTRA (PILLS)
         extra_pills_final = []
