@@ -356,11 +356,11 @@ with col_workarea:
     c_mat, c_search = st.columns([1, 1.5])
     
     with c_mat:
-        if macro_it == "🏗️ ASSEMBLY": # Usa il nome esatto che hai nel DB/Radio
+        # --- FIX: Usiamo 'in' per ignorare emoji o spazi extra ---
+        if "ASSEMBLY" in macro_it.upper(): 
             st.toggle("ASSEMBLATO", key="check_assembled", help="Attiva se il componente è fornito già montato")
-            mat_it, mat_en = "", "" # Gli assiemi solitamente non hanno materiale singolo
+            mat_it, mat_en = "ASSEMBLY", "" # Inizializzazione sicura per il Modulo 3
         else:
-            # Recuperiamo i materiali dal tuo dizionario (DATABASE o CONFIG)
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             
             if materiali_disponibili:
@@ -368,31 +368,32 @@ with col_workarea:
                 mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
                 mat_en = materiali_disponibili[mat_it]
                 
-                # 2. Logica Condizionale per Zincatura (SOLO se selezioni ZINCATO)
-                # NOTA: Controlla se nel tuo DB è "ZINCATO" o "ZINC"
-                if mat_it == "ZINCATO":
+                # 2. Logica Zincatura (Più robusta)
+                if mat_it.upper() == "ZINCATO":
                     tipo_zinc = st.radio(
                         "Tipo zincatura:",
                         ["A FREDDO (Zinc Plated)", "A CALDO (Galvanized)"],
                         horizontal=True,
-                        help="A FREDDO (Zinc Plated) = Zinc Plated | A CALDO (Galvanized) = Galvanized"
+                        key="zinc_type_radio"
                     )
                     
-                    # Sovrascriviamo il valore inglese in base alla scelta
-                    if tipo_zinc == "A FREDDO (Zinc Plated)":
+                    # Sovrascriviamo subito mat_en per il Modulo 3
+                    if "A FREDDO" in tipo_zinc:
                         mat_en = "ZINC PLATED"
                     else:
                         mat_en = "GALVANIZED"
 
     with c_search:
         # Recupero dettagli dal Database
-        part_dict = DATABASE[macro_it]["Particolari"]
+        # Usiamo .get() per evitare errori se la macro_it non esiste per un millisecondo
+        part_info = DATABASE.get(macro_it, {}).get("Particolari", {})
+        
         scelta_part_it = st.selectbox(
             "Cerca o seleziona dettaglio:", 
-            options=sorted(list(part_dict.keys())), 
+            options=sorted(list(part_info.keys())), 
             index=None,
             placeholder="Cerca componente...",
-            format_func=lambda x: f"🔧 {x} ({part_dict[x][0]})" if x else "Seleziona...",
+            format_func=lambda x: f"🔧 {x} ({part_info[x][0]})" if x else "Seleziona...",
             key="selectbox_part"
         )
 
@@ -402,9 +403,10 @@ with col_workarea:
     st.subheader("✨ 3. Extra e Note")
     
     if scelta_part_it:
-        dati_part = part_dict[scelta_part_it]
-        part_en = dati_part[0]
-        extra_dedicati_dict = dati_part[1]
+        # Recuperiamo i dati corretti dal dizionario dei particolari
+        dati_part = part_info[scelta_part_it]
+        part_en = dati_part[0] # Nome inglese
+        extra_dedicati_dict = dati_part[1] # Dizionario extra
         
         tag_suggerimento = " - ".join(dati_part[2:]) if len(dati_part) > 2 else ""
         
@@ -413,6 +415,7 @@ with col_workarea:
             extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
             
             if extra_selezionati:
+                # Controllo incompatibilità (manteniamo la tua logica)
                 tags_attivi = set(extra_selezionati)
                 for gruppo in COPPIE_INCOMPATIBILI:
                     intersezione = gruppo.intersection(tags_attivi)
@@ -420,6 +423,7 @@ with col_workarea:
                         st.error(f"⚠️ **CONFLITTO:** {', '.join(intersezione)} non possono stare insieme.")
                         blocco_incompatibilita = True
 
+                # Sotto-opzioni e Input manuali
                 for ex in extra_selezionati:
                     if ex in SUB_OPTIONS_CONFIG:
                         st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
@@ -428,10 +432,6 @@ with col_workarea:
         
         if tag_suggerimento:
             st.caption(f"🔍 Classificazione suggerita: **{tag_suggerimento}**")
-
-    st.text_input("Note libere (Traduzione automatica):", key="extra_text", placeholder="es: con tappi in gomma...").strip()
-
-    st.markdown("---")
     
     # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento e Normative")
