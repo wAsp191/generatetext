@@ -96,14 +96,13 @@ SUB_OPTIONS_CONFIG = {
     },
     "Orientamento (+)": {"Destra": "RIGHT", "Sinistra": "LEFT"},
     "Posizioni multiple (+)": {
-        "1 posizione": "1 POSITION", "2 posizioni": "2 POSITION", "3 posizioni": "3 POSITION"
+        "1 posizione": "1 POSITION", "2 posizioni": "2 POSITIONS", "3 posizioni": "3 POSITIONS"
     },
     "Altezza piede (+)": {"H90": "H90", "H100": "H100", "H150": "H150"},
     "Predisposto per montante (+)": {
         "L80": "FOR L80 UPRIGHT", "L100/L120": "FOR L100/L120 UPRIGHT"
     },
-    "Numero tasche (+)": {"1 Tasca": "1 POCKET", "2 Tasche": "2 POCKETS"},
-    },
+    "Numero tasche (+)": {"1 Tasca": "1 POCKET", "2 Tasche": "2 POCKETS"}, # Qui ho tolto la graffa extra
     "Numero gradoni (+)": {"1 gradone": "1 STEP", "2 gradoni": "2 STEPS", "3 gradoni": "3 STEPS"}
 }
 
