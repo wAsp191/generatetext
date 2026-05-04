@@ -434,25 +434,6 @@ with col_workarea:
     
     # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento e Normative")
-    
-    col_campi, col_immagine = st.columns([1, 1.5], gap="medium")
-    with col_campi:
-        if macro_it == "FASTENER":
-            st.text_input("Lunghezza (L)", key="dim_l")
-            st.text_input("Diametro (D/M)", key="dim_dia")
-            opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-            st.selectbox("Riferimento Normativo", options=list(opzioni_norm.keys()), key="norm_select")
-        else:
-            st.text_input("Lunghezza (L)", key="dim_l")
-            st.text_input("Profondità (P)", key="dim_p")
-            st.text_input("Altezza (H)", key="dim_h")
-            st.text_input("Diametro (Ø)", key="dim_dia_gen")
-            
-    with col_immagine:
-        st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", width=LARGHEZZA_IMMAGINE)
-    
-    # --- SEZIONE 4: DIMENSIONAMENTO ---
-    st.subheader("📏 4. Dimensionamento e Normative")
     col_campi, col_immagine = st.columns([1, 1.5], gap="medium")
     with col_campi:
         if macro_it == "FASTENER":
