@@ -514,10 +514,14 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         # il cambiamento nello session_state e mostrerà il risultato.
         
 # =========================================================
-# 4. OUTPUT E MONITORAGGIO (VERSIONE STABILE)
+# 4. OUTPUT E MONITORAGGIO (VERSIONE TANK)
 # =========================================================
 
-# Usiamo un contenitore per stabilizzare l'interfaccia
+# Funzione per gestire l'aggiornamento manuale senza rompere il flusso
+def aggiorna_da_input():
+    st.session_state['stringa_editabile'] = st.session_state['input_manuale'].upper()
+
+# Contenitore principale per evitare collassi visivi
 risultato_container = st.container()
 
 if st.session_state.get('stringa_editabile'):
@@ -528,44 +532,53 @@ if st.session_state.get('stringa_editabile'):
         # 1. LAYOUT CONTROLLI
         col_str, col_opt = st.columns([4, 1])
         
-        # Il segreto è la 'key' univoca per mantenere lo stato del toggle
+        # Toggle con chiave persistente
         modifica_attiva = col_opt.toggle("✏️ Modifica", key="toggle_manual_edit")
 
         if modifica_attiva:
-            # Se l'utente modifica, aggiorniamo direttamente lo stato
-            nuovo_valore = st.text_input(
+            # Usiamo on_change per aggiornare lo stato solo quando l'utente preme invio
+            st.text_input(
                 "Modifica manuale stringa:", 
                 value=st.session_state['stringa_editabile'],
+                key="input_manuale",
+                on_change=aggiorna_da_input,
                 label_visibility="collapsed"
             )
-            st.session_state['stringa_editabile'] = nuovo_valore.upper()
         else:
-            # Visualizzazione pulita
+            # Formato codice: pulito, tech e con tasto "copia" nativo di Streamlit
             st.code(st.session_state['stringa_editabile'], language=None)
 
-        # 2. BARRA DI PROGRESSO (Sempre presente se c'è una stringa)
+        # 2. BARRA DI PROGRESSO DINAMICA
         lunghezza = len(st.session_state['stringa_editabile'])
         perc = min(lunghezza / 100, 1.0)
         
         if lunghezza > 100:
-            st.error(f"⚠️ LIMITE SUPERATO: {lunghezza}/100")
-            st.progress(perc)
+            st.error(f"⚠️ LIMITE CRITICO SUPERATO: {lunghezza}/100")
+        elif lunghezza >= 90:
+            st.warning(f"🟡 ATTENZIONE: Lunghezza limite vicina ({lunghezza}/100)")
         else:
-            st.caption(f"✅ Lunghezza attuale: {lunghezza}/100 caratteri")
-            st.progress(perc)
+            st.caption(f"✅ Lunghezza ottimale: {lunghezza}/100 caratteri")
+        
+        st.progress(perc)
 
-        # 3. TAGS DI CLASSIFICAZIONE (Visualizzazione Minimal)
-        # (Qui recuperi i tag come abbiamo fatto nei moduli precedenti)
-        tags_finti = ["METALLO", "F25", "UNI-EN-1090"] # Esempio
-        st.markdown(f"**Classificazione:** `{'` `'.join(tags_finti)}` ")
+        # 3. TAGS DI CLASSIFICAZIONE (Logica Automatica)
+        # Qui recuperiamo i tag reali basandoci sulle selezioni precedenti
+        tag_macro = st.session_state.get('radio_macro', 'N/D')
+        tag_comp = st.session_state.get('comp_tags', '')
+        
+        display_tags = [tag_macro]
+        if tag_comp: display_tags.append(tag_comp)
+        if st.session_state.get('check_1090'): display_tags.append("EN1090")
+        
+        st.markdown(f"**Classificazione:** `{'` `'.join(display_tags)}` ")
 
-        # 4. TASTO SALVA CON ANIMAZIONE TECNICA
-        st.write("") # Spazio di cortesia
+        # 4. TASTO CONFERMA CON FEEDBACK SERIO
+        st.write("") 
         if st.button("💾 CONFERMA E REGISTRA", use_container_width=True):
-            # Animazione "Loading" professionale invece della neve
-            with st.spinner("Sincronizzazione in corso..."):
+            with st.spinner("Sincronizzazione record in corso..."):
                 import time
-                time.sleep(0.6) # Feedback tattile per l'utente
+                time.sleep(0.8) # Quel secondo di attesa che dà "peso" all'azione
             
-            # Feedback finale non invasivo
-            st.toast("Stringa validata e salvata correttamente!", icon="🎯")
+            # Feedback finale: Toast (professionale) e un segnale visivo netto
+            st.toast("Stringa validata e registrata!", icon="🎯")
+            st.success("Operazione completata con successo.")
