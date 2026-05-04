@@ -478,25 +478,40 @@ with col_workarea:
     
     st.markdown("---")
     
-    # --- SEZIONE 4: DIMENSIONAMENTO ---
-    st.subheader("📏 4. Dimensionamento e Normative")
-    col_campi, col_immagine = st.columns([1, 1.5], gap="medium")
-    with col_campi:
-        if macro_it == "FASTENER":
-            st.text_input("Lunghezza (L)", key="dim_l")
-            st.text_input("Diametro (D/M)", key="dim_dia")
-            opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-            st.selectbox("Riferimento Normativo", options=list(opzioni_norm.keys()), key="norm_select")
-        else:
-            st.text_input("Lunghezza (L)", key="dim_l")
-            st.text_input("Profondità (P)", key="dim_p")
-            st.text_input("Altezza (H)", key="dim_h")
-            st.text_input("Diametro (Ø)", key="dim_dia_gen")
-            
-    with col_immagine:
-        st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", width=LARGHEZZA_IMMAGINE)
+    # --- SEZIONE 4: DIMENSIONAMENTO E NORMATIVE ---
+st.subheader("📏 4. Dimensionamento e Normative")
 
-    st.markdown("---")
+# Creiamo due macro-colonne: una per gli input e una per l'immagine
+col_input_area, col_img_area = st.columns([2.5, 1.5], gap="small")
+
+with col_input_area:
+    if macro_it == "FASTENER":
+        # Griglia 2x1 per Fastener
+        c1, c2 = st.columns(2)
+        with c1: st.text_input("Lunghezza (L)", key="dim_l")
+        with c2: st.text_input("Diametro (D/M)", key="dim_dia")
+        
+        opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
+        st.selectbox("Riferimento Normativo", options=list(opzioni_norm.keys()), key="norm_select")
+    else:
+        # Griglia 2x2 per gli altri componenti (Molto più compatta!)
+        c1, c2 = st.columns(2)
+        with c1:
+            st.text_input("Lunghezza (L)", key="dim_l_gen")
+            st.text_input("Altezza (H)", key="dim_h")
+        with c2:
+            st.text_input("Profondità (P)", key="dim_p")
+            st.text_input("Diametro (Ø)", key="dim_dia_gen")
+
+with col_img_area:
+    # Rimpiccioliamo l'immagine agendo sul parametro use_container_width
+    # e aggiungendo un piccolo padding verticale per centrarla
+    st.write("") # Spazio vuoto per allineamento
+    st.image(
+        "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
+        caption="Legenda Misure",
+        width=250 # Forza una larghezza fissa più piccola
+    )
     
     # --- SEZIONE 5: COMPATIBILITÀ ---
     st.subheader("🔗 5. Compatibilità")
