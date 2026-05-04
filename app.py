@@ -417,12 +417,12 @@ from deep_translator import GoogleTranslator
 def traduci_note(testo):
     if not testo: return ""
     try:
-        # Traduce e trasforma in UPPERCASE per uniformità tecnica
         return GoogleTranslator(source='it', target='en').translate(testo).upper()
     except:
         return testo.upper()
 
-# 2. Tasto Genera (Senza type="primary" per evitare lo sfondo rosso)
+# 2. Tasto Genera 
+# Rimosso il type="primary" e aggiunta una logica di persistenza
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     
     # --- A. RECUPERO DATI ---
@@ -436,15 +436,16 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", {}, ""])
         part_en = part_db[0].upper()
         dict_extra_db = part_db[1]
+        
+        # --- RECUPERO TAG REALE DAL DB ---
+        tag_reale_db = part_db[2] if len(part_db) > 2 else ""
 
-        # --- B. GESTIONE EXTRA E AGGETTIVI (Grammatica Inglese) ---
+        # --- B. GESTIONE EXTRA E AGGETTIVI ---
         lista_prima = []
         lista_dopo = []
-        
         tags_selezionati = st.session_state.get("extra_tags", [])
         
         for tag in tags_selezionati:
-            # Recupero la traduzione corretta (Sotto-opzione o Extra standard)
             if tag in SUB_OPTIONS_CONFIG:
                 chiave_sub = st.session_state.get(f"sub_{tag}", "")
                 traduzione = SUB_OPTIONS_CONFIG[tag].get(chiave_sub, chiave_sub).upper()
@@ -453,7 +454,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
             else:
                 traduzione = dict_extra_db.get(tag, tag).upper()
             
-            # Smistamento basato sulla lista TERMINI_ANTICIPATI del Modulo 1
             if traduzione in TERMINI_ANTICIPATI:
                 lista_prima.append(traduzione)
             else:
@@ -466,24 +466,20 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         for key, label in campi:
             val = st.session_state.get(key, "").strip().upper()
             if val:
-                # Logica speciale Fastener: aggiunge 'M' se manca al diametro
                 if macro_it == "FASTENER" and label == "D" and not val.startswith("M"):
                     dim_list.append(f"M{val}")
                 else:
                     dim_list.append(f"{label}{val}")
         
         dim_str = " ".join(dim_list)
-        
-        # Normativa (Solo Fastener)
         norma_sel = st.session_state.get("norm_select", "")
         norma_str = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {}).get(norma_sel, "")
 
-        # --- D. TRADUZIONE NOTE LIBERE ---
+        # --- D. TRADUZIONE NOTE ---
         note_it = st.session_state.get("extra_text", "").strip()
         note_en = traduci_note(note_it)
 
-        # --- E. ASSEMBLAGGIO FINALE (Lego Mode) ---
-        # Ordine: [MAT] [EXTRA PRIMA] [NOME] [EXTRA DOPO] [DIM] [NORMA]
+        # --- E. ASSEMBLAGGIO FINALE ---
         prefix = f"{mat_en} {' '.join(lista_prima)}".strip()
         core = f"{prefix} {part_en}".strip()
         
@@ -494,11 +490,9 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         
         corpo = f"{core} {' '.join(info_aggiuntive)}".strip()
         
-        # Aggiunta Note (con virgola)
         if note_en:
             corpo = f"{corpo}, {note_en}"
             
-        # Compatibilità e Certificazioni
         comp_tag = st.session_state.get("comp_tags", "")
         if comp_tag:
             corpo = f"{corpo} - {comp_tag}"
@@ -506,50 +500,60 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         if st.session_state.get("check_1090"):
             corpo += " (EXC2 UNI EN 1090-2)"
 
-        # --- F. SALVATAGGIO ---
-        # Pulizia spazi doppi e salvataggio nello stato
-        st.session_state['stringa_editabile'] = " ".join(corpo.split()).upper()
+        # --- F. SALVATAGGIO IN SESSION STATE (La chiave della stabilità) ---
+        # Salviamo la stringa e i tag in variabili che non dipendono dal tasto
+        st.session_state['stringa_stabile'] = " ".join(corpo.split()).upper()
         
-        # NOTA: Qui non stampiamo nulla. Il Modulo 4 rileverà 
-        # il cambiamento nello session_state e mostrerà il risultato.
+        # Prepariamo i tag reali per il modulo 4
+        lista_tag_finali = []
+        if tag_reale_db: lista_tag_finali.append(tag_reale_db.upper())
+        if macro_it: lista_tag_finali.append(macro_it.upper())
+        if comp_tag: lista_tag_finali.append(comp_tag.upper())
+        
+        st.session_state['tags_stabili'] = list(dict.fromkeys(lista_tag_finali))
+        
+        # Forziamo un rerun così il Modulo 4 si accorge subito della nuova stringa
+        st.rerun()
         
 # =========================================================
-# 4. OUTPUT E MONITORAGGIO (VERSIONE TANK)
+# 4. OUTPUT E MONITORAGGIO (VERSIONE DEFINITIVA)
 # =========================================================
 
-# Funzione per gestire l'aggiornamento manuale senza rompere il flusso
-def aggiorna_da_input():
-    st.session_state['stringa_editabile'] = st.session_state['input_manuale'].upper()
+# Funzione di callback per sincronizzare l'input manuale con lo stato globale
+def sincronizza_modifica():
+    if 'input_manuale' in st.session_state:
+        st.session_state['stringa_stabile'] = st.session_state['input_manuale'].upper()
 
-# Contenitore principale per evitare collassi visivi
+# Contenitore principale: garantisce che l'interfaccia non "salti"
 risultato_container = st.container()
 
-if st.session_state.get('stringa_editabile'):
+# Verifichiamo se esiste una stringa generata dal Modulo 3
+if st.session_state.get('stringa_stabile'):
     with risultato_container:
         st.markdown("---")
         st.subheader("📋 Risultato Finale")
         
-        # 1. LAYOUT CONTROLLI
+        # 1. LAYOUT CONTROLLI (Stringa + Toggle Modifica)
         col_str, col_opt = st.columns([4, 1])
         
-        # Toggle con chiave persistente
+        # Toggle stabile: non chiude più la sezione perché lo stato è in 'stringa_stabile'
         modifica_attiva = col_opt.toggle("✏️ Modifica", key="toggle_manual_edit")
 
         if modifica_attiva:
-            # Usiamo on_change per aggiornare lo stato solo quando l'utente preme invio
+            # Input manuale con callback on_change
             st.text_input(
                 "Modifica manuale stringa:", 
-                value=st.session_state['stringa_editabile'],
+                value=st.session_state['stringa_stabile'],
                 key="input_manuale",
-                on_change=aggiorna_da_input,
+                on_change=sincronizza_modifica,
                 label_visibility="collapsed"
             )
         else:
-            # Formato codice: pulito, tech e con tasto "copia" nativo di Streamlit
-            st.code(st.session_state['stringa_editabile'], language=None)
+            # Visualizzazione tech: st.code aggiunge il tasto "copia" in automatico
+            st.code(st.session_state['stringa_stabile'], language=None)
 
-        # 2. BARRA DI PROGRESSO DINAMICA
-        lunghezza = len(st.session_state['stringa_editabile'])
+        # 2. MONITORAGGIO LUNGHEZZA (Barra dinamica)
+        lunghezza = len(st.session_state['stringa_stabile'])
         perc = min(lunghezza / 100, 1.0)
         
         if lunghezza > 100:
@@ -561,24 +565,25 @@ if st.session_state.get('stringa_editabile'):
         
         st.progress(perc)
 
-        # 3. TAGS DI CLASSIFICAZIONE (Logica Automatica)
-        # Qui recuperiamo i tag reali basandoci sulle selezioni precedenti
-        tag_macro = st.session_state.get('radio_macro', 'N/D')
-        tag_comp = st.session_state.get('comp_tags', '')
+        # 3. TAGS DI CLASSIFICAZIONE (Reali dal Database)
+        # Recuperiamo i tag salvati dal Modulo 3
+        tags_reali = st.session_state.get('tags_stabili', [])
         
-        display_tags = [tag_macro]
-        if tag_comp: display_tags.append(tag_comp)
-        if st.session_state.get('check_1090'): display_tags.append("EN1090")
-        
-        st.markdown(f"**Classificazione:** `{'` `'.join(display_tags)}` ")
+        if tags_reali:
+            # Creiamo una riga di "badge" eleganti
+            st.markdown(f"**Classificazione:** `{'` `'.join(tags_reali)}` ")
+        else:
+            # Fallback se per qualche motivo i tag mancano
+            st.caption("Nessun tag di classificazione rilevato.")
 
-        # 4. TASTO CONFERMA CON FEEDBACK SERIO
+        # 4. TASTO CONFERMA E REGISTRAZIONE
         st.write("") 
         if st.button("💾 CONFERMA E REGISTRA", use_container_width=True):
-            with st.spinner("Sincronizzazione record in corso..."):
+            # Animazione tecnica "Spinner"
+            with st.spinner("Sincronizzazione con il database aziendale..."):
                 import time
-                time.sleep(0.8) # Quel secondo di attesa che dà "peso" all'azione
+                time.sleep(0.8) 
             
-            # Feedback finale: Toast (professionale) e un segnale visivo netto
-            st.toast("Stringa validata e registrata!", icon="🎯")
-            st.success("Operazione completata con successo.")
+            # Feedback di successo
+            st.toast("Record salvato correttamente!", icon="🎯")
+            st.success(f"Stringa registrata: {st.session_state['stringa_stabile']}")
