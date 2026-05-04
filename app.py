@@ -278,12 +278,12 @@ blocco_incompatibilita = False
 LARGHEZZA_IMMAGINE = 600 
 TESTO_MANUALE = """
 **PROCEDURA STANDARD:**
-1. **CATEGORIA 📂**: Seleziona una tipologia dal gruppo a sinistra.
-2. **CONFIGURAZIONE BASE 🛠️**: Scegli il tipo di materiale e componente.
-3. **EXTRA E NOTE ✨**: Seleziona i pills necessari aggiungendo eventuali note.
-4. **DIMENSIONAMENTO E NORMATIVE 📏**: Aggiungi dimensioni ed eventuali normative.
-5. **COMPATIBILITA' 🔗**: Scegli la compatibilità (F25, F50, ecc.).
-6. **GENERA STRINGA 🚀**: Clicca il tasto rosso in fondo.
+* 📂 **CATEGORIA**: Seleziona una tipologia dal gruppo a sinistra.
+* 🛠️ **CONFIGURAZIONE BASE**: Scegli il tipo di materiale e componente.
+* ✨ **EXTRA E NOTE**: Seleziona i pills necessari aggiungendo eventuali note.
+* 📏 **DIMENSIONAMENTO**: Aggiungi dimensioni e normative.
+* 🔗 **COMPATIBILITÀ**: Scegli il modello (F25, F50, ecc.).
+* 🚀 **GENERA**: Clicca il tasto in fondo per creare la stringa.
 """
 
 # --- HEADER ---
@@ -402,105 +402,111 @@ with col_workarea:
         st.info("Nessuna compatibilità necessaria per i Fastener.")
 
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E ASSEMBLAGGIO FINALE
+# 3. LOGICA DI GENERAZIONE (MOTORE DI CALCOLO)
 # =========================================================
 st.divider()
 
-def compila_stringa():
-    # 1. RECUPERO DATI FONDAMENTALI
+# 1. Funzione di traduzione note
+from deep_translator import GoogleTranslator
+
+def traduci_note(testo):
+    if not testo: return ""
+    try:
+        # Traduce e trasforma in UPPERCASE per uniformità tecnica
+        return GoogleTranslator(source='it', target='en').translate(testo).upper()
+    except:
+        return testo.upper()
+
+# 2. Tasto Genera (Senza type="primary" per evitare lo sfondo rosso)
+if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
+    
+    # --- A. RECUPERO DATI ---
     macro_it = st.session_state.get("radio_macro", "")
     scelta_part_it = st.session_state.get("selectbox_part", "")
     mat_en = st.session_state.get("mat_en", "").upper()
     
-    if not scelta_part_it:
-        return # Esce se non c'è un componente
-    
-    # 2. RECUPERO INFO DAL DATABASE (Modulo 1)
-    # part_db = [Nome EN, {Dizionario Extra}, TAG]
-    part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", {}, ""])
-    part_en = part_db[0].upper()
-    dict_extra_db = part_db[1]
+    if scelta_part_it:
+        # Recupero info dal DATABASE (Modulo 1)
+        # part_db = [Nome EN, {Dizionario Extra}, TAG]
+        part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", {}, ""])
+        part_en = part_db[0].upper()
+        dict_extra_db = part_db[1]
 
-    # 3. ELABORAZIONE EXTRA (Pills + Sotto-opzioni)
-    lista_termini_prima = []
-    lista_termini_dopo = []
-    
-    tags_selezionati = st.session_state.get("extra_tags", [])
-    
-    for tag in tags_selezionati:
-        # Recuperiamo la traduzione dal DB o dalle sotto-opzioni (+)
-        if tag in SUB_OPTIONS_CONFIG:
-            chiave_sub = st.session_state.get(f"sub_{tag}", "")
-            traduzione = SUB_OPTIONS_CONFIG[tag].get(chiave_sub, chiave_sub).upper()
-        elif tag in EXTRA_CON_INPUT_MANUALE:
-            traduzione = st.session_state.get(f"manual_{tag}", "").upper()
-        else:
-            traduzione = dict_extra_db.get(tag, tag).upper()
+        # --- B. GESTIONE EXTRA E AGGETTIVI (Grammatica Inglese) ---
+        lista_prima = []
+        lista_dopo = []
         
-        # Smistamento: va prima o dopo il nome?
-        if traduzione in TERMINI_ANTICIPATI:
-            lista_termini_prima.append(traduzione)
-        else:
-            lista_termini_dopo.append(traduzione)
-
-    # 4. DIMENSIONI E NORMATIVE (Sezione 4)
-    dim_parts = []
-    campi_dim = [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H"), ("dim_dia", "D"), ("dim_dia_gen", "Ø")]
-    
-    for key, label in campi_dim:
-        val = st.session_state.get(key, "").strip().upper()
-        if val:
-            # Se è un fastener e la label è D, aggiungiamo 'M' se manca
-            if macro_it == "FASTENER" and label == "D" and not val.startswith("M"):
-                dim_parts.append(f"M{val}")
+        tags_selezionati = st.session_state.get("extra_tags", [])
+        
+        for tag in tags_selezionati:
+            # Recupero la traduzione corretta (Sotto-opzione o Extra standard)
+            if tag in SUB_OPTIONS_CONFIG:
+                chiave_sub = st.session_state.get(f"sub_{tag}", "")
+                traduzione = SUB_OPTIONS_CONFIG[tag].get(chiave_sub, chiave_sub).upper()
+            elif tag in EXTRA_CON_INPUT_MANUALE:
+                traduzione = st.session_state.get(f"manual_{tag}", "").upper()
             else:
-                dim_parts.append(f"{label}{val}")
-    
-    dim_str = " ".join(dim_parts)
-    
-    # Riferimento Normativo (Solo per Fastener)
-    norma = st.session_state.get("norm_select", "")
-    norma_str = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {}).get(norma, "")
+                traduzione = dict_extra_db.get(tag, tag).upper()
+            
+            # Smistamento basato sulla lista TERMINI_ANTICIPATI del Modulo 1
+            if traduzione in TERMINI_ANTICIPATI:
+                lista_prima.append(traduzione)
+            else:
+                lista_dopo.append(traduzione)
 
-    # 5. TRADUZIONE NOTE LIBERE
-    note_it = st.session_state.get("extra_text", "").strip()
-    note_en = traduci_note(note_it) if note_it else ""
-
-    # 6. COSTRUZIONE DELLA STRINGA (Lego Mode)
-    # Schema: [MATERIALE] [AGGETTIVI ANTICIPATI] [NOME COMPONENTE] [AGGETTIVI POST] [DIMENSIONI]
-    
-    prefix = f"{mat_en} {' '.join(lista_termini_prima)}".strip()
-    core = f"{prefix} {part_en}".strip()
-    
-    suffix_list = []
-    if lista_termini_dopo: suffix_list.append(" ".join(lista_termini_dopo))
-    if dim_str: suffix_list.append(dim_str)
-    if norma_str: suffix_list.append(norma_str)
-    
-    corpo_completo = f"{core} {' '.join(suffix_list)}".strip()
-    
-    # Aggiunta Note e Compatibilità
-    if note_en:
-        corpo_completo = f"{corpo_completo}, {note_en}"
-    
-    comp_tag = st.session_state.get("comp_tags", "")
-    if comp_tag:
-        corpo_completo = f"{corpo_completo} - {comp_tag}"
+        # --- C. DIMENSIONI E NORMATIVE ---
+        dim_list = []
+        campi = [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H"), ("dim_dia", "D"), ("dim_dia_gen", "Ø")]
         
-    # Certificazione 1090
-    if st.session_state.get("check_1090"):
-        corpo_completo += " (EXC2 UNI EN 1090-2)"
+        for key, label in campi:
+            val = st.session_state.get(key, "").strip().upper()
+            if val:
+                # Logica speciale Fastener: aggiunge 'M' se manca al diametro
+                if macro_it == "FASTENER" and label == "D" and not val.startswith("M"):
+                    dim_list.append(f"M{val}")
+                else:
+                    dim_list.append(f"{label}{val}")
+        
+        dim_str = " ".join(dim_list)
+        
+        # Normativa (Solo Fastener)
+        norma_sel = st.session_state.get("norm_select", "")
+        norma_str = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {}).get(norma_sel, "")
 
-    # Risultato Finale: pulizia spazi doppi
-    st.session_state['stringa_editabile'] = " ".join(corpo_completo.split()).upper()
+        # --- D. TRADUZIONE NOTE LIBERE ---
+        note_it = st.session_state.get("extra_text", "").strip()
+        note_en = traduci_note(note_it)
 
-# --- TRIGGER UI ---
-if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, type="primary", disabled=not scelta_part_it):
-    compila_stringa()
-    st.success("Stringa creata con successo!")
+        # --- E. ASSEMBLAGGIO FINALE (Lego Mode) ---
+        # Ordine: [MAT] [EXTRA PRIMA] [NOME] [EXTRA DOPO] [DIM] [NORMA]
+        prefix = f"{mat_en} {' '.join(lista_prima)}".strip()
+        core = f"{prefix} {part_en}".strip()
+        
+        info_aggiuntive = []
+        if lista_dopo: info_aggiuntive.append(" ".join(lista_dopo))
+        if dim_str: info_aggiuntive.append(dim_str)
+        if norma_str: info_aggiuntive.append(norma_str)
+        
+        corpo = f"{core} {' '.join(info_aggiuntive)}".strip()
+        
+        # Aggiunta Note (con virgola)
+        if note_en:
+            corpo = f"{corpo}, {note_en}"
+            
+        # Compatibilità e Certificazioni
+        comp_tag = st.session_state.get("comp_tags", "")
+        if comp_tag:
+            corpo = f"{corpo} - {comp_tag}"
+            
+        if st.session_state.get("check_1090"):
+            corpo += " (EXC2 UNI EN 1090-2)"
 
-# Campo di output sempre visibile per editing finale
-st.text_input("Risultato finale (Editabile):", key="stringa_editabile")
+        # --- F. SALVATAGGIO ---
+        # Pulizia spazi doppi e salvataggio nello stato
+        st.session_state['stringa_editabile'] = " ".join(corpo.split()).upper()
+        
+        # NOTA: Qui non stampiamo nulla. Il Modulo 4 rileverà 
+        # il cambiamento nello session_state e mostrerà il risultato.
         
 # =========================================================
 # 4. OUTPUT, MONITORAGGIO E CLASSIFICAZIONE
