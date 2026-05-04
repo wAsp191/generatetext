@@ -509,22 +509,22 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         # il cambiamento nello session_state e mostrerà il risultato.
         
 # =========================================================
-# 4. OUTPUT E MONITORAGGIO (VERSIONE PRO)
+# 4. OUTPUT, MONITORAGGIO E CLASSIFICAZIONE (VERSIONE FINALE)
 # =========================================================
 if st.session_state.get('stringa_editabile'):
     st.markdown("---")
     st.subheader("📋 Risultato Finale")
     
-    # 1. VISUALIZZAZIONE E MODIFICA (Layout migliorato)
+    # 1. VISUALIZZAZIONE E MODIFICA SNELLA
     col_str, col_opt = st.columns([4, 1])
     
     with col_opt:
-        # Toggle per sbloccare la modifica manuale
+        # Il toggle permette di passare dalla visualizzazione "codice" all'editing
         modifica_attiva = st.toggle("Modifica", key="toggle_edit")
 
     with col_str:
         if modifica_attiva:
-            # Se attivo, mostriamo un campo di testo per l'editing
+            # Campo di testo per l'editing manuale
             nuova_stringa = st.text_input(
                 "Modifica la stringa qui:", 
                 value=st.session_state['stringa_editabile'],
@@ -532,33 +532,57 @@ if st.session_state.get('stringa_editabile'):
             )
             st.session_state['stringa_editabile'] = nuova_stringa.upper()
         else:
-            # Se disattivo, mostriamo la stringa in formato codice (facile da copiare)
+            # Visualizzazione standard in blocco codice (pulita e professionale)
             st.code(st.session_state['stringa_editabile'], language=None)
 
-    # 2. MONITORAGGIO LUNGHEZZA
+    # 2. MONITORAGGIO LUNGHEZZA CON BARRA DI PROGRESSO
     lunghezza = len(st.session_state['stringa_editabile'])
+    percentuale = min(lunghezza / 100, 1.0) # Normalizza il valore per la barra (0.0 a 1.0)
     
+    # Visualizzazione della barra e del feedback testuale
     if lunghezza > 100:
-        st.error(f"⚠️ LIMITE CRITICO: {lunghezza}/100 caratteri")
+        st.error(f"⚠️ LIMITE CRITICO SUPERATO: {lunghezza}/100 caratteri")
+        st.progress(percentuale)
     elif lunghezza >= 90:
-        st.warning(f"🟡 ATTENZIONE: {lunghezza}/100 caratteri")
+        st.warning(f"🟡 ATTENZIONE: Lunghezza limite vicina ({lunghezza}/100)")
+        st.progress(percentuale)
     else:
-        # Usiamo una scritta discreta invece di un box verde gigante
-        st.caption(f"✅ Lunghezza conforme: {lunghezza}/100 caratteri")
+        st.info(f"✅ Lunghezza ottimale: {lunghezza}/100 caratteri")
+        st.progress(percentuale)
 
     # 3. TAGS DI CLASSIFICAZIONE
-    # Recuperiamo i tag (logica identica alla precedente)
-    all_tags = []
-    # ... (inserire qui la logica di recupero tag del messaggio precedente) ...
+    # Recupero dinamico dei tag dal database per la classificazione
+    macro_corr = st.session_state.get("radio_macro", "")
+    part_corr = st.session_state.get("selectbox_part", "")
+    info_db = DATABASE.get(macro_corr, {}).get("Particolari", {}).get(part_corr, ["", {}, ""])
     
-    if all_tags:
-        tags_puliti = list(dict.fromkeys(all_tags))
-        st.markdown(f"**TAGS:** `{'` `'.join(tags_puliti)}` ")
+    all_tags = []
+    
+    # Tag 1: Suggerimento dal DB
+    if len(info_db) > 2 and info_db[2]:
+        all_tags.append(info_db[2].upper())
+    
+    # Tag 2: Modello di Compatibilità
+    comp_sel = st.session_state.get("comp_tags")
+    if comp_sel:
+        all_tags.append(comp_sel.upper())
+    
+    # Tag 3: Normative e Certificazioni
+    if st.session_state.get("check_1090"):
+        all_tags.append("UNI EN-1090-1")
+    
+    norma_sel = st.session_state.get("norm_select")
+    if norma_sel:
+        all_tags.append(norma_sel.upper())
 
-    # 4. AZIONE DI CONFERMA (Animazione professionale)
-    st.markdown("br", unsafe_allow_html=True) # Piccolo spazio
+    # Visualizzazione dei tag con stile "Badge"
+    if all_tags:
+        tags_unici = list(dict.fromkeys(all_tags)) # Rimuove duplicati
+        st.markdown(f"**TAGS CLASSIFICAZIONE:** `{'` `'.join(tags_unici)}` ")
+
+    # 4. TASTO DI CONFERMA FINALE
+    st.write("") # Spazio naturale invece del <br>
     if st.button("💾 CONFERMA E SALVA", use_container_width=True):
-        # Sostituiamo i palloncini con un feedback visivo rapido e tecnico
+        # Feedback professionale: un toast veloce e un leggero effetto neve
         st.toast("Stringa registrata con successo!", icon="✅")
-        # Se proprio vuoi un'animazione di successo, 'snow' è più sobria:
-        # st.snow()
+        st.snow()
