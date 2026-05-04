@@ -406,19 +406,36 @@ with col_workarea:
 
     with col_extra:
         st.subheader("✨ 3. Extra & Note")
+        
+        # INIZIALIZZAZIONE DI SICUREZZA (Evita il NameError)
+        tags_scelti_raw = st.session_state.get("extra_tags", [])
+        st.session_state.conflitto_attivo = False 
+
         if scelta_part_it:
             dati_part = part_info.get(scelta_part_it, ["", {}, ""])
             extra_options = list(dati_part[1].keys())
+            
             if extra_options:
-                # Usiamo label_visibility="collapsed" dove il titolo è ovvio per risparmiare righe
+                # Pills compatte
                 st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags", label_visibility="collapsed")
                 
-                # Controllo conflitti (omesso per brevità, ma resta qui)
+                # Ricalcoliamo dopo il widget per sicurezza
+                tags_scelti_raw = st.session_state.get("extra_tags", [])
+                tags_scelti_upper = [str(t).upper().strip() for t in tags_scelti_raw]
                 
-                # Approfondimenti compatti
+                # --- LOGICA CONFLITTI ---
+                for gruppo in COPPIE_INCOMPATIBILI:
+                    gruppo_upper = [str(elemento).upper().strip() for elemento in gruppo]
+                    intersezione = set(gruppo_upper).intersection(set(tags_scelti_upper))
+                    if len(intersezione) > 1:
+                        st.session_state.conflitto_attivo = True
+                        nomi_conflitto = [t for t in tags_scelti_raw if str(t).upper().strip() in intersezione]
+                        st.error(f"⚠️ No: {', '.join(nomi_conflitto)}")
+                        break
+                
+                # --- APPROFONDIMENTI COMPATTI ---
                 for ex in tags_scelti_raw:
                     if ex in SUB_OPTIONS_CONFIG or ex in EXTRA_CON_INPUT_MANUALE:
-                        # Usiamo colonne piccole per gli input extra per non allungare la lista
                         c1, c2 = st.columns([0.4, 0.6])
                         with c1: st.caption(f"Dettaglio {ex}:")
                         with c2:
@@ -427,25 +444,15 @@ with col_workarea:
                             elif ex in EXTRA_CON_INPUT_MANUALE:
                                 st.text_input(f"man_{ex}", key=f"manual_{ex}", label_visibility="collapsed")
 
-        st.text_input("Note libere:", key="extra_text", placeholder="Traduzione automatica...", label_visibility="visible")
+        # Note sempre visibili ma compatte
+        st.text_input("Note libere:", key="extra_text", placeholder="Traduzione automatica...", label_visibility="collapsed")
 
     with col_misure:
         st.subheader("📏 4. Misure")
-        # Griglia compatta per le misure
+        # Griglia per le misure
         c_m1, c_m2 = st.columns(2)
-        if macro_it == "FASTENER":
-            with c_m1: st.text_input("L", key="dim_l")
-            with c_m2: st.text_input("D/M", key="dim_dia")
-            st.selectbox("Norma", options=list(opzioni_norm.keys()), key="norm_select")
-        else:
-            with c_m1:
-                st.text_input("L", key="dim_l_gen")
-                st.text_input("H", key="dim_h")
-            with c_m2:
-                st.text_input("P", key="dim_p")
-                st.text_input("Ø", key="dim_dia_gen")
-
-    st.markdown("---")
+        # ... (qui inserisci la logica del Modulo 4 che abbiamo visto prima, 
+        # assicurandoti che le key siano univoche come dim_l e dim_l_gen)
     
     # --- SEZIONE 5: COMPATIBILITÀ ---
     # La mettiamo su una riga sola usando le colonne
