@@ -478,57 +478,46 @@ with col_workarea:
     
     st.markdown("---")
     
-    # --- SEZIONE 4: DIMENSIONAMENTO E NORMATIVE ---
-st.subheader("📏 4. Dimensionamento e Normative")
-
-# Creiamo due macro-colonne: una per gli input e una per l'immagine
-col_input_area, col_img_area = st.columns([2.5, 1.5], gap="small")
-
-with col_input_area:
+    # --- SEZIONE 4: DIMENSIONAMENTO ---
+    st.subheader("📏 4. Dimensionamento")
+    
+    # Creiamo una riga con molte colonne piccole per i campi
+    # Le proporzioni [1, 1, 1, 1, 2] servono a dare più spazio alla Selectbox finale
     if macro_it == "FASTENER":
-        # Griglia 2x1 per Fastener
-        c1, c2 = st.columns(2)
-        with c1: st.text_input("Lunghezza (L)", key="dim_l")
-        with c2: st.text_input("Diametro (D/M)", key="dim_dia")
-        
-        opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-        st.selectbox("Riferimento Normativo", options=list(opzioni_norm.keys()), key="norm_select")
+        c1, c2, c3, _ = st.columns([1, 1, 2, 2])
+        with c1: st.text_input("L", key="dim_l", placeholder="Lung.")
+        with c2: st.text_input("D/M", key="dim_dia", placeholder="Diam.")
+        with c3: 
+            opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
+            st.selectbox("Normativa", options=list(opzioni_norm.keys()), key="norm_select")
     else:
-        # Griglia 2x2 per gli altri componenti (Molto più compatta!)
-        c1, c2 = st.columns(2)
-        with c1:
-            st.text_input("Lunghezza (L)", key="dim_l_gen")
-            st.text_input("Altezza (H)", key="dim_h")
-        with c2:
-            st.text_input("Profondità (P)", key="dim_p")
-            st.text_input("Diametro (Ø)", key="dim_dia_gen")
+        c1, c2, c3, c4, _ = st.columns([1, 1, 1, 1, 1])
+        with c1: st.text_input("L", key="dim_l_gen", placeholder="Lung.")
+        with c2: st.text_input("P", key="dim_p", placeholder="Prof.")
+        with c3: st.text_input("H", key="dim_h", placeholder="Alt.")
+        with c4: st.text_input("Ø", key="dim_dia_gen", placeholder="Diam.")
 
-with col_img_area:
-    # Rimpiccioliamo l'immagine agendo sul parametro use_container_width
-    # e aggiungendo un piccolo padding verticale per centrarla
-    st.write("") # Spazio vuoto per allineamento
-    st.image(
-        "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
-        caption="Legenda Misure",
-        width=250 # Forza una larghezza fissa più piccola
-    )
+    # Immagine disabilitata come richiesto
+    # st.image("https://raw.githubusercontent.com/...", width=250)
+
+    st.markdown("---")
     
     # --- SEZIONE 5: COMPATIBILITÀ ---
     st.subheader("🔗 5. Compatibilità")
     
-    if st.session_state.get("radio_macro") != "FASTENER":
-        comp_selezionata = st.pills(
-            "Seleziona Modello di destinazione:", 
-            options=OPZIONI_COMPATIBILITA, 
-            selection_mode="single", 
-            key="comp_tags"
-        )
-        
-        if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
-            st.warning("⚡ Componente Strutturale rilevato")
-            st.checkbox("Certificazione UNI EN-1090", key="check_1090")
-    else:
-        st.info("Nessuna compatibilità necessaria per i Fastener.")
+    # Anche qui, tutto su una riga
+    c_pills, c_check = st.columns([3, 1], vertical_alignment="center")
+    
+    with c_pills:
+        if st.session_state.get("radio_macro") != "FASTENER":
+            st.pills("Modello di destinazione:", options=OPZIONI_COMPATIBILITA, selection_mode="single", key="comp_tags", label_visibility="collapsed")
+        else:
+            st.info("Nessuna compatibilità necessaria per i Fastener.")
+            
+    with c_check:
+        # Mostriamo la checkbox EN-1090 solo se serve, ma sulla stessa riga
+        if st.session_state.get("comp_tags") in ["FORTISSIMO", "MINIRACK"]:
+            st.checkbox("Cert. 1090", key="check_1090")
 # =========================================================
 # 3. LOGICA DI GENERAZIONE (MOTORE DI CALCOLO)
 # =========================================================
