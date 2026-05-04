@@ -268,7 +268,11 @@ TERMINI_ANTICIPATI = [
 
 # --- FUNZIONE DI RESET (Logica interna al Modulo 2) ---
 def esegui_reset_totale():
-    """Svuota completamente lo stato dell'app, incluse le stringhe generate."""
+    """
+    Svuota lo stato dell'app. 
+    Nota: st.rerun() non serve qui perché il callback 
+    triggera il refresh automaticamente al termine.
+    """
     # 1. Lista delle chiavi custom da eliminare
     chiavi_da_pulire = [
         'stringa_stabile', 'tags_stabili', 'stringa_editabile', 
@@ -279,20 +283,17 @@ def esegui_reset_totale():
     
     for chiave in chiavi_da_pulire:
         if chiave in st.session_state:
-            # Per le liste usiamo [], per i booleani False, per il resto stringa vuota
             if isinstance(st.session_state[chiave], list):
                 st.session_state[chiave] = []
             elif isinstance(st.session_state[chiave], bool):
                 st.session_state[chiave] = False
             else:
                 st.session_state[chiave] = ""
-                
-    # 2. Riavvio immediato per pulire l'interfaccia
-    st.rerun()
+    
+    # Rimosso st.rerun() per evitare il messaggio di No-Op
 
 # --- INIZIALIZZAZIONE VARIABILI DI STATO ---
 if "mat_en" not in st.session_state: st.session_state.mat_en = ""
-# Nota: uni_en_1090_active e le altre variabili locali verranno resettate a ogni rerun
 
 # Configurazione visuale
 LARGHEZZA_IMMAGINE = 600 
@@ -318,7 +319,7 @@ with col_m:
     with st.expander("📖 Manuale d'uso"):
         st.markdown(f'<div style="font-size: 14px;">{TESTO_MANUALE}</div>', unsafe_allow_html=True)
 with col_r: 
-    # MODIFICA: Collegamento diretto alla nuova funzione di reset
+    # Il callback esegue la funzione e poi rinfresca la pagina da solo
     st.button("🔄 AZZERA", on_click=esegui_reset_totale, use_container_width=True)
 
 st.markdown("---")
@@ -438,7 +439,6 @@ with col_workarea:
             st.checkbox("Certificazione UNI EN-1090", key="check_1090")
     else:
         st.info("Nessuna compatibilità necessaria per i Fastener.")
-
 # =========================================================
 # 3. LOGICA DI GENERAZIONE (MOTORE DI CALCOLO)
 # =========================================================
