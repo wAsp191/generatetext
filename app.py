@@ -558,17 +558,46 @@ if st.button(label_tasto, use_container_width=True, disabled=blocco_genera or no
                 else:
                     extra_pills_final.append(base_t)
 
-        # 3. TRADUZIONE NOTE LIBERE
-        note_tradotte = ""
-        if extra_libero:
-            testo_it = extra_libero.lower()
-            for ita, eng in GLOSSARIO_TECNICO.items():
-                testo_it = testo_it.replace(ita, eng)
-            try:
-                note_tradotte = GoogleTranslator(source='it', target='en').translate(testo_it).upper()
-            except:
-                note_tradotte = extra_libero.upper()
+        # --- SEZIONE 3: EXTRA E NOTE ---
+    st.subheader("✨ 3. Extra e Note")
+    
+    if scelta_part_it:
+        # Recuperiamo i dati corretti dal dizionario dei particolari
+        dati_part = part_info[scelta_part_it]
+        part_en = dati_part[0] # Nome inglese
+        extra_dedicati_dict = dati_part[1] # Dizionario extra
+        
+        tag_suggerimento = " - ".join(dati_part[2:]) if len(dati_part) > 2 else ""
+        
+        extra_options = list(extra_dedicati_dict.keys())
+        if extra_options:
+            extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
+            
+            if extra_selezionati:
+                tags_attivi = set(extra_selezionati)
+                for gruppo in COPPIE_INCOMPATIBILI:
+                    intersezione = gruppo.intersection(tags_attivi)
+                    if len(intersezione) >= 2:
+                        st.error(f"⚠️ **CONFLITTO:** {', '.join(intersezione)} non possono stare insieme.")
+                        blocco_incompatibilita = True
 
+                for ex in extra_selezionati:
+                    if ex in SUB_OPTIONS_CONFIG:
+                        st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
+                    elif ex in EXTRA_CON_INPUT_MANUALE:
+                        st.text_input(f"↳ Valore specifico per {ex}:", key=f"manual_{ex}")
+        
+        if tag_suggerimento:
+            st.caption(f"🔍 Classificazione suggerita: **{tag_suggerimento}**")
+
+    # --- SPOSTATO FUORI DALL'IF ---
+    # In questo modo il campo Note Libere è SEMPRE visibile, come richiesto
+    st.text_input(
+        "Note libere (Traduzione automatica):", 
+        key="extra_text", 
+        placeholder="es: con tappi in gomma...",
+        help="Il testo verrà tradotto in inglese e convertito in stampatello."
+    )
         # 4. ASSEMBLAGGIO LOGICO
         pre, suf = [], []
         set_anticipati = {term.upper() for term in TERMINI_ANTICIPATI}
