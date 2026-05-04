@@ -332,19 +332,26 @@ with col_workarea:
     # --- SEZIONE 3: EXTRA E NOTE ---
     st.subheader("✨ 3. Extra e Note")
     
+    # --- SUGGERIMENTO PER SEZIONE 3 (LOGICA PIÙ PULITA) ---
+with col_workarea:
+    # ... (parte precedente ok)
+    
     if scelta_part_it:
-        dati_part = part_info.get(scelta_part_it, ["", {}])
+        # Recupero sicuro del particolare
+        dati_part = part_info.get(scelta_part_it, ["", {}, ""])
         extra_options = list(dati_part[1].keys())
         
         if extra_options:
             st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-            # Gestione dinamica sotto-opzioni
+            # Rendering dinamico degli approfondimenti
             for ex in st.session_state.get("extra_tags", []):
-                if ex in SUB_OPTIONS_CONFIG:
-                    st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
-                elif ex in EXTRA_CON_INPUT_MANUALE:
-                    st.text_input(f"↳ Valore specifico per {ex}:", key=f"manual_{ex}")
+                col_indent, col_input = st.columns([0.1, 0.9]) # Crea un piccolo rientro visivo
+                with col_input:
+                    if ex in SUB_OPTIONS_CONFIG:
+                        st.selectbox(f"Dettaglio per {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
+                    elif ex in EXTRA_CON_INPUT_MANUALE:
+                        st.text_input(f"Specifica valore per {ex}:", key=f"manual_{ex}")
 
     # CAMPO NOTE LIBERE: Indispensabile per la traduzione automatica
     st.text_input(
@@ -353,7 +360,6 @@ with col_workarea:
         placeholder="es: con tappi in gomma...",
         help="Il testo inserito verrà tradotto in inglese nel risultato finale."
     )
-
     st.markdown("---")
     
     # --- SEZIONE 4: DIMENSIONAMENTO ---
@@ -396,105 +402,187 @@ with col_workarea:
         st.info("Nessuna compatibilità necessaria per i Fastener.")
 
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE
+# 3. LOGICA DI GENERAZIONE E ASSEMBLAGGIO FINALE
 # =========================================================
 st.divider()
 
-# 1. Recupero dati dallo stato
-note_it = st.session_state.get("extra_text", "").strip()
-macro_it = st.session_state.get("radio_macro", "")
-scelta_part_it = st.session_state.get("selectbox_part", "")
+def compila_stringa():
+    # 1. RECUPERO DATI FONDAMENTALI
+    macro_it = st.session_state.get("radio_macro", "")
+    scelta_part_it = st.session_state.get("selectbox_part", "")
+    mat_en = st.session_state.get("mat_en", "").upper()
+    
+    if not scelta_part_it:
+        return # Esce se non c'è un componente
+    
+    # 2. RECUPERO INFO DAL DATABASE (Modulo 1)
+    # part_db = [Nome EN, {Dizionario Extra}, TAG]
+    part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", {}, ""])
+    part_en = part_db[0].upper()
+    dict_extra_db = part_db[1]
 
-# 2. Funzione di traduzione (Richiede: pip install deep-translator)
-from deep_translator import GoogleTranslator
+    # 3. ELABORAZIONE EXTRA (Pills + Sotto-opzioni)
+    lista_termini_prima = []
+    lista_termini_dopo = []
+    
+    tags_selezionati = st.session_state.get("extra_tags", [])
+    
+    for tag in tags_selezionati:
+        # Recuperiamo la traduzione dal DB o dalle sotto-opzioni (+)
+        if tag in SUB_OPTIONS_CONFIG:
+            chiave_sub = st.session_state.get(f"sub_{tag}", "")
+            traduzione = SUB_OPTIONS_CONFIG[tag].get(chiave_sub, chiave_sub).upper()
+        elif tag in EXTRA_CON_INPUT_MANUALE:
+            traduzione = st.session_state.get(f"manual_{tag}", "").upper()
+        else:
+            traduzione = dict_extra_db.get(tag, tag).upper()
+        
+        # Smistamento: va prima o dopo il nome?
+        if traduzione in TERMINI_ANTICIPATI:
+            lista_termini_prima.append(traduzione)
+        else:
+            lista_termini_dopo.append(traduzione)
 
-def traduci_note(testo):
-    if not testo: return ""
-    try:
-        return GoogleTranslator(source='it', target='en').translate(testo).upper()
-    except:
-        return testo.upper() # Fallback se non c'è internet
+    # 4. DIMENSIONI E NORMATIVE (Sezione 4)
+    dim_parts = []
+    campi_dim = [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H"), ("dim_dia", "D"), ("dim_dia_gen", "Ø")]
+    
+    for key, label in campi_dim:
+        val = st.session_state.get(key, "").strip().upper()
+        if val:
+            # Se è un fastener e la label è D, aggiungiamo 'M' se manca
+            if macro_it == "FASTENER" and label == "D" and not val.startswith("M"):
+                dim_parts.append(f"M{val}")
+            else:
+                dim_parts.append(f"{label}{val}")
+    
+    dim_str = " ".join(dim_parts)
+    
+    # Riferimento Normativo (Solo per Fastener)
+    norma = st.session_state.get("norm_select", "")
+    norma_str = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {}).get(norma, "")
 
-# 3. Tasto Genera
-if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=not scelta_part_it):
-    
-    # A. Traduzione Note
-    note_en = traduci_note(note_it)
-    
-    # B. Recupero Nomi dal DB
-    part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", {}])
-    part_en = part_db[0]
-    
-    # C. Costruzione Dimensioni (L-P-H)
-    dim_list = []
-    for k, label in [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H")]:
-        val = st.session_state.get(k, "").strip().upper()
-        if val: dim_list.append(f"{label}{val}")
-    dim_str = " ".join(dim_list)
+    # 5. TRADUZIONE NOTE LIBERE
+    note_it = st.session_state.get("extra_text", "").strip()
+    note_en = traduci_note(note_it) if note_it else ""
 
-    # D. Assemblaggio finale
-    mat_en = st.session_state.get("mat_en", "") # Assicurati di averlo salvato nel Modulo 2
+    # 6. COSTRUZIONE DELLA STRINGA (Lego Mode)
+    # Schema: [MATERIALE] [AGGETTIVI ANTICIPATI] [NOME COMPONENTE] [AGGETTIVI POST] [DIMENSIONI]
     
-    # Logica: Materiale + Particular + Dimensioni + Note
-    corpo = f"{mat_en} {part_en} {dim_str}".strip()
+    prefix = f"{mat_en} {' '.join(lista_termini_prima)}".strip()
+    core = f"{prefix} {part_en}".strip()
     
+    suffix_list = []
+    if lista_termini_dopo: suffix_list.append(" ".join(lista_termini_dopo))
+    if dim_str: suffix_list.append(dim_str)
+    if norma_str: suffix_list.append(norma_str)
+    
+    corpo_completo = f"{core} {' '.join(suffix_list)}".strip()
+    
+    # Aggiunta Note e Compatibilità
     if note_en:
-        corpo = f"{corpo}, {note_en}"
-        
-    # Aggiunta Compatibilità
-    comp_tag = st.session_state.get("comp_tags", "")
-    stringa_finale = f"{corpo} - {comp_tag}" if comp_tag else corpo
+        corpo_completo = f"{corpo_completo}, {note_en}"
     
-    # E. Output
-    st.session_state['stringa_editabile'] = " ".join(stringa_finale.split()).upper()
+    comp_tag = st.session_state.get("comp_tags", "")
+    if comp_tag:
+        corpo_completo = f"{corpo_completo} - {comp_tag}"
+        
+    # Certificazione 1090
+    if st.session_state.get("check_1090"):
+        corpo_completo += " (EXC2 UNI EN 1090-2)"
+
+    # Risultato Finale: pulizia spazi doppi
+    st.session_state['stringa_editabile'] = " ".join(corpo_completo.split()).upper()
+
+# --- TRIGGER UI ---
+if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, type="primary", disabled=not scelta_part_it):
+    compila_stringa()
     st.success("Stringa creata con successo!")
-    st.text_input("Risultato:", key="output_final", value=st.session_state['stringa_editabile'])
+
+# Campo di output sempre visibile per editing finale
+st.text_input("Risultato finale (Editabile):", key="stringa_editabile")
         
 # =========================================================
-# 4. OUTPUT E CLASSIFICAZIONE (FINAL STEP)
+# 4. OUTPUT, MONITORAGGIO E CLASSIFICAZIONE
 # =========================================================
 
-if st.session_state.get('stringa_editabile'):
+# Recuperiamo la stringa generata dal Modulo 3
+stringa_finale = st.session_state.get('stringa_editabile', "")
+
+if stringa_finale:
     st.markdown("---")
     st.subheader("📋 Risultato Finale")
     
-    # Visualizzazione stringa generata
-    st.code(st.session_state['stringa_editabile'], language=None)
+    # 1. VISUALIZZAZIONE E MODIFICA
+    # Usiamo un layout a colonne per separare il codice dall'edit
+    col_out, col_edit = st.columns([3, 1])
     
-    # Campo di modifica rapida
-    with st.expander("✏️ Modifica manuale stringa"):
-        st.text_input("Modifica il testo:", key='stringa_editabile', label_visibility="collapsed")
+    with col_out:
+        st.code(stringa_finale, language=None)
+    
+    with col_edit:
+        # Tasto per copiare negli appunti (Streamlit lo gestisce bene nei widget code, 
+        # ma qui diamo un'opzione di modifica rapida)
+        edit_mode = st.toggle("Abilita Modifica", key="edit_toggle")
 
-    # Monitoraggio lunghezza (Cruciale per i database aziendali)
-    lunghezza = len(st.session_state['stringa_editabile'])
+    if edit_mode:
+        # Sovrascrive lo stato solo se l'utente digita manualmente
+        nuova_stringa = st.text_input("Modifica manuale:", value=stringa_finale)
+        if nuova_stringa != stringa_finale:
+            st.session_state['stringa_editabile'] = nuova_stringa.upper()
+            st.rerun()
+
+    # 2. MONITORAGGIO LUNGHEZZA (Logica Aziendale)
+    lunghezza = len(stringa_finale)
+    progress_val = min(lunghezza / 100, 1.0) # Per una barra di progresso visiva
+    
     if lunghezza > 100:
         st.error(f"⚠️ LIMITE CRITICO SUPERATO: {lunghezza}/100 caratteri")
+        st.progress(progress_val)
     elif lunghezza >= 90:
         st.warning(f"🟡 Attenzione: Lunghezza limite vicina ({lunghezza}/100)")
+        st.progress(progress_val)
     else:
-        st.success(f"✅ Lunghezza ottimale: {lunghezza} caratteri")
+        st.success(f"✅ Lunghezza ottimale: {lunghezza}/100 caratteri")
 
-    # --- SISTEMA DI CLASSIFICAZIONE (TAGS) ---
+    # 3. SISTEMA DI CLASSIFICAZIONE (TAGS)
+    st.markdown("##### 🏷️ Metadati e Classificazione")
+    
     all_tags = []
     
-    # 1. Tag suggeriti dal database componenti
+    # Recupero TAG dal DB (Modulo 1)
+    # Assicuriamoci che tag_suggerimento sia estratto correttamente dal DATABASE
+    macro_corr = st.session_state.get("radio_macro", "")
+    part_corr = st.session_state.get("selectbox_part", "")
+    info_db = DATABASE.get(macro_corr, {}).get("Particolari", {}).get(part_corr, ["", {}, ""])
+    
+    tag_suggerimento = info_db[2] if len(info_db) > 2 else ""
     if tag_suggerimento:
         all_tags.append(tag_suggerimento.upper())
     
-    # 2. Modello di Compatibilità (se presente)
+    # Tag Compatibilità
     comp_selezionata = st.session_state.get("comp_tags")
     if comp_selezionata:
         all_tags.append(comp_selezionata.upper())
     
-    # 3. Certificazioni e Normative
+    # Tag Normative
     if st.session_state.get("check_1090"):
         all_tags.append("UNI EN-1090-1")
     
-    if normativa:
-        all_tags.append(normativa.upper())
-    
-    # Visualizzazione finale dei Metadati
+    norma_sel = st.session_state.get("norm_select")
+    if norma_sel:
+        all_tags.append(norma_sel.upper())
+
+    # Visualizzazione Tag come Badge (estetica moderna)
     if all_tags:
-        # Rimuoviamo eventuali duplicati mantenendo l'ordine
-        all_tags = list(dict.fromkeys(all_tags))
-        st.info(f"🔍 **TAGS CLASSIFICAZIONE:** {' | '.join(all_tags)}")
+        all_tags = list(dict.fromkeys(all_tags)) # Rimuove duplicati
+        # Creiamo dei piccoli "badge" visivi
+        cols = st.columns(len(all_tags) if len(all_tags) > 0 else 1)
+        tag_string = "  |  ".join([f"**{t}**" for t in all_tags])
+        st.info(f"🔍 TAGS: {tag_string}")
+
+    # 4. AZIONE FINALE (Opzionale ma consigliata)
+    if st.button("💾 Conferma e Copia", use_container_width=True):
+        # Qui potresti aggiungere una logica per salvare su un database reale
+        st.balloons()
+        st.toast("Stringa pronta per il caricamento a sistema!", icon="💾")
