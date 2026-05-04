@@ -262,17 +262,44 @@ TERMINI_ANTICIPATI = [
     "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "ROTATING", "CTR", "UPRIGHT-GRAFT"
 ]
 
+Grazie per la fiducia, socio. Ricevuto il messaggio: agiremo con precisione chirurgica per assicurarci che il codice non solo funzioni, ma rispecchi la logica di un'applicazione professionale e reattiva.
+
+Ho analizzato il tuo Modulo 2. Il problema del tasto "AZZERA" attuale è che richiama una funzione activate_reset che probabilmente non pulisce le chiavi "persistenti" che abbiamo creato nel Modulo 3 (stringa_stabile, ecc.).
+
+Ecco il Modulo 2 integrale con la logica di reset corretta e potenziata.
+
+Python
 # =========================================================
 # 2. INTERFACCIA UTENTE (Layout & Logica)
 # =========================================================
 
+# --- FUNZIONE DI RESET (Logica interna al Modulo 2) ---
+def esegui_reset_totale():
+    """Svuota completamente lo stato dell'app, incluse le stringhe generate."""
+    # 1. Lista delle chiavi custom da eliminare
+    chiavi_da_pulire = [
+        'stringa_stabile', 'tags_stabili', 'stringa_editabile', 
+        'extra_tags', 'selectbox_part', 'extra_text', 
+        'dim_l', 'dim_p', 'dim_h', 'dim_dia', 'dim_dia_gen',
+        'norm_select', 'comp_tags', 'check_1090', 'check_assembled'
+    ]
+    
+    for chiave in chiavi_da_pulire:
+        if chiave in st.session_state:
+            # Per le liste usiamo [], per i booleani False, per il resto stringa vuota
+            if isinstance(st.session_state[chiave], list):
+                st.session_state[chiave] = []
+            elif isinstance(st.session_state[chiave], bool):
+                st.session_state[chiave] = False
+            else:
+                st.session_state[chiave] = ""
+                
+    # 2. Riavvio immediato per pulire l'interfaccia
+    st.rerun()
+
 # --- INIZIALIZZAZIONE VARIABILI DI STATO ---
 if "mat_en" not in st.session_state: st.session_state.mat_en = ""
-uni_en_1090_active = False 
-part_en, normativa, tag_suggerimento = "", "", ""
-extra_dedicati_dict = {}
-extra_selezionati = []
-blocco_incompatibilita = False 
+# Nota: uni_en_1090_active e le altre variabili locali verranno resettate a ogni rerun
 
 # Configurazione visuale
 LARGHEZZA_IMMAGINE = 600 
@@ -289,15 +316,17 @@ TESTO_MANUALE = """
     </ul>
 </div>
 """
-# Nel widget lo userai così: st.markdown(TESTO_MANUALE, unsafe_allow_html=True)
 
 # --- HEADER ---
 col_t, col_m, col_r = st.columns([2.5, 1.5, 1], vertical_alignment="bottom")
-with col_t: st.title("⚙️ REG - Title Generator")
+with col_t: 
+    st.title("⚙️ REG - Title Generator")
 with col_m:
     with st.expander("📖 Manuale d'uso"):
         st.markdown(f'<div style="font-size: 14px;">{TESTO_MANUALE}</div>', unsafe_allow_html=True)
-with col_r: st.button("🔄 AZZERA", on_click=activate_reset, use_container_width=True)
+with col_r: 
+    # MODIFICA: Collegamento diretto alla nuova funzione di reset
+    st.button("🔄 AZZERA", on_click=esegui_reset_totale, use_container_width=True)
 
 st.markdown("---")
 
@@ -305,8 +334,21 @@ col_left, col_workarea = st.columns([1, 4], gap="large")
 
 with col_left:
     st.subheader("📂 1. Categoria")
-    mappa_estetica = {"METAL COMP": "⚙️ METAL COMP", "WOOD COMP": "🪵 WOOD COMP", "PLASTIC COMP": "🧪 PLASTIC COMP", "GLASS COMP": "🧊 GLASS COMP", "FASTENER": "🔩 FASTENER", "ASSEMBLY": "🏛️ ASSEMBLY"}
-    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), format_func=lambda x: mappa_estetica.get(x, x), key="radio_macro", label_visibility="collapsed")
+    mappa_estetica = {
+        "METAL COMP": "⚙️ METAL COMP", 
+        "WOOD COMP": "🪵 WOOD COMP", 
+        "PLASTIC COMP": "🧪 PLASTIC COMP", 
+        "GLASS COMP": "🧊 GLASS COMP", 
+        "FASTENER": "🔩 FASTENER", 
+        "ASSEMBLY": "🏛️ ASSEMBLY"
+    }
+    macro_it = st.radio(
+        "Seleziona categoria:", 
+        options=list(DATABASE.keys()), 
+        format_func=lambda x: mappa_estetica.get(x, x), 
+        key="radio_macro", 
+        label_visibility="collapsed"
+    )
 
 with col_workarea:
     st.subheader("🛠️ 2. Configurazione Base")
@@ -330,35 +372,35 @@ with col_workarea:
 
     with c_search:
         part_info = DATABASE.get(macro_it, {}).get("Particolari", {})
-        scelta_part_it = st.selectbox("Cerca dettaglio:", options=sorted(list(part_info.keys())), index=None, placeholder="Cerca componente...", format_func=lambda x: f"🔧 {x} ({part_info[x][0]})" if x else "Seleziona...", key="selectbox_part")
+        scelta_part_it = st.selectbox(
+            "Cerca dettaglio:", 
+            options=sorted(list(part_info.keys())), 
+            index=None, 
+            placeholder="Cerca componente...", 
+            format_func=lambda x: f"🔧 {x} ({part_info[x][0]})" if x else "Seleziona...", 
+            key="selectbox_part"
+        )
 
     st.markdown("---")
     
     # --- SEZIONE 3: EXTRA E NOTE ---
     st.subheader("✨ 3. Extra e Note")
     
-    # --- SUGGERIMENTO PER SEZIONE 3 (LOGICA PIÙ PULITA) ---
-with col_workarea:
-    # ... (parte precedente ok)
-    
     if scelta_part_it:
-        # Recupero sicuro del particolare
         dati_part = part_info.get(scelta_part_it, ["", {}, ""])
         extra_options = list(dati_part[1].keys())
         
         if extra_options:
             st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-            # Rendering dinamico degli approfondimenti
             for ex in st.session_state.get("extra_tags", []):
-                col_indent, col_input = st.columns([0.1, 0.9]) # Crea un piccolo rientro visivo
+                col_indent, col_input = st.columns([0.1, 0.9])
                 with col_input:
                     if ex in SUB_OPTIONS_CONFIG:
                         st.selectbox(f"Dettaglio per {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
                     elif ex in EXTRA_CON_INPUT_MANUALE:
                         st.text_input(f"Specifica valore per {ex}:", key=f"manual_{ex}")
 
-    # CAMPO NOTE LIBERE: Indispensabile per la traduzione automatica
     st.text_input(
         "Note libere (Traduzione automatica):", 
         key="extra_text", 
@@ -391,7 +433,6 @@ with col_workarea:
     st.subheader("🔗 5. Compatibilità")
     
     if st.session_state.get("radio_macro") != "FASTENER":
-        # Usiamo la lista che mi hai fornito
         comp_selezionata = st.pills(
             "Seleziona Modello di destinazione:", 
             options=OPZIONI_COMPATIBILITA, 
@@ -399,7 +440,6 @@ with col_workarea:
             key="comp_tags"
         )
         
-        # Logica speciale per componenti strutturali
         if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
             st.warning("⚡ Componente Strutturale rilevato")
             st.checkbox("Certificazione UNI EN-1090", key="check_1090")
