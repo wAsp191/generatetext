@@ -373,11 +373,30 @@ with col_workarea:
         st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", width=LARGHEZZA_IMMAGINE)
 
     st.markdown("---")
+    # --- SEZIONE 5: COMPATIBILITÀ ---
     st.subheader("🔗 5. Compatibilità")
+    
     if macro_it != "FASTENER":
-        st.pills("Modello di destinazione:", options=[opt for opt in OPZIONI_COMPATIBILI if opt], selection_mode="single", key="comp_tags")
-        if st.session_state.get("comp_tags") in ["FORTISSIMO", "MINIRACK"]:
-            st.checkbox("Certificazione UNI EN-1090", key="check_1090")
+        # Usiamo locals().get o globals().get per evitare il crash se la variabile sparisce
+        lista_comp = globals().get('OPZIONI_COMPATIBILI', [])
+        
+        if not lista_comp:
+            st.error("⚠️ Errore di configurazione: Lista OPZIONI_COMPATIBILI non trovata.")
+        else:
+            pills_compatibilita = [opt for opt in lista_comp if opt]
+            comp_selezionata = st.pills(
+                "Modello di destinazione:", 
+                options=pills_compatibilita, 
+                selection_mode="single", 
+                key="comp_tags"
+            )
+            
+            # Logica 1090 legata alla selezione
+            if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
+                st.warning("⚡ Componente Strutturale")
+                st.checkbox("Certificazione UNI EN-1090", key="check_1090")
+    else:
+        st.info("Nessuna compatibilità necessaria per la categoria FASTENER.")
 
 # =========================================================
 # 3. LOGICA DI GENERAZIONE E TRADUZIONE (DEFINITIVA)
