@@ -378,30 +378,59 @@ with col_workarea:
     st.markdown("---")
     
     # --- SEZIONE 3: EXTRA E NOTE ---
-    st.subheader("✨ 3. Extra e Note")
-    
-    if scelta_part_it:
-        dati_part = part_info.get(scelta_part_it, ["", {}, ""])
-        extra_options = list(dati_part[1].keys())
-        
-        if extra_options:
-            st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
-            
-            for ex in st.session_state.get("extra_tags", []):
-                col_indent, col_input = st.columns([0.1, 0.9])
-                with col_input:
-                    if ex in SUB_OPTIONS_CONFIG:
-                        st.selectbox(f"Dettaglio per {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
-                    elif ex in EXTRA_CON_INPUT_MANUALE:
-                        st.text_input(f"Specifica valore per {ex}:", key=f"manual_{ex}")
+st.subheader("✨ 3. Extra e Note")
 
-    st.text_input(
-        "Note libere (Traduzione automatica):", 
-        key="extra_text", 
-        placeholder="es: con tappi in gomma...",
-        help="Il testo inserito verrà tradotto in inglese nel risultato finale."
-    )
-    st.markdown("---")
+# Inizializziamo l'interruttore a False a ogni giro
+st.session_state.conflitto_attivo = False 
+
+if scelta_part_it:
+    dati_part = part_info.get(scelta_part_it, ["", {}, ""])
+    extra_options = list(dati_part[1].keys())
+    
+    if extra_options:
+        # 1. Visualizzazione dei Pills
+        st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
+        
+        # --- CONTROLLO INCOMPATIBILITÀ IMMEDIATO ---
+        tags_scelti_raw = st.session_state.get("extra_tags", [])
+        tags_scelti_upper = [str(t).upper().strip() for t in tags_scelti_raw]
+        
+        conflitto_rilevato = False
+        messaggio_errore = ""
+
+        for gruppo in COPPIE_INCOMPATIBILI:
+            gruppo_upper = [str(elemento).upper().strip() for elemento in gruppo]
+            intersezione = set(gruppo_upper).intersection(set(tags_scelti_upper))
+            
+            if len(intersezione) > 1:
+                conflitto_rilevato = True
+                # Aggiorniamo l'interruttore globale nello stato
+                st.session_state.conflitto_attivo = True 
+                
+                nomi_originali = [t for t in tags_scelti_raw if str(t).upper().strip() in intersezione]
+                messaggio_errore = f"⚠️ **Incompatibilità**: Non puoi selezionare contemporaneamente **{', '.join(nomi_originali)}**."
+                break
+        
+        # Visualizzazione immediata dell'errore
+        if conflitto_rilevato:
+            st.error(messaggio_errore)
+        
+        # Rendering dinamico degli approfondimenti
+        for ex in tags_scelti_raw:
+            col_indent, col_input = st.columns([0.1, 0.9])
+            with col_input:
+                if ex in SUB_OPTIONS_CONFIG:
+                    st.selectbox(f"Dettaglio per {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
+                elif ex in EXTRA_CON_INPUT_MANUALE:
+                    st.text_input(f"Specifica valore per {ex}:", key=f"manual_{ex}")
+
+st.text_input(
+    "Note libere (Traduzione automatica):", 
+    key="extra_text", 
+    placeholder="es: con tappi in gomma...",
+    help="Il testo inserito verrà tradotto in inglese nel risultato finale."
+)
+st.markdown("---")
     
     # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento e Normative")
