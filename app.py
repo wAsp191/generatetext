@@ -450,32 +450,43 @@ from deep_translator import GoogleTranslator
 def traduci_note(testo):
     if not testo: return ""
     try:
+        # Usiamo il modulo 3 per tradurre in inglese e trasformare in maiuscolo
         return GoogleTranslator(source='it', target='en').translate(testo).upper()
     except:
         return testo.upper()
 
 # --- LOGICA DI CONTROLLO INCOMPATIBILITÀ (RIF. MODULO 1) ---
-tags_selezionati = st.session_state.get("extra_tags", [])
+# Recuperiamo i tag scelti dall'utente
+tags_scelti_raw = st.session_state.get("extra_tags", [])
+
+# TRUCCO DA ESPERTO: Trasformiamo tutto in MAIUSCOLO per il confronto
+# così non importa come sono scritti nel database o nei Pills
+tags_scelti_upper = [str(t).upper().strip() for t in tags_scelti_raw]
+
 conflitto_rilevato = False
 messaggio_errore = ""
 
-# Scansione dinamica basata sulla tua lista COPPIE_INCOMPATIBILI
+# Verifichiamo le COPPIE_INCOMPATIBILI definite nel Modulo 1
 for gruppo in COPPIE_INCOMPATIBILI:
-    # Troviamo l'intersezione tra i tag scelti e il gruppo di incompatibilità
-    intersezione = set(gruppo).intersection(set(tags_selezionati))
+    # Trasformiamo anche il gruppo del database in maiuscolo per il controllo
+    gruppo_upper = [str(elemento).upper().strip() for elemento in gruppo]
     
-    # Se ci sono 2 o più elementi dello stesso gruppo, c'è un conflitto
+    # Intersezione tra quello che ha scelto l'utente e il gruppo "vietato"
+    intersezione = set(gruppo_upper).intersection(set(tags_scelti_upper))
+    
+    # Se l'intersezione contiene più di un elemento, abbiamo un problema
     if len(intersezione) > 1:
         conflitto_rilevato = True
-        elementi_conflitto = ", ".join(intersezione)
-        messaggio_errore = f"⚠️ **Incompatibilità rilevata**: Non puoi selezionare contemporaneamente: **{elementi_conflitto}**."
+        # Recuperiamo i nomi originali per mostrarli all'utente
+        nomi_originali = [t for t in tags_scelti_raw if str(t).upper().strip() in intersezione]
+        messaggio_errore = f"⚠️ **Conflitto rilevato**: Non puoi combinare **{', '.join(nomi_originali)}**."
         break
 
-# Visualizzazione errore se presente
+# Visualizzazione dinamica dell'errore
 if conflitto_rilevato:
     st.error(messaggio_errore)
 
-# 2. Tasto Genera (Disabilitato se c'è un conflitto)
+# 2. TASTO GENERA (Si disabilita se c'è conflitto)
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=conflitto_rilevato):
     
     # --- A. RECUPERO DATI ---
@@ -484,7 +495,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
     mat_en = st.session_state.get("mat_en", "").upper()
     
     if scelta_part_it:
-        # Recupero info dal DATABASE (Modulo 1)
+        # Recupero dal DATABASE (Modulo 1)
         part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", {}, ""])
         part_en = part_db[0].upper()
         dict_extra_db = part_db[1]
@@ -494,7 +505,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         lista_prima = []
         lista_dopo = []
         
-        for tag in tags_selezionati:
+        for tag in tags_scelti_raw:
+            # Recupero traduzione dal DB o dalle sub-options
             if tag in SUB_OPTIONS_CONFIG:
                 chiave_sub = st.session_state.get(f"sub_{tag}", "")
                 traduzione = SUB_OPTIONS_CONFIG[tag].get(chiave_sub, chiave_sub).upper()
@@ -503,6 +515,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             else:
                 traduzione = dict_extra_db.get(tag, tag).upper()
             
+            # Posizionamento (Prima o Dopo il nome del componente)
             if traduzione in TERMINI_ANTICIPATI:
                 lista_prima.append(traduzione)
             else:
@@ -515,6 +528,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         for key, label in campi:
             val = st.session_state.get(key, "").strip().upper()
             if val:
+                # Regola speciale per i Fastener (Diametro -> M)
                 if macro_it == "FASTENER" and label == "D" and not val.startswith("M"):
                     dim_list.append(f"M{val}")
                 else:
@@ -549,10 +563,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         if st.session_state.get("check_1090"):
             corpo += " (EXC2 UNI EN 1090-2)"
 
-        # --- F. SALVATAGGIO IN SESSION STATE ---
+        # --- F. SALVATAGGIO ---
         st.session_state['stringa_stabile'] = " ".join(corpo.split()).upper()
         
-        # Tag per Modulo 4
+        # Prepariamo i tag reali per il modulo 4
         lista_tag_finali = [t.upper() for t in [tag_reale_db, macro_it, comp_tag] if t]
         st.session_state['tags_stabili'] = list(dict.fromkeys(lista_tag_finali))
         
