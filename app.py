@@ -503,50 +503,86 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, type="prima
 st.text_input("Risultato finale (Editabile):", key="stringa_editabile")
         
 # =========================================================
-# 4. OUTPUT E CLASSIFICAZIONE (FINAL STEP)
+# 4. OUTPUT, MONITORAGGIO E CLASSIFICAZIONE
 # =========================================================
 
-if st.session_state.get('stringa_editabile'):
+# Recuperiamo la stringa generata dal Modulo 3
+stringa_finale = st.session_state.get('stringa_editabile', "")
+
+if stringa_finale:
     st.markdown("---")
     st.subheader("📋 Risultato Finale")
     
-    # Visualizzazione stringa generata
-    st.code(st.session_state['stringa_editabile'], language=None)
+    # 1. VISUALIZZAZIONE E MODIFICA
+    # Usiamo un layout a colonne per separare il codice dall'edit
+    col_out, col_edit = st.columns([3, 1])
     
-    # Campo di modifica rapida
-    with st.expander("✏️ Modifica manuale stringa"):
-        st.text_input("Modifica il testo:", key='stringa_editabile', label_visibility="collapsed")
+    with col_out:
+        st.code(stringa_finale, language=None)
+    
+    with col_edit:
+        # Tasto per copiare negli appunti (Streamlit lo gestisce bene nei widget code, 
+        # ma qui diamo un'opzione di modifica rapida)
+        edit_mode = st.toggle("Abilita Modifica", key="edit_toggle")
 
-    # Monitoraggio lunghezza (Cruciale per i database aziendali)
-    lunghezza = len(st.session_state['stringa_editabile'])
+    if edit_mode:
+        # Sovrascrive lo stato solo se l'utente digita manualmente
+        nuova_stringa = st.text_input("Modifica manuale:", value=stringa_finale)
+        if nuova_stringa != stringa_finale:
+            st.session_state['stringa_editabile'] = nuova_stringa.upper()
+            st.rerun()
+
+    # 2. MONITORAGGIO LUNGHEZZA (Logica Aziendale)
+    lunghezza = len(stringa_finale)
+    progress_val = min(lunghezza / 100, 1.0) # Per una barra di progresso visiva
+    
     if lunghezza > 100:
         st.error(f"⚠️ LIMITE CRITICO SUPERATO: {lunghezza}/100 caratteri")
+        st.progress(progress_val)
     elif lunghezza >= 90:
         st.warning(f"🟡 Attenzione: Lunghezza limite vicina ({lunghezza}/100)")
+        st.progress(progress_val)
     else:
-        st.success(f"✅ Lunghezza ottimale: {lunghezza} caratteri")
+        st.success(f"✅ Lunghezza ottimale: {lunghezza}/100 caratteri")
 
-    # --- SISTEMA DI CLASSIFICAZIONE (TAGS) ---
+    # 3. SISTEMA DI CLASSIFICAZIONE (TAGS)
+    st.markdown("##### 🏷️ Metadati e Classificazione")
+    
     all_tags = []
     
-    # 1. Tag suggeriti dal database componenti
+    # Recupero TAG dal DB (Modulo 1)
+    # Assicuriamoci che tag_suggerimento sia estratto correttamente dal DATABASE
+    macro_corr = st.session_state.get("radio_macro", "")
+    part_corr = st.session_state.get("selectbox_part", "")
+    info_db = DATABASE.get(macro_corr, {}).get("Particolari", {}).get(part_corr, ["", {}, ""])
+    
+    tag_suggerimento = info_db[2] if len(info_db) > 2 else ""
     if tag_suggerimento:
         all_tags.append(tag_suggerimento.upper())
     
-    # 2. Modello di Compatibilità (se presente)
+    # Tag Compatibilità
     comp_selezionata = st.session_state.get("comp_tags")
     if comp_selezionata:
         all_tags.append(comp_selezionata.upper())
     
-    # 3. Certificazioni e Normative
+    # Tag Normative
     if st.session_state.get("check_1090"):
         all_tags.append("UNI EN-1090-1")
     
-    if normativa:
-        all_tags.append(normativa.upper())
-    
-    # Visualizzazione finale dei Metadati
+    norma_sel = st.session_state.get("norm_select")
+    if norma_sel:
+        all_tags.append(norma_sel.upper())
+
+    # Visualizzazione Tag come Badge (estetica moderna)
     if all_tags:
-        # Rimuoviamo eventuali duplicati mantenendo l'ordine
-        all_tags = list(dict.fromkeys(all_tags))
-        st.info(f"🔍 **TAGS CLASSIFICAZIONE:** {' | '.join(all_tags)}")
+        all_tags = list(dict.fromkeys(all_tags)) # Rimuove duplicati
+        # Creiamo dei piccoli "badge" visivi
+        cols = st.columns(len(all_tags) if len(all_tags) > 0 else 1)
+        tag_string = "  |  ".join([f"**{t}**" for t in all_tags])
+        st.info(f"🔍 TAGS: {tag_string}")
+
+    # 4. AZIONE FINALE (Opzionale ma consigliata)
+    if st.button("💾 Conferma e Copia", use_container_width=True):
+        # Qui potresti aggiungere una logica per salvare su un database reale
+        st.balloons()
+        st.toast("Stringa pronta per il caricamento a sistema!", icon="💾")
