@@ -530,52 +530,36 @@ from deep_translator import GoogleTranslator
 def traduci_note(testo):
     if not testo: return ""
     try:
-        # Usiamo il modulo 3 per tradurre in inglese e trasformare in maiuscolo
         return GoogleTranslator(source='it', target='en').translate(testo).upper()
     except:
         return testo.upper()
 
-# --- LOGICA DI CONTROLLO INCOMPATIBILITÀ (RIF. MODULO 1) ---
-# Recuperiamo i tag scelti dall'utente
+# --- LOGICA DI CONTROLLO INCOMPATIBILITÀ ---
 tags_scelti_raw = st.session_state.get("extra_tags", [])
-
-# TRUCCO DA ESPERTO: Trasformiamo tutto in MAIUSCOLO per il confronto
-# così non importa come sono scritti nel database o nei Pills
 tags_scelti_upper = [str(t).upper().strip() for t in tags_scelti_raw]
-
 conflitto_rilevato = False
 messaggio_errore = ""
 
-# Verifichiamo le COPPIE_INCOMPATIBILI definite nel Modulo 1
 for gruppo in COPPIE_INCOMPATIBILI:
-    # Trasformiamo anche il gruppo del database in maiuscolo per il controllo
     gruppo_upper = [str(elemento).upper().strip() for elemento in gruppo]
-    
-    # Intersezione tra quello che ha scelto l'utente e il gruppo "vietato"
     intersezione = set(gruppo_upper).intersection(set(tags_scelti_upper))
-    
-    # Se l'intersezione contiene più di un elemento, abbiamo un problema
     if len(intersezione) > 1:
         conflitto_rilevato = True
-        # Recuperiamo i nomi originali per mostrarli all'utente
         nomi_originali = [t for t in tags_scelti_raw if str(t).upper().strip() in intersezione]
         messaggio_errore = f"⚠️ **Conflitto rilevato**: Non puoi combinare **{', '.join(nomi_originali)}**."
         break
 
-# Visualizzazione dinamica dell'errore
 if conflitto_rilevato:
     st.error(messaggio_errore)
 
-# 2. TASTO GENERA (Si disabilita se c'è conflitto)
+# 2. TASTO GENERA
 if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=conflitto_rilevato):
     
-    # --- A. RECUPERO DATI ---
     macro_it = st.session_state.get("radio_macro", "")
     scelta_part_it = st.session_state.get("selectbox_part", "")
     mat_en = st.session_state.get("mat_en", "").upper()
     
     if scelta_part_it:
-        # Recupero dal DATABASE (Modulo 1)
         part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", {}, ""])
         part_en = part_db[0].upper()
         dict_extra_db = part_db[1]
@@ -586,7 +570,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         lista_dopo = []
         
         for tag in tags_scelti_raw:
-            # Recupero traduzione dal DB o dalle sub-options
             if tag in SUB_OPTIONS_CONFIG:
                 chiave_sub = st.session_state.get(f"sub_{tag}", "")
                 traduzione = SUB_OPTIONS_CONFIG[tag].get(chiave_sub, chiave_sub).upper()
@@ -595,26 +578,31 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             else:
                 traduzione = dict_extra_db.get(tag, tag).upper()
             
-            # Posizionamento (Prima o Dopo il nome del componente)
             if traduzione in TERMINI_ANTICIPATI:
                 lista_prima.append(traduzione)
             else:
                 lista_dopo.append(traduzione)
 
-        # --- C. DIMENSIONI E NORMATIVE ---
+        # --- C. DIMENSIONI (CORRETTO) ---
         dim_list = []
-        campi = [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H"), ("dim_dia", "D"), ("dim_dia_gen", "Ø")]
         
-        for key, label in campi:
-            val = st.session_state.get(key, "").strip().upper()
-            if val:
-                # Regola speciale per i Fastener (Diametro -> M)
-                if macro_it == "FASTENER" and label == "D" and not val.startswith("M"):
-                    dim_list.append(f"M{val}")
-                else:
-                    dim_list.append(f"{label}{val}")
+        # TRUCCO: Recuperiamo i valori cercando in entrambe le chiavi possibili (specifica o generica)
+        L = st.session_state.get("dim_l", "").strip() or st.session_state.get("dim_l_gen", "").strip()
+        P = st.session_state.get("dim_p", "").strip()
+        H = st.session_state.get("dim_h", "").strip()
+        D = st.session_state.get("dim_dia", "").strip() or st.session_state.get("dim_dia_gen", "").strip()
+
+        # Costruiamo la lista dimensioni solo se i valori esistono
+        if L: dim_list.append(f"L{L.upper()}")
+        if P: dim_list.append(f"P{P.upper()}")
+        if H: dim_list.append(f"H{H.upper()}")
+        if D:
+            # Regola speciale Fastener: Diametro diventa M
+            prefix_d = "M" if (macro_it == "FASTENER" and not D.upper().startswith("M")) else "Ø"
+            dim_list.append(f"{prefix_d}{D.upper()}")
         
         dim_str = " ".join(dim_list)
+        
         norma_sel = st.session_state.get("norm_select", "")
         norma_str = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {}).get(norma_sel, "")
 
@@ -645,8 +633,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
 
         # --- F. SALVATAGGIO ---
         st.session_state['stringa_stabile'] = " ".join(corpo.split()).upper()
-        
-        # Prepariamo i tag reali per il modulo 4
         lista_tag_finali = [t.upper() for t in [tag_reale_db, macro_it, comp_tag] if t]
         st.session_state['tags_stabili'] = list(dict.fromkeys(lista_tag_finali))
         
