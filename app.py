@@ -329,29 +329,31 @@ with col_workarea:
 
     st.markdown("---")
     
-    # --- SEZIONE 3: EXTRA E NOTE (SISTEMATA) ---
+    # --- SEZIONE 3: EXTRA E NOTE ---
     st.subheader("✨ 3. Extra e Note")
     
     if scelta_part_it:
-        dati_part = part_info[scelta_part_it]
+        dati_part = part_info.get(scelta_part_it, ["", {}])
         extra_options = list(dati_part[1].keys())
+        
         if extra_options:
-            extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
-            if extra_selezionati:
-                for ex in extra_selezionati:
-                    if ex in SUB_OPTIONS_CONFIG:
-                        st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
-                    elif ex in EXTRA_CON_INPUT_MANUALE:
-                        st.text_input(f"↳ Valore specifico per {ex}:", key=f"manual_{ex}")
+            st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
+            
+            # Gestione dinamica sotto-opzioni
+            for ex in st.session_state.get("extra_tags", []):
+                if ex in SUB_OPTIONS_CONFIG:
+                    st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
+                elif ex in EXTRA_CON_INPUT_MANUALE:
+                    st.text_input(f"↳ Valore specifico per {ex}:", key=f"manual_{ex}")
 
-    # CAMPO NOTE LIBERE: SEMPRE VISIBILE
+    # CAMPO NOTE LIBERE: Indispensabile per la traduzione automatica
     st.text_input(
         "Note libere (Traduzione automatica):", 
         key="extra_text", 
         placeholder="es: con tappi in gomma...",
-        help="Il testo verrà tradotto in inglese e messo in stampatello."
+        help="Il testo inserito verrà tradotto in inglese nel risultato finale."
     )
-    
+
     st.markdown("---")
     
     # --- SEZIONE 4: DIMENSIONAMENTO ---
@@ -373,30 +375,25 @@ with col_workarea:
         st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", width=LARGHEZZA_IMMAGINE)
 
     st.markdown("---")
+    
     # --- SEZIONE 5: COMPATIBILITÀ ---
     st.subheader("🔗 5. Compatibilità")
     
-    if macro_it != "FASTENER":
-        # Usiamo locals().get o globals().get per evitare il crash se la variabile sparisce
-        lista_comp = globals().get('OPZIONI_COMPATIBILI', [])
+    if st.session_state.get("radio_macro") != "FASTENER":
+        # Usiamo la lista che mi hai fornito
+        comp_selezionata = st.pills(
+            "Seleziona Modello di destinazione:", 
+            options=OPZIONI_COMPATIBILITA, 
+            selection_mode="single", 
+            key="comp_tags"
+        )
         
-        if not lista_comp:
-            st.error("⚠️ Errore di configurazione: Lista OPZIONI_COMPATIBILI non trovata.")
-        else:
-            pills_compatibilita = [opt for opt in lista_comp if opt]
-            comp_selezionata = st.pills(
-                "Modello di destinazione:", 
-                options=pills_compatibilita, 
-                selection_mode="single", 
-                key="comp_tags"
-            )
-            
-            # Logica 1090 legata alla selezione
-            if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
-                st.warning("⚡ Componente Strutturale")
-                st.checkbox("Certificazione UNI EN-1090", key="check_1090")
+        # Logica speciale per componenti strutturali
+        if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
+            st.warning("⚡ Componente Strutturale rilevato")
+            st.checkbox("Certificazione UNI EN-1090", key="check_1090")
     else:
-        st.info("Nessuna compatibilità necessaria per la categoria FASTENER.")
+        st.info("Nessuna compatibilità necessaria per i Fastener.")
 
 # =========================================================
 # 3. LOGICA DI GENERAZIONE E TRADUZIONE (DEFINITIVA)
