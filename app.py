@@ -298,8 +298,8 @@ MAPPA_NORMATIVE_FASTENER = {
     "Inserti filettati": { "": "" }
 }
 
-OPZIONI_SPESSORE_STD = ["", "0.5", "0.6", "0.75", "0.8", "1", "1.2", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5", "6", "8", "10"]
-OPZIONI_SPESSORE_WOOD = ["", "10mm", "15mm", "18mm", "19mm", "20mm", "22mm", "24mm", "25mm", "30mm", "35mm"]
+# OPZIONI_SPESSORE_STD = ["", "0.5", "0.6", "0.75", "0.8", "1", "1.2", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5", "6", "8", "10"]
+# OPZIONI_SPESSORE_WOOD = ["", "10mm", "15mm", "18mm", "19mm", "20mm", "22mm", "24mm", "25mm", "30mm", "35mm"]
 
 TERMINI_ANTICIPATI = [
     "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "STATIC", "ADJUSTABLE", "SEISMIC",
@@ -641,7 +641,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             corpo = f"{corpo} - {comp_tag}"
             
         if st.session_state.get("check_1090"):
-            corpo += " (EXC2 UNI EN 1090-2)"
+            corpo += " (UNI EN 1090-2)"
 
         # --- F. SALVATAGGIO ---
         st.session_state['stringa_stabile'] = " ".join(corpo.split()).upper()
