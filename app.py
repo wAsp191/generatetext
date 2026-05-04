@@ -652,7 +652,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         st.rerun()
         
 # =========================================================
-# 4. OUTPUT E MONITORAGGIO (VERSIONE DEFINITIVA)
+# 4. OUTPUT E MONITORAGGIO (VERSIONE DEFINITIVA COMPATTA)
 # =========================================================
 
 # Funzione di callback per sincronizzare l'input manuale con lo stato globale
@@ -667,16 +667,17 @@ risultato_container = st.container()
 if st.session_state.get('stringa_stabile'):
     with risultato_container:
         st.markdown("---")
-        st.subheader("📋 Risultato Finale")
         
-        # 1. LAYOUT CONTROLLI (Stringa + Toggle Modifica)
-        col_str, col_opt = st.columns([4, 1])
+        # 1. LAYOUT CONTROLLI (Header + Toggle Modifica)
+        col_titolo, col_opt = st.columns([4, 1])
+        with col_titolo:
+            st.subheader("📋 Risultato Finale")
         
-        # Toggle stabile: non chiude più la sezione perché lo stato è in 'stringa_stabile'
         modifica_attiva = col_opt.toggle("✏️ Modifica", key="toggle_manual_edit")
 
+        # 2. AREA RISULTATO
         if modifica_attiva:
-            # Input manuale con callback on_change
+            # Input manuale: si attiva solo se l'utente vuole intervenire
             st.text_input(
                 "Modifica manuale stringa:", 
                 value=st.session_state['stringa_stabile'],
@@ -685,41 +686,23 @@ if st.session_state.get('stringa_stabile'):
                 label_visibility="collapsed"
             )
         else:
-            # Visualizzazione tech: st.code aggiunge il tasto "copia" in automatico
+            # Visualizzazione Standard: st.code fornisce il tasto "COPIA" integrato a destra
             st.code(st.session_state['stringa_stabile'], language=None)
 
-        # 2. MONITORAGGIO LUNGHEZZA (Barra dinamica)
+        # 3. MONITORAGGIO LUNGHEZZA (Barra dinamica compatta)
         lunghezza = len(st.session_state['stringa_stabile'])
         perc = min(lunghezza / 100, 1.0)
         
         if lunghezza > 100:
-            st.error(f"⚠️ LIMITE CRITICO SUPERATO: {lunghezza}/100")
+            st.error(f"⚠️ LIMITE CRITICO: {lunghezza}/100")
         elif lunghezza >= 90:
-            st.warning(f"🟡 ATTENZIONE: Lunghezza limite vicina ({lunghezza}/100)")
+            st.warning(f"🟡 ATTENZIONE: {lunghezza}/100")
         else:
-            st.caption(f"✅ Lunghezza ottimale: {lunghezza}/100 caratteri")
+            st.caption(f"✅ Lunghezza ottimale: {lunghezza}/100")
         
         st.progress(perc)
 
-        # 3. TAGS DI CLASSIFICAZIONE (Reali dal Database)
-        # Recuperiamo i tag salvati dal Modulo 3
+        # 4. TAGS DI CLASSIFICAZIONE
         tags_reali = st.session_state.get('tags_stabili', [])
-        
         if tags_reali:
-            # Creiamo una riga di "badge" eleganti
             st.markdown(f"**Classificazione:** `{'` `'.join(tags_reali)}` ")
-        else:
-            # Fallback se per qualche motivo i tag mancano
-            st.caption("Nessun tag di classificazione rilevato.")
-
-        # 4. TASTO CONFERMA E REGISTRAZIONE
-        st.write("") 
-        if st.button("💾 CONFERMA E COPIA NEGLI APPUNTI", use_container_width=True):
-            # Animazione tecnica "Spinner"
-            with st.spinner("Sincronizzazione con il database aziendale..."):
-                import time
-                time.sleep(0.8) 
-            
-            # Feedback di successo
-            st.toast("Record salvato correttamente!", icon="🎯")
-            st.success(f"Stringa registrata: {st.session_state['stringa_stabile']}")
