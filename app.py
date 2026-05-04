@@ -424,14 +424,9 @@ with col_workarea:
     st.markdown("---")
     
     # --- SEZIONE 3: EXTRA E NOTE ---
-    # Creiamo due colonne principali con proporzioni bilanciate
-col_extra, col_dim = st.columns([1.2, 1], gap="medium")
-
-with col_extra:
     st.subheader("✨ 3. Extra e Note")
-    
-    # Inizializzazione sicura
-    tags_scelti_raw = st.session_state.get("extra_tags", [])
+
+    # Inizializziamo l'interruttore a False a ogni giro
     st.session_state.conflitto_attivo = False 
 
     if scelta_part_it:
@@ -439,62 +434,73 @@ with col_extra:
         extra_options = list(dati_part[1].keys())
         
         if extra_options:
-            # Pills compatte
-            st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags", label_visibility="collapsed")
+            # 1. Visualizzazione dei Pills
+            st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-            # --- LOGICA CONFLITTI ---
+            # --- CONTROLLO INCOMPATIBILITÀ IMMEDIATO ---
+            tags_scelti_raw = st.session_state.get("extra_tags", [])
             tags_scelti_upper = [str(t).upper().strip() for t in tags_scelti_raw]
+            
+            conflitto_rilevato = False
+            messaggio_errore = ""
+
             for gruppo in COPPIE_INCOMPATIBILI:
                 gruppo_upper = [str(elemento).upper().strip() for elemento in gruppo]
                 intersezione = set(gruppo_upper).intersection(set(tags_scelti_upper))
+                
                 if len(intersezione) > 1:
-                    st.session_state.conflitto_attivo = True
-                    nomi_conflitto = [t for t in tags_scelti_raw if str(t).upper().strip() in intersezione]
-                    st.error(f"⚠️ Incompatibili: {', '.join(nomi_conflitto)}")
+                    conflitto_rilevato = True
+                    st.session_state.conflitto_attivo = True 
+                    
+                    nomi_originali = [t for t in tags_scelti_raw if str(t).upper().strip() in intersezione]
+                    messaggio_errore = f"⚠️ **Incompatibilità**: Non puoi selezionare contemporaneamente **{', '.join(nomi_originali)}**."
                     break
             
-            # Dettagli extra (Selectbox/Input) - Rendering compatto
+            if conflitto_rilevato:
+                st.error(messaggio_errore)
+            
+            # Rendering dinamico degli approfondimenti
             for ex in tags_scelti_raw:
-                if ex in SUB_OPTIONS_CONFIG or ex in EXTRA_CON_INPUT_MANUALE:
-                    c1, c2 = st.columns([0.4, 0.6])
-                    with c1: st.caption(f"{ex}:")
-                    with c2:
-                        if ex in SUB_OPTIONS_CONFIG:
-                            st.selectbox(f"sub_{ex}", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}", label_visibility="collapsed")
-                        elif ex in EXTRA_CON_INPUT_MANUALE:
-                            st.text_input(f"man_{ex}", key=f"manual_{ex}", label_visibility="collapsed")
+                col_indent, col_input = st.columns([0.1, 0.9])
+                with col_input:
+                    if ex in SUB_OPTIONS_CONFIG:
+                        st.selectbox(f"Dettaglio per {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
+                    elif ex in EXTRA_CON_INPUT_MANUALE:
+                        st.text_input(f"Specifica valore per {ex}:", key=f"manual_{ex}")
 
-    # Note libere sotto i pills/extra
-    st.text_input("Note libere (Traduzione):", key="extra_text", placeholder="es: con tappi...", label_visibility="collapsed")
-
-with col_dim:
+    # Allineato a st.subheader ("Extra e Note")
+    st.text_input(
+        "Note libere (Traduzione automatica):", 
+        key="extra_text", 
+        placeholder="es: con tappi in gomma...",
+        help="Il testo inserito verrà tradotto in inglese nel risultato finale."
+    )
+    
+    st.markdown("---")
+    
+    # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento")
     
-    # Griglia interna per le misure: tutto su due righe per non eccedere in altezza
+    # Creiamo una riga con molte colonne piccole per i campi
+    # Le proporzioni [1, 1, 1, 1, 2] servono a dare più spazio alla Selectbox finale
     if macro_it == "FASTENER":
-        c1, c2 = st.columns(2)
+        c1, c2, c3, _ = st.columns([1, 1, 2, 2])
         with c1: st.text_input("L", key="dim_l", placeholder="Lung.")
         with c2: st.text_input("D/M", key="dim_dia", placeholder="Diam.")
-        
-        opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-        st.selectbox("Normativa", options=list(opzioni_norm.keys()), key="norm_select")
+        with c3: 
+            opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
+            st.selectbox("Normativa", options=list(opzioni_norm.keys()), key="norm_select")
     else:
-        # Layout 2x2 per misure generiche
-        c1, c2 = st.columns(2)
-        with c1:
-            st.text_input("L", key="dim_l_gen", placeholder="Lung.")
-            st.text_input("H", key="dim_h", placeholder="Alt.")
-        with c2:
-            st.text_input("P", key="dim_p", placeholder="Prof.")
-            st.text_input("Ø", key="dim_dia_gen", placeholder="Diam.")
+        c1, c2, c3, c4, _ = st.columns([1, 1, 1, 1, 1])
+        with c1: st.text_input("L", key="dim_l_gen", placeholder="Lung.")
+        with c2: st.text_input("P", key="dim_p", placeholder="Prof.")
+        with c3: st.text_input("H", key="dim_h", placeholder="Alt.")
+        with c4: st.text_input("Ø", key="dim_dia_gen", placeholder="Diam.")
 
-# Divider orizzontale unico per pulizia visiva
-st.markdown("---")
+    # Immagine disabilitata come richiesto
+    # st.image("https://raw.githubusercontent.com/...", width=250)
 
-# --- SEZIONE 5: COMPATIBILITÀ (Sotto, a tutta larghezza o in colonna) ---
-st.subheader("🔗 5. Compatibilità")
-if st.session_state.get("radio_macro") != "FASTENER":
-    st.pills("Modello:", options=OPZIONI_COMPATIBILITA, selection_mode="single", key="comp_tags", label_visibility="collapsed")
+    st.markdown("---")
     
     # --- SEZIONE 5: COMPATIBILITÀ ---
     st.subheader("🔗 5. Compatibilità")
@@ -512,6 +518,7 @@ if st.session_state.get("radio_macro") != "FASTENER":
         # Mostriamo la checkbox EN-1090 solo se serve, ma sulla stessa riga
         if st.session_state.get("comp_tags") in ["FORTISSIMO", "MINIRACK"]:
             st.checkbox("Cert. 1090", key="check_1090")
+            
 # =========================================================
 # 3. LOGICA DI GENERAZIONE (MOTORE DI CALCOLO)
 # =========================================================
