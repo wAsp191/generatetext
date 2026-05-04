@@ -9,7 +9,7 @@ st.markdown("""
     <style>
         /* 1. Riduciamo il padding superiore della pagina */
         .block-container {
-            padding-top: 0.5rem !important;
+            padding-top: 0.3rem !important;
             padding-bottom: 0rem !important;
         }
 
