@@ -421,9 +421,29 @@ def traduci_note(testo):
     except:
         return testo.upper()
 
-# 2. Tasto Genera 
-# Rimosso il type="primary" e aggiunta una logica di persistenza
-if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
+# --- LOGICA DI CONTROLLO INCOMPATIBILITÀ (RIF. MODULO 1) ---
+tags_selezionati = st.session_state.get("extra_tags", [])
+conflitto_rilevato = False
+messaggio_errore = ""
+
+# Scansione dinamica basata sulla tua lista COPPIE_INCOMPATIBILI
+for gruppo in COPPIE_INCOMPATIBILI:
+    # Troviamo l'intersezione tra i tag scelti e il gruppo di incompatibilità
+    intersezione = set(gruppo).intersection(set(tags_selezionati))
+    
+    # Se ci sono 2 o più elementi dello stesso gruppo, c'è un conflitto
+    if len(intersezione) > 1:
+        conflitto_rilevato = True
+        elementi_conflitto = ", ".join(intersezione)
+        messaggio_errore = f"⚠️ **Incompatibilità rilevata**: Non puoi selezionare contemporaneamente: **{elementi_conflitto}**."
+        break
+
+# Visualizzazione errore se presente
+if conflitto_rilevato:
+    st.error(messaggio_errore)
+
+# 2. Tasto Genera (Disabilitato se c'è un conflitto)
+if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=conflitto_rilevato):
     
     # --- A. RECUPERO DATI ---
     macro_it = st.session_state.get("radio_macro", "")
@@ -432,18 +452,14 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
     
     if scelta_part_it:
         # Recupero info dal DATABASE (Modulo 1)
-        # part_db = [Nome EN, {Dizionario Extra}, TAG]
         part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", {}, ""])
         part_en = part_db[0].upper()
         dict_extra_db = part_db[1]
-        
-        # --- RECUPERO TAG REALE DAL DB ---
         tag_reale_db = part_db[2] if len(part_db) > 2 else ""
 
         # --- B. GESTIONE EXTRA E AGGETTIVI ---
         lista_prima = []
         lista_dopo = []
-        tags_selezionati = st.session_state.get("extra_tags", [])
         
         for tag in tags_selezionati:
             if tag in SUB_OPTIONS_CONFIG:
@@ -500,19 +516,13 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         if st.session_state.get("check_1090"):
             corpo += " (EXC2 UNI EN 1090-2)"
 
-        # --- F. SALVATAGGIO IN SESSION STATE (La chiave della stabilità) ---
-        # Salviamo la stringa e i tag in variabili che non dipendono dal tasto
+        # --- F. SALVATAGGIO IN SESSION STATE ---
         st.session_state['stringa_stabile'] = " ".join(corpo.split()).upper()
         
-        # Prepariamo i tag reali per il modulo 4
-        lista_tag_finali = []
-        if tag_reale_db: lista_tag_finali.append(tag_reale_db.upper())
-        if macro_it: lista_tag_finali.append(macro_it.upper())
-        if comp_tag: lista_tag_finali.append(comp_tag.upper())
-        
+        # Tag per Modulo 4
+        lista_tag_finali = [t.upper() for t in [tag_reale_db, macro_it, comp_tag] if t]
         st.session_state['tags_stabili'] = list(dict.fromkeys(lista_tag_finali))
         
-        # Forziamo un rerun così il Modulo 4 si accorge subito della nuova stringa
         st.rerun()
         
 # =========================================================
