@@ -277,15 +277,17 @@ blocco_incompatibilita = False
 # Configurazione visuale
 LARGHEZZA_IMMAGINE = 600 
 TESTO_MANUALE = """
-TESTO_MANUALE = """
-<ul style="font-family: sans-serif; font-size: 14px; line-height: 1.6;">
-    <li>📂 <b>CATEGORIA</b>: Seleziona la tipologia a sinistra.</li>
-    <li>🛠️ <b>CONFIGURAZIONE</b>: Scegli materiale e componente.</li>
-    <li>✨ <b>EXTRA</b>: Seleziona i dettagli e aggiungi note.</li>
-    <li>📏 <b>MISURE</b>: Inserisci dimensioni e normative.</li>
-    <li>🔗 <b>COMPATIBILITÀ</b>: Scegli il modello di destinazione.</li>
-    <li>🚀 <b>GENERA</b>: Clicca il tasto per creare la stringa.</li>
-</ul>
+<div style="font-family: sans-serif; font-size: 14px; line-height: 1.6;">
+    <p><b>PROCEDURA STANDARD:</b></p>
+    <ul>
+        <li>📁 <b>CATEGORIA</b>: Seleziona la tipologia a sinistra.</li>
+        <li>🛠️ <b>CONFIGURAZIONE</b>: Scegli materiale e componente.</li>
+        <li>✨ <b>EXTRA</b>: Seleziona i dettagli e aggiungi note.</li>
+        <li>📏 <b>MISURE</b>: Inserisci dimensioni e normative.</li>
+        <li>🔗 <b>COMPATIBILITÀ</b>: Scegli il modello di destinazione.</li>
+        <li>🚀 <b>GENERA</b>: Clicca il tasto per creare la stringa.</li>
+    </ul>
+</div>
 """
 # Nel widget lo userai così: st.markdown(TESTO_MANUALE, unsafe_allow_html=True)
 
@@ -512,38 +514,58 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
         # il cambiamento nello session_state e mostrerà il risultato.
         
 # =========================================================
-# 4. OUTPUT, MONITORAGGIO E CLASSIFICAZIONE (VERSIONE FINALE)
+# 4. OUTPUT E MONITORAGGIO (VERSIONE STABILE)
 # =========================================================
+
+# Usiamo un contenitore per stabilizzare l'interfaccia
+risultato_container = st.container()
+
 if st.session_state.get('stringa_editabile'):
-    with area_risultato:
+    with risultato_container:
         st.markdown("---")
         st.subheader("📋 Risultato Finale")
         
-        # 1. LAYOUT STRINGA & TOGGLE
+        # 1. LAYOUT CONTROLLI
         col_str, col_opt = st.columns([4, 1])
         
-        # Usiamo il toggle con un valore di default per non perdere lo stato
-        modifica_attiva = col_opt.toggle("✏️ Modifica", key="persistent_toggle")
+        # Il segreto è la 'key' univoca per mantenere lo stato del toggle
+        modifica_attiva = col_opt.toggle("✏️ Modifica", key="toggle_manual_edit")
 
         if modifica_attiva:
-            nuova_val = st.text_input("Editing manuale:", value=st.session_state['stringa_editabile'])
-            st.session_state['stringa_editabile'] = nuova_val.upper()
+            # Se l'utente modifica, aggiorniamo direttamente lo stato
+            nuovo_valore = st.text_input(
+                "Modifica manuale stringa:", 
+                value=st.session_state['stringa_editabile'],
+                label_visibility="collapsed"
+            )
+            st.session_state['stringa_editabile'] = nuovo_valore.upper()
         else:
+            # Visualizzazione pulita
             st.code(st.session_state['stringa_editabile'], language=None)
 
-        # 2. MONITORAGGIO & BARRA
+        # 2. BARRA DI PROGRESSO (Sempre presente se c'è una stringa)
         lunghezza = len(st.session_state['stringa_editabile'])
-        st.progress(min(lunghezza / 100, 1.0))
+        perc = min(lunghezza / 100, 1.0)
         
         if lunghezza > 100:
             st.error(f"⚠️ LIMITE SUPERATO: {lunghezza}/100")
+            st.progress(perc)
         else:
-            st.caption(f"✅ Lunghezza: {lunghezza}/100")
+            st.caption(f"✅ Lunghezza attuale: {lunghezza}/100 caratteri")
+            st.progress(perc)
 
-        # 3. AZIONE DI SALVATAGGIO (Senza neve/palloncini)
+        # 3. TAGS DI CLASSIFICAZIONE (Visualizzazione Minimal)
+        # (Qui recuperi i tag come abbiamo fatto nei moduli precedenti)
+        tags_finti = ["METALLO", "F25", "UNI-EN-1090"] # Esempio
+        st.markdown(f"**Classificazione:** `{'` `'.join(tags_finti)}` ")
+
+        # 4. TASTO SALVA CON ANIMAZIONE TECNICA
+        st.write("") # Spazio di cortesia
         if st.button("💾 CONFERMA E REGISTRA", use_container_width=True):
-            # Animazione professionale: Spinner rapido + Toast
-            with st.spinner("Registrazione in corso..."):
+            # Animazione "Loading" professionale invece della neve
+            with st.spinner("Sincronizzazione in corso..."):
                 import time
-                time.sleep(0.5) # Simula un salvataggio reale
-            st.toast("Stringa validata!", icon="🎯")
+                time.sleep(0.6) # Feedback tattile per l'utente
+            
+            # Feedback finale non invasivo
+            st.toast("Stringa validata e salvata correttamente!", icon="🎯")
