@@ -267,8 +267,9 @@ TERMINI_ANTICIPATI = [
 # =========================================================
 
 # --- INIZIALIZZAZIONE VARIABILI DI STATO ---
+if "mat_en" not in st.session_state: st.session_state.mat_en = ""
 uni_en_1090_active = False 
-mat_en, part_en, normativa, tag_suggerimento = "", "", "", ""
+part_en, normativa, tag_suggerimento = "", "", ""
 extra_dedicati_dict = {}
 extra_selezionati = []
 blocco_incompatibilita = False 
@@ -280,326 +281,199 @@ TESTO_MANUALE = """
 1. **CATEGORIA 📂**: Seleziona una tipologia dal gruppo a sinistra.
 2. **CONFIGURAZIONE BASE 🛠️**: Scegli il tipo di materiale e componente.
 3. **EXTRA E NOTE ✨**: Seleziona i pills necessari aggiungendo eventuali note.
-4. **DIMENSIONAMENTO E MORMATIVE 📏**: Aggiungi dimensioni ed eventuali normative.
+4. **DIMENSIONAMENTO E NORMATIVE 📏**: Aggiungi dimensioni ed eventuali normative.
 5. **COMPATIBILITA' 🔗**: Scegli la compatibilità (F25, F50, ecc.).
 6. **GENERA STRINGA 🚀**: Clicca il tasto rosso in fondo.
-
----
-**NOTE TECNICHE:**
-* Prefissi L-P-H nel campo dimensionamento sono automatici.
-* Note libere tradotte in inglese e formattate in stampatello automaticamente.
-* Max 100 caratteri totali.
 """
 
-# --- HEADER: TITOLO | MANUALE | RESET ---
+# --- HEADER ---
 col_t, col_m, col_r = st.columns([2.5, 1.5, 1], vertical_alignment="bottom")
-
-with col_t:
-    st.title("⚙️ REG - Title Generator")
-
+with col_t: st.title("⚙️ REG - Title Generator")
 with col_m:
     with st.expander("📖 Manuale d'uso"):
-        st.markdown(f"""
-        <div style="font-size: 14px; line-height: 1.4;">
-        {TESTO_MANUALE}
-        """, unsafe_allow_html=True)
-
-with col_r:
-    st.button("🔄 AZZERA", on_click=activate_reset, use_container_width=True, key="btn_top")
+        st.markdown(f'<div style="font-size: 14px;">{TESTO_MANUALE}</div>', unsafe_allow_html=True)
+with col_r: st.button("🔄 AZZERA", on_click=activate_reset, use_container_width=True)
 
 st.markdown("---")
 
-# LAYOUT PRINCIPALE: Sidebar (SX) | Area Lavoro (DX)
 col_left, col_workarea = st.columns([1, 4], gap="large")
 
 with col_left:
     st.subheader("📂 1. Categoria")
-    
-    # --- PICCOLO BLOCCO CSS SICURO ---
-    st.markdown("""
-        <style>
-        /* Ingrandisce il font delle opzioni nel radio button */
-        div[data-testid="stRadio"] label p {
-            font-size: 20px !important;
-            font-weight: 500 !important;
-            margin-bottom: 10px !important; /* Distanza tra le opzioni */
-            padding: 5px 0px !important;
-        }
-        /* Aggiunge spazio tra un'opzione e l'altra */
-        div[data-testid="stWidgetLabel"] {
-            margin-bottom: 15px !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
-
-    # Mappa estetica (le tue icone)
-    mappa_estetica = {
-        "METAL COMP": "⚙️ METAL COMP",
-        "WOOD COMP": "🪵 WOOD COMP",
-        "PLASTIC COMP": "🧪 PLASTIC COMP",
-        "GLASS COMP": "🧊 GLASS COMP",
-        "FASTENER": "🔩 FASTENER",
-        "ASSEMBLY": "🏛️ ASSEMBLY"
-    }
-
-    # Il widget radio con il font ora maggiorato dal CSS sopra
-    macro_it = st.radio(
-        "Seleziona categoria:", 
-        options=list(DATABASE.keys()), 
-        format_func=lambda x: mappa_estetica.get(x, x),
-        key="radio_macro", 
-        label_visibility="collapsed"
-    )
+    mappa_estetica = {"METAL COMP": "⚙️ METAL COMP", "WOOD COMP": "🪵 WOOD COMP", "PLASTIC COMP": "🧪 PLASTIC COMP", "GLASS COMP": "🧊 GLASS COMP", "FASTENER": "🔩 FASTENER", "ASSEMBLY": "🏛️ ASSEMBLY"}
+    macro_it = st.radio("Seleziona categoria:", options=list(DATABASE.keys()), format_func=lambda x: mappa_estetica.get(x, x), key="radio_macro", label_visibility="collapsed")
 
 with col_workarea:
     st.subheader("🛠️ 2. Configurazione Base")
     c_mat, c_search = st.columns([1, 1.5])
     
     with c_mat:
-        # --- FIX: Usiamo 'in' per ignorare emoji o spazi extra ---
         if "ASSEMBLY" in macro_it.upper(): 
-            st.toggle("ASSEMBLATO", key="check_assembled", help="Attiva se il componente è fornito già montato")
-            mat_it, mat_en = "ASSEMBLY", "" # Inizializzazione sicura per il Modulo 3
+            st.toggle("ASSEMBLATO", key="check_assembled")
+            st.session_state.mat_en = "ASSEMBLY"
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
-            
             if materiali_disponibili:
-                # 1. Selezione Materiale Base
-                mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True)
-                mat_en = materiali_disponibili[mat_it]
+                mat_it = st.radio("Materiale:", options=list(materiali_disponibili.keys()), horizontal=True, key="mat_radio")
+                temp_mat_en = materiali_disponibili[mat_it]
                 
-                # 2. Logica Zincatura (Più robusta)
                 if mat_it.upper() == "ZINCATO":
-                    tipo_zinc = st.radio(
-                        "Tipo zincatura:",
-                        ["A FREDDO (Zinc Plated)", "A CALDO (Galvanized)"],
-                        horizontal=True,
-                        key="zinc_type_radio"
-                    )
-                    
-                    # Sovrascriviamo subito mat_en per il Modulo 3
-                    if "A FREDDO" in tipo_zinc:
-                        mat_en = "ZINC PLATED"
-                    else:
-                        mat_en = "GALVANIZED"
+                    tipo_zinc = st.radio("Tipo zincatura:", ["A FREDDO (Zinc Plated)", "A CALDO (Galvanized)"], horizontal=True, key="zinc_type_radio")
+                    st.session_state.mat_en = "ZINC PLATED" if "A FREDDO" in tipo_zinc else "GALVANIZED"
+                else:
+                    st.session_state.mat_en = temp_mat_en
 
     with c_search:
-        # Recupero dettagli dal Database
-        # Usiamo .get() per evitare errori se la macro_it non esiste per un millisecondo
         part_info = DATABASE.get(macro_it, {}).get("Particolari", {})
-        
-        scelta_part_it = st.selectbox(
-            "Cerca o seleziona dettaglio:", 
-            options=sorted(list(part_info.keys())), 
-            index=None,
-            placeholder="Cerca componente...",
-            format_func=lambda x: f"🔧 {x} ({part_info[x][0]})" if x else "Seleziona...",
-            key="selectbox_part"
-        )
+        scelta_part_it = st.selectbox("Cerca dettaglio:", options=sorted(list(part_info.keys())), index=None, placeholder="Cerca componente...", format_func=lambda x: f"🔧 {x} ({part_info[x][0]})" if x else "Seleziona...", key="selectbox_part")
 
     st.markdown("---")
     
-    # --- SEZIONE 3: EXTRA E NOTE ---
+    # --- SEZIONE 3: EXTRA E NOTE (SISTEMATA) ---
     st.subheader("✨ 3. Extra e Note")
     
     if scelta_part_it:
-        # Recuperiamo i dati corretti dal dizionario dei particolari
         dati_part = part_info[scelta_part_it]
-        part_en = dati_part[0] # Nome inglese
-        extra_dedicati_dict = dati_part[1] # Dizionario extra
-        
-        tag_suggerimento = " - ".join(dati_part[2:]) if len(dati_part) > 2 else ""
-        
-        extra_options = list(extra_dedicati_dict.keys())
+        extra_options = list(dati_part[1].keys())
         if extra_options:
             extra_selezionati = st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
-            
             if extra_selezionati:
-                # Controllo incompatibilità (manteniamo la tua logica)
-                tags_attivi = set(extra_selezionati)
-                for gruppo in COPPIE_INCOMPATIBILI:
-                    intersezione = gruppo.intersection(tags_attivi)
-                    if len(intersezione) >= 2:
-                        st.error(f"⚠️ **CONFLITTO:** {', '.join(intersezione)} non possono stare insieme.")
-                        blocco_incompatibilita = True
-
-                # Sotto-opzioni e Input manuali
                 for ex in extra_selezionati:
                     if ex in SUB_OPTIONS_CONFIG:
                         st.selectbox(f"↳ Variante {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
                     elif ex in EXTRA_CON_INPUT_MANUALE:
                         st.text_input(f"↳ Valore specifico per {ex}:", key=f"manual_{ex}")
-        
-        if tag_suggerimento:
-            st.caption(f"🔍 Classificazione suggerita: **{tag_suggerimento}**")
+
+    # CAMPO NOTE LIBERE: SEMPRE VISIBILE
+    st.text_input(
+        "Note libere (Traduzione automatica):", 
+        key="extra_text", 
+        placeholder="es: con tappi in gomma...",
+        help="Il testo verrà tradotto in inglese e messo in stampatello."
+    )
+    
+    st.markdown("---")
     
     # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento e Normative")
     col_campi, col_immagine = st.columns([1, 1.5], gap="medium")
-
     with col_campi:
         if macro_it == "FASTENER":
-            dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-            dim_dia = st.text_input("Diametro (D/M)", key="dim_dia")
+            st.text_input("Lunghezza (L)", key="dim_l")
+            st.text_input("Diametro (D/M)", key="dim_dia")
             opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-            norma_scelta = st.selectbox("Riferimento Normativo", options=list(opzioni_norm.keys()))
-            normativa = opzioni_norm[norma_scelta] if norma_scelta else ""
-            dim_p, dim_h, dim_dia_gen = "", "", ""
+            st.selectbox("Riferimento Normativo", options=list(opzioni_norm.keys()), key="norm_select")
         else:
-            dim_l = st.text_input("Lunghezza (L)", key="dim_l")
-            dim_p = st.text_input("Profondità (P)", key="dim_p")
-            dim_h = st.text_input("Altezza (H)", key="dim_h")
-            dim_dia_gen = st.text_input("Diametro (Ø)", key="dim_dia_gen")
+            st.text_input("Lunghezza (L)", key="dim_l")
+            st.text_input("Profondità (P)", key="dim_p")
+            st.text_input("Altezza (H)", key="dim_h")
+            st.text_input("Diametro (Ø)", key="dim_dia_gen")
             
     with col_immagine:
-        st.image(
-            "https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", 
-            caption="Standard Quote Tecniche", 
-            width=LARGHEZZA_IMMAGINE
-        )
+        st.image("https://raw.githubusercontent.com/wAsp191/generatetext/main/Gemini_Generated_Image_rtac8jrtac8jrtac%20(1).png", width=LARGHEZZA_IMMAGINE)
 
     st.markdown("---")
-
-    # --- SEZIONE 5: COMPATIBILITÀ (L'ULTIMO STEP) ---
     st.subheader("🔗 5. Compatibilità")
     if macro_it != "FASTENER":
-        pills_compatibilita = [opt for opt in OPZIONI_COMPATIBILITA if opt]
-        comp_selezionata = st.pills("Seleziona il Modello di destinazione:", options=pills_compatibilita, selection_mode="single", key="comp_tags")
-        
-        if comp_selezionata in ["FORTISSIMO", "MINIRACK"]:
-            st.warning("⚡ Componente Strutturale")
-            uni_en_1090_active = st.checkbox("Certificazione UNI EN-1090", key="check_1090")
-    else:
-        st.info("Nessuna compatibilità necessaria per la categoria FASTENER.")
+        st.pills("Modello di destinazione:", options=[opt for opt in OPZIONI_COMPATIBILI if opt], selection_mode="single", key="comp_tags")
+        if st.session_state.get("comp_tags") in ["FORTISSIMO", "MINIRACK"]:
+            st.checkbox("Certificazione UNI EN-1090", key="check_1090")
 
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE (VERSIONE BLINDATA)
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE (DEFINITIVA)
 # =========================================================
 
 st.divider()
 
-# --- 1. RECUPERO DATI DALLO STATO ---
-# Usiamo .get() con fallback per evitare che il codice crashi se l'utente non ha ancora toccato i widget
+# --- RECUPERO DATI ---
 note_libere_it = st.session_state.get("extra_text", "").strip()
 extra_selezionati = st.session_state.get("extra_tags", [])
 macro_it = st.session_state.get("radio_macro", "")
 scelta_part_it = st.session_state.get("selectbox_part", "")
+mat_en = st.session_state.get("mat_en", "")
 
-# --- DEBUG (Rimuovi i commenti qui sotto per vedere i dati in tempo reale se non funziona) ---
-# st.write(f"DEBUG: Note rilevate: '{note_libere_it}'")
-# st.write(f"DEBUG: Extra: {extra_selezionati}")
-
-# --- 2. FUNZIONE DI TRADUZIONE ROBUSTA ---
+# --- TRADUZIONE ---
 from deep_translator import GoogleTranslator
-
 def processa_note(testo):
-    if not testo:
-        return ""
+    if not testo: return ""
     try:
-        # Traduzione + pulizia spazi + maiuscolo
         tradotto = GoogleTranslator(source='it', target='en').translate(testo)
         return tradotto.strip().upper()
-    except Exception as e:
-        # Se l'API fallisce (es. no internet), non blocchiamo tutto: usiamo l'originale in CAPS
-        st.warning(f"⚠️ Traduzione fallita (usato testo originale): {e}")
+    except:
         return testo.strip().upper()
 
-# --- 3. CONTROLLO ERRORI ---
-errori_rilevati = []
+# --- ERRORI ---
+errori = []
 if extra_selezionati:
-    tags_attivi = set(extra_selezionati)
+    tags = set(extra_selezionati)
     for coppia in COPPIE_INCOMPATIBILI:
-        if len(coppia.intersection(tags_attivi)) >= 2:
-            errori_rilevati.append(f"⚠️ **Incongruenza:** {', '.join(coppia)} sono incompatibili.")
+        if len(coppia.intersection(tags)) >= 2:
+            errori.append(f"⚠️ **Incongruenza:** {', '.join(coppia)} incompatibili.")
+for err in errori: st.error(err)
 
-for err in errori_rilevati:
-    st.error(err)
-
-# --- 4. TASTO GENERAZIONE ---
-# Calcolo dinamico label e stato del tasto
+# --- STATO TASTO ---
 mancano_dim = not any([st.session_state.get(f"dim_{x}", "").strip() for x in ["l", "p", "h", "dia_gen"]])
-if not scelta_part_it:
-    label_tasto, icona_t, disabilitato = "⚠️ SELEZIONA PARTICOLARE", "❌", True
-elif mancano_dim and macro_it != "ASSEMBLY":
-    label_tasto, icona_t, disabilitato = "📐 INSERISCI DIMENSIONI", "📏", False # Lasciamo False per permettere test
-else:
-    label_tasto, icona_t, disabilitato = "🚀 GENERA STRINGA FINALE", "✅", False
+label_tasto = "🚀 GENERA STRINGA FINALE" if scelta_part_it else "⚠️ SELEZIONA PARTICOLARE"
 
-if st.button(label_tasto, use_container_width=True, disabled=disabilitato or len(errori_rilevati) > 0):
+if st.button(label_tasto, use_container_width=True, disabled=not scelta_part_it or len(errori) > 0):
     
-    # --- A. TRADUZIONE NOTE ---
-    # Forza il recupero immediato dal widget per sicurezza
     note_finali_en = processa_note(note_libere_it)
+    
+    # Dati database
+    part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", {}])
+    part_en = part_db[0]
+    extra_map = part_db[1]
 
-    # --- B. RECUPERO INFO DATABASE ---
-    # Accediamo al database dei nomi inglesi e extra
-    part_info_dict = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", {}])
-    part_en = part_info_dict[0]
-    extra_map = part_info_dict[1]
-
-    # --- C. COSTRUZIONE DIMENSIONI ---
-    dim_final = ""
+    # Dimensioni
     if macro_it == "FASTENER":
         d = st.session_state.get("dim_dia", "").strip().upper()
         l = st.session_state.get("dim_l", "").strip().upper()
-        dim_final = f"{'' if d.startswith('M') else 'D'}{d}X{l}" if d and l else d or l
+        norm_key = st.session_state.get("norm_select", "")
+        norm_val = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {}).get(norm_key, "")
+        dim_final = f"{'' if d.startswith('M') else 'D'}{d}X{l} {norm_val}".strip()
     else:
         dims = []
         for k, l in [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H")]:
             v = st.session_state.get(k, "").strip().upper()
             if v: dims.append(f"{l}{v}")
-        lph = " ".join(dims)
         dia = st.session_state.get("dim_dia_gen", "").strip().upper()
-        dim_final = " ".join(filter(None, [lph, f"Ø{dia}" if dia else None]))
+        dim_final = " ".join(filter(None, [" ".join(dims), f"Ø{dia}" if dia else None]))
 
-    # --- D. COSTRUZIONE EXTRA (PILLS) ---
-    extra_tradotti = []
+    # Extra
+    extra_list = []
     for ex in extra_selezionati:
         base = extra_map.get(ex, ex.upper())
-        # Sotto-opzioni
         if ex in SUB_OPTIONS_CONFIG:
-            sub_val = st.session_state.get(f"sub_{ex}", "")
-            sub_tr = SUB_OPTIONS_CONFIG[ex].get(sub_val, "")
-            extra_tradotti.append(f"{base} {sub_tr}".strip())
-        # Manuali
+            sub = SUB_OPTIONS_CONFIG[ex].get(st.session_state.get(f"sub_{ex}", ""), "")
+            extra_list.append(f"{base} {sub}".strip())
         elif ex in EXTRA_CON_INPUT_MANUALE:
-            m_val = st.session_state.get(f"manual_{ex}", "").strip().upper()
-            extra_tradotti.append(f"{base} {m_val}" if m_val else base)
+            man = st.session_state.get(f"manual_{ex}", "").strip().upper()
+            extra_list.append(f"{base} {man}" if man else base)
         else:
-            extra_tradotti.append(base)
+            extra_list.append(base)
 
-    # --- E. ASSEMBLAGGIO FINALE ---
-    # Dividiamo tra prefissi (es. PAINTED) e suffissi
+    # Assemblaggio
     pre, suf = [], []
     set_pre = {t.upper() for t in TERMINI_ANTICIPATI}
-    for et in extra_tradotti:
+    for et in extra_list:
         if et.split()[0].upper() in set_pre: pre.append(et)
         else: suf.append(et)
 
-    # Materiale (evita doppioni tipo METAL METAL)
     mat_prefix = mat_en if mat_en.upper() not in part_en.upper() else ""
+    corpo = " ".join(filter(None, [mat_prefix, " ".join(pre), part_en, dim_final, " ".join(suf)]))
     
-    # Unione pezzi
-    componenti = [mat_prefix, " ".join(pre), part_en, dim_final, " ".join(suf)]
-    corpo = " ".join(filter(None, [c.strip() for c in componenti]))
+    if note_finali_en: corpo = f"{corpo}, {note_finali_en}"
+
+    # Pulizia WITH e compatibilità
+    res = " ".join(corpo.split()).upper().replace("WITH WITH", "WITH")
+    comp = st.session_state.get("comp_tags", "")
+    if comp: res = f"{res} - {comp}"
     
-    # Aggiunta Note Libere (Il pezzo mancante!)
-    if note_finali_en:
-        corpo = f"{corpo}, {note_finali_en}"
-
-    # Pulizia spazi e WITH
-    res = " ".join(corpo.split()).upper()
-    if " WITH " in f" {res} ":
-        p = [x.strip() for x in res.split("WITH") if x.strip()]
-        if len(p) > 1: res = f"{p[0]} WITH {' AND '.join(p[1:])}"
-
-    # Prefissi speciali
-    if macro_it == "ASSEMBLY" and st.session_state.get("check_assembled"): res = f"ASSEMBLED - {res}"
+    if st.session_state.get("check_assembled"): res = f"ASSEMBLED - {res}"
     if st.session_state.get("check_1090"): res = f"UNI EN-1090 - {res}"
 
-    # Salvataggio
-    st.session_state['stringa_editabile'] = res.strip()
-    st.toast("Generato con successo!", icon=icona_t)
+    st.session_state['stringa_editabile'] = res.replace("  ", " ").strip()
+    st.toast("Generato!", icon="✅")
         
 # =========================================================
 # 4. OUTPUT E CLASSIFICAZIONE (FINAL STEP)
