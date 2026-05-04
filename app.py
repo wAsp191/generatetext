@@ -277,14 +277,17 @@ blocco_incompatibilita = False
 # Configurazione visuale
 LARGHEZZA_IMMAGINE = 600 
 TESTO_MANUALE = """
-**PROCEDURA STANDARD:**
-* 📂 **CATEGORIA**: Seleziona una tipologia dal gruppo a sinistra.
-* 🛠️ **CONFIGURAZIONE BASE**: Scegli il tipo di materiale e componente.
-* ✨ **EXTRA E NOTE**: Seleziona i pills necessari aggiungendo eventuali note.
-* 📏 **DIMENSIONAMENTO**: Aggiungi dimensioni e normative.
-* 🔗 **COMPATIBILITÀ**: Scegli il modello (F25, F50, ecc.).
-* 🚀 **GENERA**: Clicca il tasto in fondo per creare la stringa.
+TESTO_MANUALE = """
+<ul style="font-family: sans-serif; font-size: 14px; line-height: 1.6;">
+    <li>📂 <b>CATEGORIA</b>: Seleziona la tipologia a sinistra.</li>
+    <li>🛠️ <b>CONFIGURAZIONE</b>: Scegli materiale e componente.</li>
+    <li>✨ <b>EXTRA</b>: Seleziona i dettagli e aggiungi note.</li>
+    <li>📏 <b>MISURE</b>: Inserisci dimensioni e normative.</li>
+    <li>🔗 <b>COMPATIBILITÀ</b>: Scegli il modello di destinazione.</li>
+    <li>🚀 <b>GENERA</b>: Clicca il tasto per creare la stringa.</li>
+</ul>
 """
+# Nel widget lo userai così: st.markdown(TESTO_MANUALE, unsafe_allow_html=True)
 
 # --- HEADER ---
 col_t, col_m, col_r = st.columns([2.5, 1.5, 1], vertical_alignment="bottom")
@@ -512,77 +515,35 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True):
 # 4. OUTPUT, MONITORAGGIO E CLASSIFICAZIONE (VERSIONE FINALE)
 # =========================================================
 if st.session_state.get('stringa_editabile'):
-    st.markdown("---")
-    st.subheader("📋 Risultato Finale")
-    
-    # 1. VISUALIZZAZIONE E MODIFICA SNELLA
-    col_str, col_opt = st.columns([4, 1])
-    
-    with col_opt:
-        # Il toggle permette di passare dalla visualizzazione "codice" all'editing
-        modifica_attiva = st.toggle("Modifica", key="toggle_edit")
+    with area_risultato:
+        st.markdown("---")
+        st.subheader("📋 Risultato Finale")
+        
+        # 1. LAYOUT STRINGA & TOGGLE
+        col_str, col_opt = st.columns([4, 1])
+        
+        # Usiamo il toggle con un valore di default per non perdere lo stato
+        modifica_attiva = col_opt.toggle("✏️ Modifica", key="persistent_toggle")
 
-    with col_str:
         if modifica_attiva:
-            # Campo di testo per l'editing manuale
-            nuova_stringa = st.text_input(
-                "Modifica la stringa qui:", 
-                value=st.session_state['stringa_editabile'],
-                label_visibility="collapsed"
-            )
-            st.session_state['stringa_editabile'] = nuova_stringa.upper()
+            nuova_val = st.text_input("Editing manuale:", value=st.session_state['stringa_editabile'])
+            st.session_state['stringa_editabile'] = nuova_val.upper()
         else:
-            # Visualizzazione standard in blocco codice (pulita e professionale)
             st.code(st.session_state['stringa_editabile'], language=None)
 
-    # 2. MONITORAGGIO LUNGHEZZA CON BARRA DI PROGRESSO
-    lunghezza = len(st.session_state['stringa_editabile'])
-    percentuale = min(lunghezza / 100, 1.0) # Normalizza il valore per la barra (0.0 a 1.0)
-    
-    # Visualizzazione della barra e del feedback testuale
-    if lunghezza > 100:
-        st.error(f"⚠️ LIMITE CRITICO SUPERATO: {lunghezza}/100 caratteri")
-        st.progress(percentuale)
-    elif lunghezza >= 90:
-        st.warning(f"🟡 ATTENZIONE: Lunghezza limite vicina ({lunghezza}/100)")
-        st.progress(percentuale)
-    else:
-        st.info(f"✅ Lunghezza ottimale: {lunghezza}/100 caratteri")
-        st.progress(percentuale)
+        # 2. MONITORAGGIO & BARRA
+        lunghezza = len(st.session_state['stringa_editabile'])
+        st.progress(min(lunghezza / 100, 1.0))
+        
+        if lunghezza > 100:
+            st.error(f"⚠️ LIMITE SUPERATO: {lunghezza}/100")
+        else:
+            st.caption(f"✅ Lunghezza: {lunghezza}/100")
 
-    # 3. TAGS DI CLASSIFICAZIONE
-    # Recupero dinamico dei tag dal database per la classificazione
-    macro_corr = st.session_state.get("radio_macro", "")
-    part_corr = st.session_state.get("selectbox_part", "")
-    info_db = DATABASE.get(macro_corr, {}).get("Particolari", {}).get(part_corr, ["", {}, ""])
-    
-    all_tags = []
-    
-    # Tag 1: Suggerimento dal DB
-    if len(info_db) > 2 and info_db[2]:
-        all_tags.append(info_db[2].upper())
-    
-    # Tag 2: Modello di Compatibilità
-    comp_sel = st.session_state.get("comp_tags")
-    if comp_sel:
-        all_tags.append(comp_sel.upper())
-    
-    # Tag 3: Normative e Certificazioni
-    if st.session_state.get("check_1090"):
-        all_tags.append("UNI EN-1090-1")
-    
-    norma_sel = st.session_state.get("norm_select")
-    if norma_sel:
-        all_tags.append(norma_sel.upper())
-
-    # Visualizzazione dei tag con stile "Badge"
-    if all_tags:
-        tags_unici = list(dict.fromkeys(all_tags)) # Rimuove duplicati
-        st.markdown(f"**TAGS CLASSIFICAZIONE:** `{'` `'.join(tags_unici)}` ")
-
-    # 4. TASTO DI CONFERMA FINALE
-    st.write("") # Spazio naturale invece del <br>
-    if st.button("💾 CONFERMA E SALVA", use_container_width=True):
-        # Feedback professionale: un toast veloce e un leggero effetto neve
-        st.toast("Stringa registrata con successo!", icon="✅")
-        st.snow()
+        # 3. AZIONE DI SALVATAGGIO (Senza neve/palloncini)
+        if st.button("💾 CONFERMA E REGISTRA", use_container_width=True):
+            # Animazione professionale: Spinner rapido + Toast
+            with st.spinner("Registrazione in corso..."):
+                import time
+                time.sleep(0.5) # Simula un salvataggio reale
+            st.toast("Stringa validata!", icon="🎯")
