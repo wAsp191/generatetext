@@ -262,13 +262,6 @@ TERMINI_ANTICIPATI = [
     "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "ROTATING", "CTR", "UPRIGHT-GRAFT"
 ]
 
-Grazie per la fiducia, socio. Ricevuto il messaggio: agiremo con precisione chirurgica per assicurarci che il codice non solo funzioni, ma rispecchi la logica di un'applicazione professionale e reattiva.
-
-Ho analizzato il tuo Modulo 2. Il problema del tasto "AZZERA" attuale è che richiama una funzione activate_reset che probabilmente non pulisce le chiavi "persistenti" che abbiamo creato nel Modulo 3 (stringa_stabile, ecc.).
-
-Ecco il Modulo 2 integrale con la logica di reset corretta e potenziata.
-
-Python
 # =========================================================
 # 2. INTERFACCIA UTENTE (Layout & Logica)
 # =========================================================
