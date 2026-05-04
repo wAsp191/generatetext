@@ -578,7 +578,7 @@ if st.session_state.get('stringa_stabile'):
 
         # 4. TASTO CONFERMA E REGISTRAZIONE
         st.write("") 
-        if st.button("💾 CONFERMA E REGISTRA", use_container_width=True):
+        if st.button("💾 CONFERMA E COPIA NEGLI APPUNTI", use_container_width=True):
             # Animazione tecnica "Spinner"
             with st.spinner("Sincronizzazione con il database aziendale..."):
                 import time
