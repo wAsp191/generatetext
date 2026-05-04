@@ -16,18 +16,18 @@ st.markdown("""
         /* 2. Compattiamo lo spazio tra ogni elemento (widget) */
         [data-testid="stVerticalBlock"] > div {
             flex-direction: column;
-            gap: 0.2rem !important; /* Riduce il buco tra un widget e l'altro */
+            gap: 0.15rem !important; /* Riduce il buco tra un widget e l'altro */
         }
 
         /* 3. Riduciamo l'altezza dei titoli */
-        h1 { margin-bottom: -1rem !important; font-size: 1.8rem !important; }
-        h2 { margin-bottom: -0.8rem !important; font-size: 1.4rem !important; }
-        h3 { margin-bottom: -0.5rem !important; font-size: 1.1rem !important; }
+        h1 { margin-bottom: -1rem !important; font-size: 1.9rem !important; }
+        h2 { margin-bottom: -0.8rem !important; font-size: 1.5rem !important; }
+        h3 { margin-bottom: -0.5rem !important; font-size: 1.2rem !important; }
 
         /* 4. Compattiamo i divisori (st.divider / st.markdown("---")) */
         hr {
             margin-top: 0.5rem !important;
-            margin-bottom: 0.5rem !important;
+            margin-bottom: 0.4rem !important;
         }
 
         /* 5. Trick per ridurre lo spazio sotto le label dei widget */
