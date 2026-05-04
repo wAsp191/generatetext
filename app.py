@@ -396,100 +396,59 @@ with col_workarea:
         st.info("Nessuna compatibilità necessaria per i Fastener.")
 
 # =========================================================
-# 3. LOGICA DI GENERAZIONE E TRADUZIONE (DEFINITIVA)
+# 3. LOGICA DI GENERAZIONE E TRADUZIONE
 # =========================================================
-
 st.divider()
 
-# --- RECUPERO DATI ---
-note_libere_it = st.session_state.get("extra_text", "").strip()
-extra_selezionati = st.session_state.get("extra_tags", [])
+# 1. Recupero dati dallo stato
+note_it = st.session_state.get("extra_text", "").strip()
 macro_it = st.session_state.get("radio_macro", "")
 scelta_part_it = st.session_state.get("selectbox_part", "")
-mat_en = st.session_state.get("mat_en", "")
 
-# --- TRADUZIONE ---
+# 2. Funzione di traduzione (Richiede: pip install deep-translator)
 from deep_translator import GoogleTranslator
-def processa_note(testo):
+
+def traduci_note(testo):
     if not testo: return ""
     try:
-        tradotto = GoogleTranslator(source='it', target='en').translate(testo)
-        return tradotto.strip().upper()
+        return GoogleTranslator(source='it', target='en').translate(testo).upper()
     except:
-        return testo.strip().upper()
+        return testo.upper() # Fallback se non c'è internet
 
-# --- ERRORI ---
-errori = []
-if extra_selezionati:
-    tags = set(extra_selezionati)
-    for coppia in COPPIE_INCOMPATIBILI:
-        if len(coppia.intersection(tags)) >= 2:
-            errori.append(f"⚠️ **Incongruenza:** {', '.join(coppia)} incompatibili.")
-for err in errori: st.error(err)
-
-# --- STATO TASTO ---
-mancano_dim = not any([st.session_state.get(f"dim_{x}", "").strip() for x in ["l", "p", "h", "dia_gen"]])
-label_tasto = "🚀 GENERA STRINGA FINALE" if scelta_part_it else "⚠️ SELEZIONA PARTICOLARE"
-
-if st.button(label_tasto, use_container_width=True, disabled=not scelta_part_it or len(errori) > 0):
+# 3. Tasto Genera
+if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=not scelta_part_it):
     
-    note_finali_en = processa_note(note_libere_it)
+    # A. Traduzione Note
+    note_en = traduci_note(note_it)
     
-    # Dati database
+    # B. Recupero Nomi dal DB
     part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", {}])
     part_en = part_db[0]
-    extra_map = part_db[1]
-
-    # Dimensioni
-    if macro_it == "FASTENER":
-        d = st.session_state.get("dim_dia", "").strip().upper()
-        l = st.session_state.get("dim_l", "").strip().upper()
-        norm_key = st.session_state.get("norm_select", "")
-        norm_val = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {}).get(norm_key, "")
-        dim_final = f"{'' if d.startswith('M') else 'D'}{d}X{l} {norm_val}".strip()
-    else:
-        dims = []
-        for k, l in [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H")]:
-            v = st.session_state.get(k, "").strip().upper()
-            if v: dims.append(f"{l}{v}")
-        dia = st.session_state.get("dim_dia_gen", "").strip().upper()
-        dim_final = " ".join(filter(None, [" ".join(dims), f"Ø{dia}" if dia else None]))
-
-    # Extra
-    extra_list = []
-    for ex in extra_selezionati:
-        base = extra_map.get(ex, ex.upper())
-        if ex in SUB_OPTIONS_CONFIG:
-            sub = SUB_OPTIONS_CONFIG[ex].get(st.session_state.get(f"sub_{ex}", ""), "")
-            extra_list.append(f"{base} {sub}".strip())
-        elif ex in EXTRA_CON_INPUT_MANUALE:
-            man = st.session_state.get(f"manual_{ex}", "").strip().upper()
-            extra_list.append(f"{base} {man}" if man else base)
-        else:
-            extra_list.append(base)
-
-    # Assemblaggio
-    pre, suf = [], []
-    set_pre = {t.upper() for t in TERMINI_ANTICIPATI}
-    for et in extra_list:
-        if et.split()[0].upper() in set_pre: pre.append(et)
-        else: suf.append(et)
-
-    mat_prefix = mat_en if mat_en.upper() not in part_en.upper() else ""
-    corpo = " ".join(filter(None, [mat_prefix, " ".join(pre), part_en, dim_final, " ".join(suf)]))
     
-    if note_finali_en: corpo = f"{corpo}, {note_finali_en}"
+    # C. Costruzione Dimensioni (L-P-H)
+    dim_list = []
+    for k, label in [("dim_l", "L"), ("dim_p", "P"), ("dim_h", "H")]:
+        val = st.session_state.get(k, "").strip().upper()
+        if val: dim_list.append(f"{label}{val}")
+    dim_str = " ".join(dim_list)
 
-    # Pulizia WITH e compatibilità
-    res = " ".join(corpo.split()).upper().replace("WITH WITH", "WITH")
-    comp = st.session_state.get("comp_tags", "")
-    if comp: res = f"{res} - {comp}"
+    # D. Assemblaggio finale
+    mat_en = st.session_state.get("mat_en", "") # Assicurati di averlo salvato nel Modulo 2
     
-    if st.session_state.get("check_assembled"): res = f"ASSEMBLED - {res}"
-    if st.session_state.get("check_1090"): res = f"UNI EN-1090 - {res}"
-
-    st.session_state['stringa_editabile'] = res.replace("  ", " ").strip()
-    st.toast("Generato!", icon="✅")
+    # Logica: Materiale + Particular + Dimensioni + Note
+    corpo = f"{mat_en} {part_en} {dim_str}".strip()
+    
+    if note_en:
+        corpo = f"{corpo}, {note_en}"
+        
+    # Aggiunta Compatibilità
+    comp_tag = st.session_state.get("comp_tags", "")
+    stringa_finale = f"{corpo} - {comp_tag}" if comp_tag else corpo
+    
+    # E. Output
+    st.session_state['stringa_editabile'] = " ".join(stringa_finale.split()).upper()
+    st.success("Stringa creata con successo!")
+    st.text_input("Risultato:", key="output_final", value=st.session_state['stringa_editabile'])
         
 # =========================================================
 # 4. OUTPUT E CLASSIFICAZIONE (FINAL STEP)
