@@ -4,6 +4,52 @@ from deep_translator import GoogleTranslator
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
+
+st.markdown("""
+    <style>
+        /* 1. Riduciamo il padding superiore della pagina */
+        .block-container {
+            padding-top: 0.5rem !important;
+            padding-bottom: 0rem !important;
+        }
+
+        /* 2. Compattiamo lo spazio tra ogni elemento (widget) */
+        [data-testid="stVerticalBlock"] > div {
+            flex-direction: column;
+            gap: 0.2rem !important; /* Riduce il buco tra un widget e l'altro */
+        }
+
+        /* 3. Riduciamo l'altezza dei titoli */
+        h1 { margin-bottom: -1rem !important; font-size: 1.8rem !important; }
+        h2 { margin-bottom: -0.8rem !important; font-size: 1.4rem !important; }
+        h3 { margin-bottom: -0.5rem !important; font-size: 1.1rem !important; }
+
+        /* 4. Compattiamo i divisori (st.divider / st.markdown("---")) */
+        hr {
+            margin-top: 0.5rem !important;
+            margin-bottom: 0.5rem !important;
+        }
+
+        /* 5. Trick per ridurre lo spazio sotto le label dei widget */
+        .st-emotion-cache-1p3m0jg {
+            margin-bottom: -0.8rem !important;
+        }
+
+        /* 6. Riduciamo lo spazio interno ai widget (Selectbox, Text Input) */
+        div[data-baseweb="select"] > div, 
+        div[data-testid="stTextInput"] > div > div > input {
+            padding-top: 0px !important;
+            padding-bottom: 0px !important;
+            min-height: 1.8rem !important;
+        }
+        
+        /* 7. Nascondiamo lo spazio extra dei Pills */
+        [data-testid="stPills"] {
+            margin-top: -0.5rem !important;
+        }
+    </style>
+""", unsafe_allow_html=True)
+
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
 def activate_reset():
