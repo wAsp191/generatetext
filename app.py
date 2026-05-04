@@ -1,9 +1,33 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
+st.set_page_config(layout="wide")
 
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
+st.markdown("""
+    <style>
+        /* Elimina lo spazio bianco in cima alla pagina */
+        .block-container {
+            padding-top: 1rem;
+            padding-bottom: 0rem;
+            padding-left: 2rem;
+            padding-right: 2rem;
+        }
+        /* Comprime lo spazio tra i widget (radio, select, ecc) */
+        .stElementContainer {
+            margin-bottom: -0.5rem;
+        }
+        /* Riduce l'altezza degli header per risparmiare spazio */
+        h1 { margin-top: -1.5rem; font-size: 2rem !important; }
+        h2 { margin-top: -1rem; font-size: 1.5rem !important; }
+        h3 { margin-top: -0.5rem; font-size: 1.2rem !important; }
+        
+        /* Compatta i divisori */
+        hr { margin-top: 0.5rem; margin-bottom: 0.5rem; }
+    </style>
+""", unsafe_allow_html=True)
+
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
 def activate_reset():
