@@ -511,15 +511,37 @@ with col_workarea:
 # =========================================================
 st.divider()
 
-# 1. Funzione di traduzione note
+# 1. Funzione di traduzione note con Glossario Tecnico
 from deep_translator import GoogleTranslator
 
 def traduci_note(testo):
     if not testo: return ""
+    
+    # GLOSSARIO FORZATO (Termini tecnici specifici)
+    GLOSSARIO_TECNICO = {
+        "mensola": "BRACKET", 
+        "mensole": "BRACKETS", 
+        "gondola": "GONDOLA",
+        "spalla": "FRAME", 
+        "innesto": "COUPLING", 
+        "montante": "UPRIGHT",
+        "per": "FOR", 
+        "losanga": "LOSANGA"
+    }
+    
+    testo_elaborato = testo.lower().strip()
+    
+    # Sostituzione forzata termini del glossario
+    for it, en in GLOSSARIO_TECNICO.items():
+        if it in testo_elaborato:
+            testo_elaborato = testo_elaborato.replace(it, en)
+            
     try:
-        return GoogleTranslator(source='it', target='en').translate(testo).upper()
+        # Il traduttore riceve il testo con i termini tecnici già in inglese
+        traduzione = GoogleTranslator(source='it', target='en').translate(testo_elaborato)
+        return traduzione.upper()
     except:
-        return testo.upper()
+        return testo_elaborato.upper()
 
 # --- LOGICA DI CONTROLLO INCOMPATIBILITÀ ---
 tags_scelti_raw = st.session_state.get("extra_tags", [])
@@ -570,21 +592,18 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             else:
                 lista_dopo.append(traduzione)
 
-        # --- C. DIMENSIONI (CORRETTO) ---
+        # --- C. DIMENSIONI ---
         dim_list = []
         
-        # TRUCCO: Recuperiamo i valori cercando in entrambe le chiavi possibili (specifica o generica)
         L = st.session_state.get("dim_l", "").strip() or st.session_state.get("dim_l_gen", "").strip()
         P = st.session_state.get("dim_p", "").strip()
         H = st.session_state.get("dim_h", "").strip()
         D = st.session_state.get("dim_dia", "").strip() or st.session_state.get("dim_dia_gen", "").strip()
 
-        # Costruiamo la lista dimensioni solo se i valori esistono
         if L: dim_list.append(f"L{L.upper()}")
         if P: dim_list.append(f"P{P.upper()}")
         if H: dim_list.append(f"H{H.upper()}")
         if D:
-            # Regola speciale Fastener: Diametro diventa M
             prefix_d = "M" if (macro_it == "FASTENER" and not D.upper().startswith("M")) else "Ø"
             dim_list.append(f"{prefix_d}{D.upper()}")
         
