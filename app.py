@@ -53,12 +53,12 @@ st.markdown("""
         }
         /* 8. Ingrandimento scritte Categorie (st.radio) */
         [data-testid="stWidgetLabel"] p {
-            font-size: 3.2rem !important; /* Ingrandisce la label del widget */
+            font-size: 2.4rem !important; /* Ingrandisce la label del widget */
             font-weight: 800 !important;
         }
 
         [data-testid="stMarkdownContainer"] p {
-            font-size: 1.05rem !important; /* Ingrandisce le opzioni del radio (Metal Comp, etc) */
+            font-size: 1.5rem !important; /* Ingrandisce le opzioni del radio (Metal Comp, etc) */
         }
         
         /* Ottimizzazione spazio tra le opzioni del radio per non farle accavallare */
