@@ -1,10 +1,16 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
 
+import streamlit as st
+
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
 
+# Spostiamo set_page_config come primissima istruzione per evitare errori
+st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
+
+# CSS per compattare l'interfaccia
 st.markdown("""
     <style>
         /* 1. Riduciamo il padding superiore della pagina */
@@ -50,13 +56,20 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
+# CONTROLLO TOAST: Eseguito ad ogni ricaricamento
+if st.session_state.get('reset_eseguito'):
+    st.toast("Interfaccia pulita!", icon="✨")
+    st.session_state['reset_eseguito'] = False
 
-# --- LOGICA DI RESET AGGIORNATA ---
+# --- LOGICA DI RESET OTTIMIZZATA ---
 def activate_reset():
-    """Reset centralizzato e robusto dello stato dell'interfaccia"""
+    """
+    Reset centralizzato dello stato. 
+    Nota: Non chiamiamo st.rerun() qui perché usata come callback 'on_click',
+    evitando l'avviso 'no-op'.
+    """
     
-    # 1. Definiamo i valori di default
+    # 1. Valori di default
     defaults = {
         'comp_tags': None,
         'selectbox_part': None,
@@ -73,31 +86,21 @@ def activate_reset():
         'stringa_editabile', 'input_manuale'
     ]
 
-    # --- ESECUZIONE RESET ---
+    # 2. Esecuzione Reset Session State
     for key, val in defaults.items():
         st.session_state[key] = val
         
     for key in text_keys:
-        # Forziamo la cancellazione invece di sovrascrivere con ""
-        # Questo obbliga il widget a ricaricare il valore di default
         if key in st.session_state:
             st.session_state[key] = ""
 
-    # Reset dinamico
+    # 3. Pulizia chiavi dinamiche
     for key in list(st.session_state.keys()):
         if key.startswith(("manual_", "sub_")):
             del st.session_state[key]
 
-    # Flag per il toast
+    # 4. Flag per attivare il toast al termine del refresh automatico
     st.session_state['reset_eseguito'] = True
-    
-    # RERUN è fondamentale
-    st.rerun()
-
-# CONTROLLO TOAST: Mettilo subito dopo il set_page_config
-if st.session_state.get('reset_eseguito'):
-    st.toast("Interfaccia pulita!", icon="✨")
-    st.session_state['reset_eseguito'] = False
     
 # =========================================================
 # 1. DIZIONARI E DATABASE (OTTIMIZZATO)
@@ -327,20 +330,9 @@ TERMINI_ANTICIPATI = [
 # 2. INTERFACCIA UTENTE (Layout & Logica)
 # =========================================================
 
-# Usiamo la funzione activate_reset() definita nel Modulo 0 per coerenza
-# Se vuoi mantenere il tasto AZZERA in alto a destra:
-def trigger_reset():
-    """Richiama il reset centralizzato del Modulo 0"""
-    if 'activate_reset' in globals():
-        activate_reset()
-    else:
-        # Fallback locale se non trova la funzione globale
-        for key in list(st.session_state.keys()):
-            del st.session_state[key]
-        st.rerun()
-
 # --- INIZIALIZZAZIONE VARIABILI DI STATO ---
-if "mat_en" not in st.session_state: st.session_state.mat_en = ""
+if "mat_en" not in st.session_state: 
+    st.session_state.mat_en = ""
 
 # Configurazione visuale
 LARGHEZZA_IMMAGINE = 600 
@@ -366,8 +358,8 @@ with col_m:
     with st.expander("📖 Manuale d'uso"):
         st.markdown(f'<div style="font-size: 14px;">{TESTO_MANUALE}</div>', unsafe_allow_html=True)
 with col_r: 
-    # Usiamo trigger_reset che richiama la logica robusta del Modulo 0
-    st.button("🔄 AZZERA", on_click=trigger_reset, use_container_width=True)
+    # Colleghiamo direttamente la funzione del Modulo 0 come callback
+    st.button("🔄 AZZERA", on_click=activate_reset, use_container_width=True)
 
 st.markdown("---")
 
@@ -472,10 +464,10 @@ with col_workarea:
     
     st.markdown("---")
     
-    # --- SEZIONE 4: DIMENSIONAMENTO (CORRETTA INDENTAZIONE) ---
+    # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento")
 
-    # Inizializzazione sicura (Solo se non esistono già)
+    # Inizializzazione sicura chiavi
     for k in ["dim_l", "dim_dia", "dim_l_gen", "dim_p", "dim_h", "dim_dia_gen"]:
         if k not in st.session_state:
             st.session_state[k] = ""
