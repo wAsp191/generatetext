@@ -327,31 +327,17 @@ TERMINI_ANTICIPATI = [
 # 2. INTERFACCIA UTENTE (Layout & Logica)
 # =========================================================
 
-# --- FUNZIONE DI RESET (Logica interna al Modulo 2) ---
-def esegui_reset_totale():
-    """
-    Svuota lo stato dell'app. 
-    Nota: st.rerun() non serve qui perché il callback 
-    triggera il refresh automaticamente al termine.
-    """
-    # 1. Lista delle chiavi custom da eliminare
-    chiavi_da_pulire = [
-        'stringa_stabile', 'tags_stabili', 'stringa_editabile', 
-        'extra_tags', 'selectbox_part', 'extra_text', 
-        'dim_l', 'dim_p', 'dim_h', 'dim_dia', 'dim_dia_gen',
-        'norm_select', 'comp_tags', 'check_1090', 'check_assembled'
-    ]
-    
-    for chiave in chiavi_da_pulire:
-        if chiave in st.session_state:
-            if isinstance(st.session_state[chiave], list):
-                st.session_state[chiave] = []
-            elif isinstance(st.session_state[chiave], bool):
-                st.session_state[chiave] = False
-            else:
-                st.session_state[chiave] = ""
-    
-    # Rimosso st.rerun() per evitare il messaggio di No-Op
+# Usiamo la funzione activate_reset() definita nel Modulo 0 per coerenza
+# Se vuoi mantenere il tasto AZZERA in alto a destra:
+def trigger_reset():
+    """Richiama il reset centralizzato del Modulo 0"""
+    if 'activate_reset' in globals():
+        activate_reset()
+    else:
+        # Fallback locale se non trova la funzione globale
+        for key in list(st.session_state.keys()):
+            del st.session_state[key]
+        st.rerun()
 
 # --- INIZIALIZZAZIONE VARIABILI DI STATO ---
 if "mat_en" not in st.session_state: st.session_state.mat_en = ""
@@ -380,8 +366,8 @@ with col_m:
     with st.expander("📖 Manuale d'uso"):
         st.markdown(f'<div style="font-size: 14px;">{TESTO_MANUALE}</div>', unsafe_allow_html=True)
 with col_r: 
-    # Il callback esegue la funzione e poi rinfresca la pagina da solo
-    st.button("🔄 AZZERA", on_click=esegui_reset_totale, use_container_width=True)
+    # Usiamo trigger_reset che richiama la logica robusta del Modulo 0
+    st.button("🔄 AZZERA", on_click=trigger_reset, use_container_width=True)
 
 st.markdown("---")
 
@@ -440,8 +426,6 @@ with col_workarea:
     
     # --- SEZIONE 3: EXTRA E NOTE ---
     st.subheader("✨ 3. Extra e Note")
-
-    # Inizializziamo l'interruttore a False a ogni giro
     st.session_state.conflitto_attivo = False 
 
     if scelta_part_it:
@@ -449,10 +433,8 @@ with col_workarea:
         extra_options = list(dati_part[1].keys())
         
         if extra_options:
-            # 1. Visualizzazione dei Pills
             st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
             
-            # --- CONTROLLO INCOMPATIBILITÀ IMMEDIATO ---
             tags_scelti_raw = st.session_state.get("extra_tags", [])
             tags_scelti_upper = [str(t).upper().strip() for t in tags_scelti_raw]
             
@@ -466,7 +448,6 @@ with col_workarea:
                 if len(intersezione) > 1:
                     conflitto_rilevato = True
                     st.session_state.conflitto_attivo = True 
-                    
                     nomi_originali = [t for t in tags_scelti_raw if str(t).upper().strip() in intersezione]
                     messaggio_errore = f"⚠️ **Incompatibilità**: Non puoi selezionare contemporaneamente **{', '.join(nomi_originali)}**."
                     break
@@ -474,7 +455,6 @@ with col_workarea:
             if conflitto_rilevato:
                 st.error(messaggio_errore)
             
-            # Rendering dinamico degli approfondimenti
             for ex in tags_scelti_raw:
                 col_indent, col_input = st.columns([0.1, 0.9])
                 with col_input:
@@ -483,7 +463,6 @@ with col_workarea:
                     elif ex in EXTRA_CON_INPUT_MANUALE:
                         st.text_input(f"Specifica valore per {ex}:", key=f"manual_{ex}")
 
-    # Allineato a st.subheader ("Extra e Note")
     st.text_input(
         "Note libere (Traduzione automatica):", 
         key="extra_text", 
@@ -493,55 +472,47 @@ with col_workarea:
     
     st.markdown("---")
     
-   # --- SEZIONE 4: DIMENSIONAMENTO ---
-st.subheader("📏 4. Dimensionamento")
+    # --- SEZIONE 4: DIMENSIONAMENTO (CORRETTA INDENTAZIONE) ---
+    st.subheader("📏 4. Dimensionamento")
 
-# Assicuriamoci che le chiavi esistano nello stato prima di disegnare i widget
-# Questo previene errori al primo avvio dopo il reset
-for k in ["dim_l", "dim_dia", "dim_l_gen", "dim_p", "dim_h", "dim_dia_gen"]:
-    if k not in st.session_state:
-        st.session_state[k] = ""
+    # Inizializzazione sicura (Solo se non esistono già)
+    for k in ["dim_l", "dim_dia", "dim_l_gen", "dim_p", "dim_h", "dim_dia_gen"]:
+        if k not in st.session_state:
+            st.session_state[k] = ""
 
-if macro_it == "FASTENER":
-    c1, c2, c3, _ = st.columns([1, 1, 2, 2])
-    with c1: 
-        # Usiamo solo la KEY. Il reset del Modulo 0 svuoterà la chiave e Streamlit pulirà il campo.
-        st.text_input("L", key="dim_l", placeholder="Lung.")
-    with c2: 
-        st.text_input("D/M", key="dim_dia", placeholder="Diam.")
-    with c3: 
-        opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-        st.selectbox("Normativa", options=list(opzioni_norm.keys()), key="norm_select")
-else:
-    c1, c2, c3, c4, _ = st.columns([1, 1, 1, 1, 1])
-    with c1: 
-        st.text_input("L", key="dim_l_gen", placeholder="Lung.")
-    with c2: 
-        st.text_input("P", key="dim_p", placeholder="Prof.")
-    with c3: 
-        st.text_input("H", key="dim_h", placeholder="Alt.")
-    with c4: 
-        st.text_input("Ø", key="dim_dia_gen", placeholder="Diam.")
-
-    # Immagine disabilitata come richiesto
-    # st.image("https://raw.githubusercontent.com/...", width=250)
+    if macro_it == "FASTENER":
+        c1, c2, c3, _ = st.columns([1, 1, 2, 2])
+        with c1: 
+            st.text_input("L", key="dim_l", placeholder="Lung.")
+        with c2: 
+            st.text_input("D/M", key="dim_dia", placeholder="Diam.")
+        with c3: 
+            opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
+            st.selectbox("Normativa", options=list(opzioni_norm.keys()), key="norm_select")
+    else:
+        c1, c2, c3, c4, _ = st.columns([1, 1, 1, 1, 1])
+        with c1: 
+            st.text_input("L", key="dim_l_gen", placeholder="Lung.")
+        with c2: 
+            st.text_input("P", key="dim_p", placeholder="Prof.")
+        with c3: 
+            st.text_input("H", key="dim_h", placeholder="Alt.")
+        with c4: 
+            st.text_input("Ø", key="dim_dia_gen", placeholder="Diam.")
 
     st.markdown("---")
     
     # --- SEZIONE 5: COMPATIBILITÀ ---
     st.subheader("🔗 5. Compatibilità")
-    
-    # Anche qui, tutto su una riga
     c_pills, c_check = st.columns([3, 1], vertical_alignment="center")
     
     with c_pills:
-        if st.session_state.get("radio_macro") != "FASTENER":
+        if macro_it != "FASTENER":
             st.pills("Modello di destinazione:", options=OPZIONI_COMPATIBILITA, selection_mode="single", key="comp_tags", label_visibility="collapsed")
         else:
             st.info("Nessuna compatibilità necessaria per i Fastener.")
             
     with c_check:
-        # Mostriamo la checkbox EN-1090 solo se serve, ma sulla stessa riga
         if st.session_state.get("comp_tags") in ["FORTISSIMO", "MINIRACK"]:
             st.checkbox("Cert. 1090", key="check_1090")
             
