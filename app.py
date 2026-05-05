@@ -78,22 +78,31 @@ def activate_reset():
 
     # --- ESECUZIONE RESET ---
     
-    # Reset chiavi strutturate
+    # 1. Reset chiavi strutturate
     for key in defaults:
         st.session_state[key] = defaults[key]
         
-    # Reset stringhe vuote
+    # 2. Reset stringhe vuote (Assicurati che dim_l_gen sia in text_keys!)
     for key in text_keys:
         if key in st.session_state:
             st.session_state[key] = ""
 
-    # Reset dinamico (extra e sub-options)
+    # 3. Reset dinamico
     for key in list(st.session_state.keys()):
         if key.startswith(("manual_", "sub_")):
-            del st.session_state[key] # Usiamo 'del' per pulire i widget dinamici non più presenti
+            del st.session_state[key]
 
-    # 3. Gestione avviso (Spostato per maggiore visibilità)
+    # --- IL TRUCCO DEL PROGRAMMATORE ---
+    # Impostiamo un flag per mostrare il toast DOPO il ricaricamento
+    st.session_state['reset_eseguito'] = True
+    
+    # Forziamo il ricaricamento immediato: questo svuota i widget visivamente
+    st.rerun()
+
+# --- DA METTERE SUBITO DOPO LA CHIAMATA A RESET NEL MAIN ---
+if st.session_state.get('reset_eseguito'):
     st.toast("Interfaccia pulita!", icon="✨")
+    st.session_state['reset_eseguito'] = False
     
 # =========================================================
 # 1. DIZIONARI E DATABASE (OTTIMIZZATO)
