@@ -53,7 +53,7 @@ st.markdown("""
         }
         /* 8. Ingrandimento scritte Categorie (st.radio) */
         [data-testid="stWidgetLabel"] p {
-            font-size: 1.6rem !important; /* Ingrandisce la label del widget */
+            font-size: 2.4rem !important; /* Ingrandisce la label del widget */
             font-weight: 800 !important;
         }
 
