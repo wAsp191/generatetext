@@ -24,13 +24,13 @@ st.markdown("""
         }
 
         /* 3. Riduciamo l'altezza dei titoli */
-        h1 { margin-bottom: -1rem !important; font-size: 1.9rem !important; }
-        h2 { margin-bottom: -0.8rem !important; font-size: 1.5rem !important; }
-        h3 { margin-bottom: -0.5rem !important; font-size: 1.2rem !important; }
+        h1 { margin-bottom: -1rem !important; font-size: 1.8rem !important; }
+        h2 { margin-bottom: -0.8rem !important; font-size: 1.4rem !important; }
+        h3 { margin-bottom: -0.5rem !important; font-size: 1.1rem !important; }
 
         /* 4. Compattiamo i divisori (st.divider / st.markdown("---")) */
         hr {
-            margin-top: 0.5rem !important;
+            margin-top: 0.4rem !important;
             margin-bottom: 0.4rem !important;
         }
 
@@ -44,7 +44,7 @@ st.markdown("""
         div[data-testid="stTextInput"] > div > div > input {
             padding-top: 0px !important;
             padding-bottom: 0px !important;
-            min-height: 1.8rem !important;
+            min-height: 1.6rem !important;
         }
         
         /* 7. Nascondiamo lo spazio extra dei Pills */
@@ -53,12 +53,12 @@ st.markdown("""
         }
         /* 8. Ingrandimento scritte Categorie (st.radio) */
         [data-testid="stWidgetLabel"] p {
-            font-size: 1.8rem !important; /* Ingrandisce la label del widget */
+            font-size: 1.6rem !important; /* Ingrandisce la label del widget */
             font-weight: 700 !important;
         }
 
         [data-testid="stMarkdownContainer"] p {
-            font-size: 1.4rem !important; /* Ingrandisce le opzioni del radio (Metal Comp, etc) */
+            font-size: 1.2rem !important; /* Ingrandisce le opzioni del radio (Metal Comp, etc) */
         }
         
         /* Ottimizzazione spazio tra le opzioni del radio per non farle accavallare */
