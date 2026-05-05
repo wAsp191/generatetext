@@ -55,33 +55,44 @@ st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 def activate_reset():
     """Reset centralizzato e robusto dello stato dell'interfaccia"""
     
-    # Valori di default per tipo di componente
+    # 1. Definiamo i valori di default per i widget complessi
     defaults = {
-        'comp_tags': None,       # Pills single
-        'selectbox_part': None,  # Selectbox
-        'extra_tags': [],        # Pills multi
-        'check_1090': False,     # Checkbox
-        'check_assembled': False # Toggle
+        'comp_tags': None,        # Pills single
+        'selectbox_part': None,   # Selectbox
+        'extra_tags': [],         # Pills multi
+        'check_1090': False,      # Checkbox
+        'check_assembled': False, # Toggle
+        'stringa_stabile': "",    # Risultato finale
+        'tags_stabili': []        # Tag classificazione
     }
 
-    # Chiavi che devono essere sempre stringhe vuote
+    # 2. Chiavi di testo (Aggiunta dim_l_gen e sincronizzazione con Modulo 2)
     text_keys = [
-        'dim_l', 'dim_p', 'dim_h', 'dim_dia', 'dim_dia_gen', 
-        'dim_s', 'extra_text', 'stringa_editabile'
+        'dim_l', 'dim_l_gen',     # Entrambe le varianti della lunghezza
+        'dim_p', 'dim_h', 
+        'dim_dia', 'dim_dia_gen', # Entrambe le varianti del diametro
+        'dim_s', 'extra_text', 
+        'stringa_editabile',
+        'input_manuale'           # Reset anche del campo modifica manuale
     ]
 
-    # 1. Reset chiavi fisse (Priorità ai valori del dizionario defaults)
+    # --- ESECUZIONE RESET ---
+    
+    # Reset chiavi strutturate
     for key in defaults:
         st.session_state[key] = defaults[key]
         
+    # Reset stringhe vuote
     for key in text_keys:
-        st.session_state[key] = ""
+        if key in st.session_state:
+            st.session_state[key] = ""
 
-    # 2. Reset dinamico (campi generati a runtime)
+    # Reset dinamico (extra e sub-options)
     for key in list(st.session_state.keys()):
         if key.startswith(("manual_", "sub_")):
-            st.session_state[key] = ""
-            
+            del st.session_state[key] # Usiamo 'del' per pulire i widget dinamici non più presenti
+
+    # 3. Gestione avviso (Spostato per maggiore visibilità)
     st.toast("Interfaccia pulita!", icon="✨")
     
 # =========================================================
