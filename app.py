@@ -65,6 +65,19 @@ st.markdown("""
         [data-testid="stAudioRadio"] div {
             gap: 0.5rem !important;
         }
+
+        /* 9. Distanziamento verticale tra le opzioni del Radio (Categorie) */
+        div[data-testid="stRadio"] div[role="radiogroup"] label {
+            margin-bottom: 12px !important; /* Aggiunge spazio sotto ogni categoria */
+            padding: 5px 0px !important;    /* Dà un po' di respiro interno */
+            transition: all 0.2s ease;      /* Effetto fluido al passaggio del mouse */
+        }
+
+        /* Opzionale: un leggero effetto hover per capire cosa stiamo selezionando */
+        div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+            border-radius: 5px;
+        }
     </style>
 """, unsafe_allow_html=True)
 
