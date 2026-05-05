@@ -526,7 +526,7 @@ else:
     # Immagine disabilitata come richiesto
     # st.image("https://raw.githubusercontent.com/...", width=250)
 
-st.markdown("---")
+    st.markdown("---")
     
     # --- SEZIONE 5: COMPATIBILITÀ ---
     st.subheader("🔗 5. Compatibilità")
