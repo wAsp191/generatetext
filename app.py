@@ -52,54 +52,49 @@ st.markdown("""
 
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
+# --- LOGICA DI RESET AGGIORNATA ---
 def activate_reset():
     """Reset centralizzato e robusto dello stato dell'interfaccia"""
     
-    # 1. Definiamo i valori di default per i widget complessi
+    # 1. Definiamo i valori di default
     defaults = {
-        'comp_tags': None,        # Pills single
-        'selectbox_part': None,   # Selectbox
-        'extra_tags': [],         # Pills multi
-        'check_1090': False,      # Checkbox
-        'check_assembled': False, # Toggle
-        'stringa_stabile': "",    # Risultato finale
-        'tags_stabili': []        # Tag classificazione
+        'comp_tags': None,
+        'selectbox_part': None,
+        'extra_tags': [],
+        'check_1090': False,
+        'check_assembled': False,
+        'stringa_stabile': "",
+        'tags_stabili': []
     }
 
-    # 2. Chiavi di testo (Aggiunta dim_l_gen e sincronizzazione con Modulo 2)
     text_keys = [
-        'dim_l', 'dim_l_gen',     # Entrambe le varianti della lunghezza
-        'dim_p', 'dim_h', 
-        'dim_dia', 'dim_dia_gen', # Entrambe le varianti del diametro
-        'dim_s', 'extra_text', 
-        'stringa_editabile',
-        'input_manuale'           # Reset anche del campo modifica manuale
+        'dim_l', 'dim_l_gen', 'dim_p', 'dim_h', 
+        'dim_dia', 'dim_dia_gen', 'dim_s', 'extra_text', 
+        'stringa_editabile', 'input_manuale'
     ]
 
     # --- ESECUZIONE RESET ---
-    
-    # 1. Reset chiavi strutturate
-    for key in defaults:
-        st.session_state[key] = defaults[key]
+    for key, val in defaults.items():
+        st.session_state[key] = val
         
-    # 2. Reset stringhe vuote (Assicurati che dim_l_gen sia in text_keys!)
     for key in text_keys:
+        # Forziamo la cancellazione invece di sovrascrivere con ""
+        # Questo obbliga il widget a ricaricare il valore di default
         if key in st.session_state:
             st.session_state[key] = ""
 
-    # 3. Reset dinamico
+    # Reset dinamico
     for key in list(st.session_state.keys()):
         if key.startswith(("manual_", "sub_")):
             del st.session_state[key]
 
-    # --- IL TRUCCO DEL PROGRAMMATORE ---
-    # Impostiamo un flag per mostrare il toast DOPO il ricaricamento
+    # Flag per il toast
     st.session_state['reset_eseguito'] = True
     
-    # Forziamo il ricaricamento immediato: questo svuota i widget visivamente
+    # RERUN è fondamentale
     st.rerun()
 
-# --- DA METTERE SUBITO DOPO LA CHIAMATA A RESET NEL MAIN ---
+# CONTROLLO TOAST: Mettilo subito dopo il set_page_config
 if st.session_state.get('reset_eseguito'):
     st.toast("Interfaccia pulita!", icon="✨")
     st.session_state['reset_eseguito'] = False
@@ -498,35 +493,40 @@ with col_workarea:
     
     st.markdown("---")
     
-    # --- SEZIONE 4: DIMENSIONAMENTO ---
+   # --- SEZIONE 4: DIMENSIONAMENTO ---
 st.subheader("📏 4. Dimensionamento")
+
+# Assicuriamoci che le chiavi esistano nello stato prima di disegnare i widget
+# Questo previene errori al primo avvio dopo il reset
+for k in ["dim_l", "dim_dia", "dim_l_gen", "dim_p", "dim_h", "dim_dia_gen"]:
+    if k not in st.session_state:
+        st.session_state[k] = ""
 
 if macro_it == "FASTENER":
     c1, c2, c3, _ = st.columns([1, 1, 2, 2])
     with c1: 
-        # Aggiungiamo value=st.session_state.get('dim_l', '') per sincronizzare il reset
-        st.text_input("L", key="dim_l", value=st.session_state.get('dim_l', ''), placeholder="Lung.")
+        # Usiamo solo la KEY. Il reset del Modulo 0 svuoterà la chiave e Streamlit pulirà il campo.
+        st.text_input("L", key="dim_l", placeholder="Lung.")
     with c2: 
-        st.text_input("D/M", key="dim_dia", value=st.session_state.get('dim_dia', ''), placeholder="Diam.")
+        st.text_input("D/M", key="dim_dia", placeholder="Diam.")
     with c3: 
         opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
         st.selectbox("Normativa", options=list(opzioni_norm.keys()), key="norm_select")
 else:
     c1, c2, c3, c4, _ = st.columns([1, 1, 1, 1, 1])
     with c1: 
-        # Sincronizzazione per la lunghezza generica
-        st.text_input("L", key="dim_l_gen", value=st.session_state.get('dim_l_gen', ''), placeholder="Lung.")
+        st.text_input("L", key="dim_l_gen", placeholder="Lung.")
     with c2: 
-        st.text_input("P", key="dim_p", value=st.session_state.get('dim_p', ''), placeholder="Prof.")
+        st.text_input("P", key="dim_p", placeholder="Prof.")
     with c3: 
-        st.text_input("H", key="dim_h", value=st.session_state.get('dim_h', ''), placeholder="Alt.")
+        st.text_input("H", key="dim_h", placeholder="Alt.")
     with c4: 
-        st.text_input("Ø", key="dim_dia_gen", value=st.session_state.get('dim_dia_gen', ''), placeholder="Diam.")
+        st.text_input("Ø", key="dim_dia_gen", placeholder="Diam.")
 
     # Immagine disabilitata come richiesto
     # st.image("https://raw.githubusercontent.com/...", width=250)
 
-    st.markdown("---")
+st.markdown("---")
     
     # --- SEZIONE 5: COMPATIBILITÀ ---
     st.subheader("🔗 5. Compatibilità")
