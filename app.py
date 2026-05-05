@@ -24,9 +24,9 @@ st.markdown("""
         }
 
         /* 3. Riduciamo l'altezza dei titoli */
-        h1 { margin-bottom: -1rem !important; font-size: 1.8rem !important; }
-        h2 { margin-bottom: -0.8rem !important; font-size: 1.4rem !important; }
-        h3 { margin-bottom: -0.5rem !important; font-size: 1.1rem !important; }
+        h1 { margin-bottom: -1rem !important; font-size: 1.6rem !important; }
+        h2 { margin-bottom: -0.8rem !important; font-size: 1.2rem !important; }
+        h3 { margin-bottom: -0.5rem !important; font-size: 1.0rem !important; }
 
         /* 4. Compattiamo i divisori (st.divider / st.markdown("---")) */
         hr {
