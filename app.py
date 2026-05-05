@@ -490,23 +490,29 @@ with col_workarea:
     st.markdown("---")
     
     # --- SEZIONE 4: DIMENSIONAMENTO ---
-    st.subheader("📏 4. Dimensionamento")
-    
-    # Creiamo una riga con molte colonne piccole per i campi
-    # Le proporzioni [1, 1, 1, 1, 2] servono a dare più spazio alla Selectbox finale
-    if macro_it == "FASTENER":
-        c1, c2, c3, _ = st.columns([1, 1, 2, 2])
-        with c1: st.text_input("L", key="dim_l", placeholder="Lung.")
-        with c2: st.text_input("D/M", key="dim_dia", placeholder="Diam.")
-        with c3: 
-            opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
-            st.selectbox("Normativa", options=list(opzioni_norm.keys()), key="norm_select")
-    else:
-        c1, c2, c3, c4, _ = st.columns([1, 1, 1, 1, 1])
-        with c1: st.text_input("L", key="dim_l_gen", placeholder="Lung.")
-        with c2: st.text_input("P", key="dim_p", placeholder="Prof.")
-        with c3: st.text_input("H", key="dim_h", placeholder="Alt.")
-        with c4: st.text_input("Ø", key="dim_dia_gen", placeholder="Diam.")
+st.subheader("📏 4. Dimensionamento")
+
+if macro_it == "FASTENER":
+    c1, c2, c3, _ = st.columns([1, 1, 2, 2])
+    with c1: 
+        # Aggiungiamo value=st.session_state.get('dim_l', '') per sincronizzare il reset
+        st.text_input("L", key="dim_l", value=st.session_state.get('dim_l', ''), placeholder="Lung.")
+    with c2: 
+        st.text_input("D/M", key="dim_dia", value=st.session_state.get('dim_dia', ''), placeholder="Diam.")
+    with c3: 
+        opzioni_norm = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {"": ""})
+        st.selectbox("Normativa", options=list(opzioni_norm.keys()), key="norm_select")
+else:
+    c1, c2, c3, c4, _ = st.columns([1, 1, 1, 1, 1])
+    with c1: 
+        # Sincronizzazione per la lunghezza generica
+        st.text_input("L", key="dim_l_gen", value=st.session_state.get('dim_l_gen', ''), placeholder="Lung.")
+    with c2: 
+        st.text_input("P", key="dim_p", value=st.session_state.get('dim_p', ''), placeholder="Prof.")
+    with c3: 
+        st.text_input("H", key="dim_h", value=st.session_state.get('dim_h', ''), placeholder="Alt.")
+    with c4: 
+        st.text_input("Ø", key="dim_dia_gen", value=st.session_state.get('dim_dia_gen', ''), placeholder="Diam.")
 
     # Immagine disabilitata come richiesto
     # st.image("https://raw.githubusercontent.com/...", width=250)
