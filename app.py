@@ -1,8 +1,6 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
 
-import streamlit as st
-
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
