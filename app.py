@@ -651,6 +651,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
 # Funzione di callback per sincronizzare l'input manuale con lo stato globale
 def sincronizza_modifica():
     if 'input_manuale' in st.session_state:
+        # Aggiorniamo la stringa principale con quella modificata a mano
         st.session_state['stringa_stabile'] = st.session_state['input_manuale'].upper()
 
 # Contenitore principale: garantisce che l'interfaccia non "salti"
@@ -670,7 +671,8 @@ if st.session_state.get('stringa_stabile'):
 
         # 2. AREA RISULTATO
         if modifica_attiva:
-            # Input manuale: si attiva solo se l'utente vuole intervenire
+            # FIX: Usiamo una chiave statica e la logica on_change 
+            # per mantenere la modifica persistente
             st.text_input(
                 "Modifica manuale stringa:", 
                 value=st.session_state['stringa_stabile'],
@@ -679,11 +681,14 @@ if st.session_state.get('stringa_stabile'):
                 label_visibility="collapsed"
             )
         else:
-            # Visualizzazione Standard: st.code fornisce il tasto "COPIA" integrato a destra
+            # Visualizzazione Standard con tasto COPIA
             st.code(st.session_state['stringa_stabile'], language=None)
 
-        # 3. MONITORAGGIO LUNGHEZZA (Barra dinamica compatta)
-        lunghezza = len(st.session_state['stringa_stabile'])
+        # 3. MONITORAGGIO LUNGHEZZA (Logica snellita)
+        stringa_attuale = st.session_state['stringa_stabile']
+        lunghezza = len(stringa_attuale)
+        
+        # Calcoliamo la percentuale per la progress bar (max 100%)
         perc = min(lunghezza / 100, 1.0)
         
         if lunghezza > 100:
@@ -691,11 +696,14 @@ if st.session_state.get('stringa_stabile'):
         elif lunghezza >= 90:
             st.warning(f"🟡 ATTENZIONE: {lunghezza}/100")
         else:
-            st.caption(f"✅ Lunghezza ottimale: {lunghezza}/100")
+            # Usiamo un colore verde per la caption se tutto è ok
+            st.markdown(f"<p style='color: #00cc66; font-size: 0.8rem; margin-bottom: -10px;'>✅ Lunghezza ottimale: {lunghezza}/100</p>", unsafe_allow_html=True)
         
         st.progress(perc)
 
         # 4. TAGS DI CLASSIFICAZIONE
         tags_reali = st.session_state.get('tags_stabili', [])
         if tags_reali:
-            st.markdown(f"**Classificazione:** `{'` `'.join(tags_reali)}` ")
+            # Formattazione più pulita per i tag
+            tag_html = " ".join([f"<code>{t}</code>" for t in tags_reali])
+            st.markdown(f"**Classificazione:** {tag_html}", unsafe_allow_html=True)
