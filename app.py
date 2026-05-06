@@ -645,22 +645,32 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         note_it = st.session_state.get("extra_text", "").strip()
         note_en = traduci_note(note_it)
 
-        # --- E. ASSEMBLAGGIO FINALE (Logica Anti-Rifuso & Check Assembly) ---
+        # --- E. ASSEMBLAGGIO FINALE (Logica Anti-Rifuso Potenziata) ---
         
-        # 1. Definiamo il prefisso base (Materiale o Assembled)
+        # 1. Definiamo il prefisso base
         if macro_it == "ASSEMBLY":
             prefix_base = "ASSEMBLED" if st.session_state.get("check_assembled") else ""
         else:
-            prefix_base = mat_en
+            prefix_base = mat_en # Es: "METAL" o "GALVANIZED"
 
-        # 2. Uniamo con eventuali aggettivi anticipati (es. HEAVY DUTY)
-        prefix_completo = f"{prefix_base} {' '.join(lista_prima)}".strip()
+        # 2. Uniamo con eventuali aggettivi anticipati (es. "HEAVY DUTY")
+        prefix_completo = f"{prefix_base} {' '.join(lista_prima)}".strip().upper()
         
-        # 3. FIX ANTI-RIFUSO: Se part_en (es. SHEET METAL) inizia già con il prefisso (es. METAL), non lo ripetiamo
-        if prefix_completo and part_en.startswith(prefix_completo):
-            core = part_en
+        # 3. Pulizia profonda del nome componente dal DB
+        part_en_clean = part_en.strip().upper()
+        
+        # --- FIX ANTI-RIFUSO "BULLDOZER" ---
+        # Controlliamo se il pezzo inizia già con il prefisso, 
+        # o se il prefisso è contenuto all'inizio del pezzo
+        if prefix_completo:
+            # Se part_en è "SHEET METAL" e prefix è "METAL", 
+            # la condizione (part_en_clean.startswith(prefix_completo)) sarà VERA.
+            if part_en_clean.startswith(prefix_completo):
+                core = part_en_clean
+            else:
+                core = f"{prefix_completo} {part_en_clean}".strip()
         else:
-            core = f"{prefix_completo} {part_en}".strip()
+            core = part_en_clean
         
         # --- COSTRUZIONE CORPO STRINGA ---
         info_aggiuntive = []
@@ -681,13 +691,9 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             corpo += " (UNI EN 1090-2)"
 
         # --- F. SALVATAGGIO ---
-        # Pulizia finale di eventuali doppi spazi residui
-        st.session_state['stringa_stabile'] = " ".join(corpo.split()).upper()
-        
-        lista_tag_finali = [t.upper() for t in [tag_reale_db, macro_it, comp_tag] if t]
-        st.session_state['tags_stabili'] = list(dict.fromkeys(lista_tag_finali))
-        
-        st.rerun()
+        # Il .replace("  ", " ") finale è la nostra rete di sicurezza
+        risultato_finale = " ".join(corpo.split()).upper()
+        st.session_state['stringa_stabile'] = risultato_finale
         
 # =========================================================
 # 4. OUTPUT E MONITORAGGIO (VERSIONE DEFINITIVA COMPATTA)
