@@ -201,7 +201,7 @@ EXTRA_CON_INPUT_MANUALE = ["Sezione circolare", "Sezione quadrata"]
 MATERIALI_CONFIG = {
     "METAL COMP": {"METAL": "METAL", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
     "WOOD COMP": {"LAMINATO": "LAMINATED", "NOBILITATO": "MELAMINE", "TRUCIOLARE": "OSB"},
-    "PLASTIC COMP": {"POLICARBONATO": "POLYCARBONATE", "PVC": "PVC", "GOMMA": "RUBBER"},
+    "PLASTIC COMP": {"PLX": "PLX", "POLICARBONATO": "POLYCARBONATE", "PVC": "PVC", "GOMMA": "RUBBER"},
     "GLASS COMP": {"VETRO TEMPRATO": "TEMPERED", "VETRO SATINATO": "SATIN"},
     "FASTENER": {"NERO": "", "ZINCATO": "GALVANIZED", "BRUNITO": "BURNISHED"}
 }
@@ -268,8 +268,9 @@ DATABASE = {
             "Tappo": ["PLASTIC CAP", {}, "CAP"],
             "Guarnizione": ["GASKET", {}, "ACCESSORY"],
             "Cerniera": ["HINGE", {}, "ACCESSORY"],
-            "Divisorio": ["DIVIDER", {"Sloping": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
+            "Divisorio": ["DIVIDER", {"Inclinato": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
             "Frontalino": ["RISER", {"Per ripiano": "FOR SHELF", "Trasparente": "TRASPARENT"}, "RISER"],
+            "Pannello": ["PANEL", {"Forato": "PERFORATED", "Trasparente": "TRASPARENT"}, "PANEL"],
             "Portaprezzo": ["TICKET-HOLDER", {"Trasparente": "TRASPARENT", "Colorato": "COLOURED", "Con tasca oscillante": "WITH LIFT-UP POCKET", "Adesivo": "ADHESIVE", "Con asola centrale": "WITH CENTRAL SLOT"}, "TICKET-HOLDER"]
         }
     },
