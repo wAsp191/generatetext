@@ -645,34 +645,36 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         note_it = st.session_state.get("extra_text", "").strip()
         note_en = traduci_note(note_it)
 
-        # --- E. ASSEMBLAGGIO FINALE (Logica Anti-Rifuso Potenziata) ---
+        # --- E. ASSEMBLAGGIO FINALE (Logica Anti-Rifuso Infallibile) ---
         
-        # 1. Definiamo il prefisso base
+        # 1. Recupero Prefisso Base
         if macro_it == "ASSEMBLY":
             prefix_base = "ASSEMBLED" if st.session_state.get("check_assembled") else ""
         else:
-            prefix_base = mat_en # Es: "METAL" o "GALVANIZED"
+            prefix_base = mat_en  # Es: "METAL"
 
-        # 2. Uniamo con eventuali aggettivi anticipati (es. "HEAVY DUTY")
-        prefix_completo = f"{prefix_base} {' '.join(lista_prima)}".strip().upper()
+        # 2. Costruzione Prefisso Completo (Materiale + Aggettivi come HEAVY DUTY)
+        elementi_prefisso = [prefix_base] + lista_prima
+        # Pulizia da stringhe vuote e normalizzazione
+        prefisso_lista = [p.strip().upper() for p in elementi_prefisso if p.strip()]
+        prefix_completo = " ".join(prefisso_lista)
         
-        # 3. Pulizia profonda del nome componente dal DB
-        part_en_clean = part_en.strip().upper()
+        # 3. Normalizzazione Nome Componente
+        part_en_upper = part_en.strip().upper()
         
-        # --- FIX ANTI-RIFUSO "BULLDOZER" ---
-        # Controlliamo se il pezzo inizia già con il prefisso, 
-        # o se il prefisso è contenuto all'inizio del pezzo
-        if prefix_completo:
-            # Se part_en è "SHEET METAL" e prefix è "METAL", 
-            # la condizione (part_en_clean.startswith(prefix_completo)) sarà VERA.
-            if part_en_clean.startswith(prefix_completo):
-                core = part_en_clean
-            else:
-                core = f"{prefix_completo} {part_en_clean}".strip()
+        # --- LOGICA DI CONFRONTO AVANZATA ---
+        # Creiamo dei set di parole per vedere se il prefisso è ridondante
+        parole_prefisso = set(prefix_completo.split())
+        parole_componente = set(part_en_upper.split())
+
+        # Se il prefisso è già interamente contenuto nel nome del componente (es: METAL in SHEET METAL)
+        # O se il componente inizia esattamente con quel prefisso
+        if parole_prefisso and (parole_prefisso.issubset(parole_componente) or part_en_upper.startswith(prefix_completo)):
+            core = part_en_upper
         else:
-            core = part_en_clean
+            core = f"{prefix_completo} {part_en_upper}".strip()
         
-        # --- COSTRUZIONE CORPO STRINGA ---
+        # --- COSTRUZIONE RESTO DELLA STRINGA ---
         info_aggiuntive = []
         if lista_dopo: info_aggiuntive.append(" ".join(lista_dopo))
         if dim_str: info_aggiuntive.append(dim_str)
@@ -691,9 +693,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             corpo += " (UNI EN 1090-2)"
 
         # --- F. SALVATAGGIO ---
-        # Il .replace("  ", " ") finale è la nostra rete di sicurezza
-        risultato_finale = " ".join(corpo.split()).upper()
-        st.session_state['stringa_stabile'] = risultato_finale
+        # Join/Split finale per eliminare ogni doppio spazio residuo
+        st.session_state['stringa_stabile'] = " ".join(corpo.split()).upper()
         
 # =========================================================
 # 4. OUTPUT E MONITORAGGIO (VERSIONE DEFINITIVA COMPATTA)
