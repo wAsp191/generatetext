@@ -414,8 +414,10 @@ with col_workarea:
     
     with c_mat:
         if "ASSEMBLY" in macro_it.upper(): 
+            # MODIFICA: Gestiamo solo il toggle. 
+            # mat_en viene resettato per evitare che "ASSEMBLY" entri come stringa fissa
             st.toggle("ASSEMBLATO", key="check_assembled")
-            st.session_state.mat_en = "ASSEMBLY"
+            st.session_state.mat_en = "" 
         else:
             materiali_disponibili = MATERIALI_CONFIG.get(macro_it, {})
             if materiali_disponibili:
@@ -643,10 +645,24 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         note_it = st.session_state.get("extra_text", "").strip()
         note_en = traduci_note(note_it)
 
-        # --- E. ASSEMBLAGGIO FINALE ---
-        prefix = f"{mat_en} {' '.join(lista_prima)}".strip()
-        core = f"{prefix} {part_en}".strip()
+        # --- E. ASSEMBLAGGIO FINALE (Logica Anti-Rifuso & Check Assembly) ---
         
+        # 1. Definiamo il prefisso base (Materiale o Assembled)
+        if macro_it == "ASSEMBLY":
+            prefix_base = "ASSEMBLED" if st.session_state.get("check_assembled") else ""
+        else:
+            prefix_base = mat_en
+
+        # 2. Uniamo con eventuali aggettivi anticipati (es. HEAVY DUTY)
+        prefix_completo = f"{prefix_base} {' '.join(lista_prima)}".strip()
+        
+        # 3. FIX ANTI-RIFUSO: Se part_en (es. SHEET METAL) inizia già con il prefisso (es. METAL), non lo ripetiamo
+        if prefix_completo and part_en.startswith(prefix_completo):
+            core = part_en
+        else:
+            core = f"{prefix_completo} {part_en}".strip()
+        
+        # --- COSTRUZIONE CORPO STRINGA ---
         info_aggiuntive = []
         if lista_dopo: info_aggiuntive.append(" ".join(lista_dopo))
         if dim_str: info_aggiuntive.append(dim_str)
@@ -665,7 +681,9 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             corpo += " (UNI EN 1090-2)"
 
         # --- F. SALVATAGGIO ---
+        # Pulizia finale di eventuali doppi spazi residui
         st.session_state['stringa_stabile'] = " ".join(corpo.split()).upper()
+        
         lista_tag_finali = [t.upper() for t in [tag_reale_db, macro_it, comp_tag] if t]
         st.session_state['tags_stabili'] = list(dict.fromkeys(lista_tag_finali))
         
