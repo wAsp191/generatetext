@@ -556,7 +556,8 @@ def traduci_note(testo):
         "innesto": "COUPLING", 
         "montante": "UPRIGHT",
         "per": "FOR", 
-        "losanga": "LOSANGA"
+        "losanga": "LOSANGA",
+        "rivestimento": "BACK PANEL"
     }
     
     testo_elaborato = testo.lower().strip()
