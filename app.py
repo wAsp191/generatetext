@@ -274,6 +274,7 @@ DATABASE = {
             "Divisorio": ["DIVIDER", {"Inclinato": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
             "Frontalino": ["RISER", {"Per ripiano": "FOR SHELF", "Trasparente": "TRASPARENT"}, "RISER"],
             "Pannello": ["PANEL", {"Forato": "PERFORATED", "Trasparente": "TRASPARENT", "Bordi smussati": "CHAMFERED EDGES"}, "PANEL"],
+            "Anta": ["DOOR", {"Forato": "PERFORATED", "Trasparente": "TRASPARENT", "Bordi smussati": "CHAMFERED EDGES", "Serigrafata": "SILKSCREENED", "Antiurto": "SHOCKPROOF"}, "DOOR"],
             "Portaprezzo": ["TICKET-HOLDER", {"Trasparente": "TRASPARENT", "Colorato": "COLOURED", "Con tasca oscillante": "WITH LIFT-UP POCKET", "Adesivo": "ADHESIVE", "Con asola centrale": "WITH CENTRAL SLOT"}, "TICKET-HOLDER"]
         }
     },
