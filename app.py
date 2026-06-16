@@ -273,7 +273,7 @@ DATABASE = {
             "Cerniera": ["HINGE", {}, "ACCESSORY"],
             "Divisorio": ["DIVIDER", {"Inclinato": "SLOPING", "Per ripiano": "FOR SHELF"}, "DIVIDER"],
             "Frontalino": ["RISER", {"Per ripiano": "FOR SHELF", "Trasparente": "TRASPARENT"}, "RISER"],
-            "Pannello": ["PANEL", {"Forato": "PERFORATED", "Trasparente": "TRASPARENT", "Bordi smussati": "CHAMFERED EDGES"}, "PANEL"],
+            "Pannello": ["PANEL", {"Serigrafata": "SILKSCREENED", "Antiurto": "SHOCKPROOF", "Forato": "PERFORATED", "Trasparente": "TRASPARENT", "Bordi smussati": "CHAMFERED EDGES"}, "PANEL"],
             "Anta": ["DOOR", {"Forato": "PERFORATED", "Trasparente": "TRASPARENT", "Bordi smussati": "CHAMFERED EDGES", "Serigrafata": "SILKSCREENED", "Antiurto": "SHOCKPROOF"}, "DOOR"],
             "Portaprezzo": ["TICKET-HOLDER", {"Trasparente": "TRASPARENT", "Colorato": "COLOURED", "Con tasca oscillante": "WITH LIFT-UP POCKET", "Adesivo": "ADHESIVE", "Con asola centrale": "WITH CENTRAL SLOT"}, "TICKET-HOLDER"]
         }
@@ -282,8 +282,8 @@ DATABASE = {
         "macro_en": "GLASS COMPONENT",
         "Particolari": {
             "Ripiano": ["GLASS SHELF", {}, "SHELF"],
-            "Anta": ["GLASS DOOR", {"Orientamento (+)": "", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"}, "DOOR"],
-            "Cancelletto": ["GLASS ARM", {"Orientamento (+)": "", "Illuminato": "ILLUMINATED"}, "ARM"],
+            "Anta": ["GLASS DOOR", {"Orientamento (+)": "", "Serigrafata": "SILKSCREENED", "Antiurto": "SHOCKPROOF", "Con foro serratura": "WITH LOCK HOLE", "Scorrevole": "SLIDING"}, "DOOR"],
+            "Cancelletto": ["GLASS ARM", {"Orientamento (+)": "", "Illuminato": "ILLUMINATED", "Serigrafata": "SILKSCREENED", "Antiurto": "SHOCKPROOF"}, "ARM"],
         }
     },
     "FASTENER": {
