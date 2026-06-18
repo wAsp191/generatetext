@@ -128,11 +128,86 @@ def activate_reset():
     st.session_state['reset_eseguito'] = True
     
 # =========================================================
-# 1A. GRUPPI DI PILLS (EXTRA) CENTRALIZZATI E CONDIVISI
+# 1. DIZIONARI, PILLS E DATABASE CENTRALIZZATO (SANIFICATO)
 # =========================================================
-# Centralizzando i Pills azzeriamo i refusi e permettiamo all'Analytics 
-# di mappare esattamente l'uso della stessa caratteristica su pezzi diversi.
 
+# --- REGOLE DI INCOMPATIBILITÀ (FILTRO SOFT) ---
+COPPIE_INCOMPATIBILI = [
+    {"Statico", "Antisismico"}, {"Angolo aperto", "Angolo chiuso"},
+    {"Portante", "Non portante"}, {"Singolo", "Doppio"},
+    {"Per ripiano in vetro", "Per ripiano in legno"}, {"Con serratura", "Senza serratura"},
+    {"Passo 25", "Passo 50"}, {"L50", "L55"}, {"Scorrevoli", "A saracinesca"},
+    {"Per attacco montante", "Per attacco fiancata"}, {"Superiore", "Tra ripiani di base"},
+    {"Dritto", "Inclinato"}, {"Cromato", "Verniciato"},
+    {"Multibarra", "Multilame", "In rete"}, {"Profilo a L", "Profilo a U"},
+    {"Per ripiano di base", "Per fiancata"}, {"Terminale", "Centrale"},
+    {"Liscio", "Liscia", "Forato", "Forata", "In filo"}, {"Zincato", "Verniciata"}
+]
+
+# --- TRADUZIONI FISSE ---
+GLOSSARIO_TECNICO = {
+    "mensola": "BRACKET", "mensole": "BRACKETS", "gondola": "GONDOLA",
+    "spalla": "FRAME", "innesto": "COUPLING", "montante": "UPRIGHT",
+    "per": "FOR", "losanga": "LOSANGA"
+}
+
+# --- CONFIGURAZIONE SOTTO-OPZIONI (+) ---
+SUB_OPTIONS_CONFIG = {
+    "VPA (+)": {
+        "Serie S": "S SERIES", "Serie SS": "SS SERIES", 
+        "Serie M": "M SERIES", "Serie L": "L SERIES"
+    },
+    "Con distanziale (+)": {
+        "L100": "S100", "L150": "S150", "L200": "S200", "L250": "S250"
+    },
+    "Numero diagonali (+)": {
+        "Doppie": "DD", "Triple": "TD", "Quadruple": "QD"
+    },
+    "Sezione (+)": {
+        "L55": "L55", "L80 Z/S": "L80 Z/S", "L80 Z/M": "L80 Z/M",
+        "L100 Z/S": "L100 Z/S", "L100 Z/M": "L100 Z/M", "L120 Z/S": "L120 Z/S", 
+        "70X30": "70X30", "90X30": "90X30", "30X30": "30X30"
+    },
+    "Tipologia di mensola (+)": {
+        "Mensola saldata a filo superiore": "UPPER BRACKET", 
+        "Mensola saldata a filo inferiore": "LOWER BRACKET"
+    },
+    "Compatibilità piede di base (+)": {
+        "Per piede H90": "FOR H90 BASE FOOT", 
+        "Per piede H100": "FOR H100 BASE FOOT", 
+        "Per piede H150": "FOR H150 BASE FOOT"
+    },
+    "Attacco gancio (+)": {
+        "Attacco barra": "HOOK FOR BAR", 
+        "Attacco multilame": "HOOK FOR MULTISTRIP", 
+        "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"
+    },
+    "Orientamento (+)": {"Destra": "RIGHT", "Sinistra": "LEFT"},
+    "Posizioni multiple (+)": {
+        "1 posizione": "1 POSITION", "2 posizioni": "2 POSITIONS", "3 posizioni": "3 POSITIONS"
+    },
+    "Altezza piede (+)": {"H90": "H90", "H100": "H100", "H150": "H150"},
+    "Predisposto per montante (+)": {
+        "L80": "FOR L80 UPRIGHT", "L100/L120": "FOR L100/L120 UPRIGHT"
+    },
+    "Numero tasche (+)": {"1 Tasca": "1 POCKET", "2 Tasche": "2 POCKETS"},
+    "Numero gradoni (+)": {"1 gradone": "1 STEP", "2 gradoni": "2 STEPS", "3 gradoni": "3 STEPS"},
+    "Asimmetrica (+)": {"AS240": "AS240", "AS340": "AS340", "AS440": "AS440"}
+}
+
+EXTRA_CON_INPUT_MANUALE = ["Sezione circolare", "Sezione quadrata"]
+
+# --- CONFIGURAZIONE MATERIALI INTERFACCIA (CHIAVE PER FIX RIGA 633) ---
+MATERIALI_CONFIG = {
+    "METAL COMP": {"METAL": "METAL", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
+    "WOOD COMP": {"LAMINATO": "LAMINATED", "NOBILITATO": "MELAMINE", "TRUCIOLARE": "OSB"},
+    "PLASTIC COMP": {"PLX": "PLX", "POLICARBONATO": "POLYCARBONATE", "PVC": "PVC", "GOMMA": "RUBBER"},
+    "GLASS COMP": {"VETRO TEMPRATO": "TEMPERED", "VETRO SATINATO": "SATIN"},
+    "FASTENER": {"NERO": "", "ZINCATO": "GALVANIZED", "BRUNITO": "BURNISHED"},
+    "ASSEMBLY": {}
+}
+
+# --- 1A. GRUPPI DI PILLS (EXTRA) CENTRALIZZATI E CONDIVISI ---
 PILLS_CONDIVISI = {
     "PILLS_PIEDI": {
         "Altezza piede (+)": "", 
@@ -412,9 +487,7 @@ PILLS_CONDIVISI = {
     "PILLS_VUOTO": {}
 }
 
-# =========================================================
-# 1B. DATABASE COMPONENTI SNELLITO (Puntatori ai Pills)
-# =========================================================
+# --- 1B. DATABASE COMPONENTI SNELLITO (Puntatori ai Pills) ---
 DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
@@ -552,16 +625,12 @@ MAPPA_NORMATIVE_FASTENER = {
     "Inserti filettati": { "": "" }
 }
 
-# OPZIONI_SPESSORE_STD = ["", "0.5", "0.6", "0.75", "0.8", "1", "1.2", "1.5", "2", "2.5", "3", "3.5", "4", "4.5", "5", "6", "8", "10"]
-# OPZIONI_SPESSORE_WOOD = ["", "10mm", "15mm", "18mm", "19mm", "20mm", "22mm", "24mm", "25mm", "30mm", "35mm"]
-
 TERMINI_ANTICIPATI = [
     "CENTRAL", "LEFT", "RIGHT", "REINFORCED", "INTERNAL", "EXTERNAL", "STATIC", "ADJUSTABLE", "SEISMIC",
     "MULTIBAR", "MULTISTRIP", "TOP", "INTER-BASE SHELF", "ROUNDED", "SLOPING", "SHAPED", "CONNECTING", "SHUTTER", "COUPLING",
     "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING", "WIRE-BASKET",
     "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "ROTATING", "CTR", "UPRIGHT-GRAFT"
 ]
-
 # =========================================================
 # 2. INTERFACCIA UTENTE (Layout & Logica)
 # =========================================================
