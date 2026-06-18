@@ -101,7 +101,28 @@ try:
         
         st.divider()
 
-        # --- NUOVA SEZIONE: ELENCO NOTE LIBERE ---
+        # --- ELENCO NOTE LIBERE ---
         st.subheader("📝 Registro Note Libere Inserite")
         
-        if "Note_Libere" in
+        if "Note_Libere" in df.columns:
+            df_note = df[df["Note_Libere"].notna() & (df["Note_Libere"].astype(str).str.strip() != "")]
+            
+            if not df_note.empty:
+                df_note_ordinate = df_note.sort_index(ascending=False)
+                
+                if "Timestamp" in df_note_ordinate.columns:
+                    df_note_show = df_note_ordinate[["Timestamp", "Particolare", "Note_Libere"]].copy()
+                    df_note_show["Timestamp"] = df_note_show["Timestamp"].dt.strftime('%d/%m/%Y %H:%M')
+                    df_note_show.columns = ["Data/Ora", "Componente", "Nota Inserita"]
+                else:
+                    df_note_show = df_note_ordinate[["Particolare", "Note_Libere"]].copy()
+                    df_note_show.columns = ["Componente", "Nota Inserita"]
+                
+                st.dataframe(df_note_show, use_container_width=True, hide_index=True)
+            else:
+                st.info("Nessuna nota libera è stata ancora inserita nei log.")
+        else:
+            st.warning("Colonna 'Note_Libere' non trovata nel database.")
+
+except Exception as e:
+    st.error(f"Errore nel caricamento dei dati: {e}")
