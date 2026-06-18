@@ -1045,49 +1045,51 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         st.session_state['stringa_stabile'] = " ".join(corpo.split()).upper()
 
         # =========================================================
-        # 📊 LIVE INJECTION: INVIO AUTOMATICO A GOOGLE SHEETS
+        # 📊 LIVE INJECTION: INVIO AUTOMATICO A GOOGLE SHEETS (FINALE)
         # =========================================================
-        if tags_scelti_raw or note_en:
-            try:
-                import datetime
-                import time
-                import pandas as pd
-                from streamlit_gsheets import GSheetsConnection
+        # Inviamo i dati SOLO alla fine di tutti i calcoli e le traduzioni
+        try:
+            import datetime
+            import time
+            import pandas as pd
+            from streamlit_gsheets import GSheetsConnection
+            
+            # Verifichiamo se abbiamo già inviato QUESTA esatta stringa finale tradotta
+            ultimo_codice_inviato = st.session_state.get("analytics_ultimo_codice", "")
+            
+            if stringa_finale.strip().upper() != ultimo_codice_inviato:
+                # Connessione ai Secrets di Streamlit
+                conn = st.connection("gsheets", type=GSheetsConnection)
                 
-                # --- SISTEMA DEBOUNCE A TEMPO ANTIDOPPIONE ---
-                orario_adesso = time.time()
-                ultimo_invio_tempo = st.session_state.get("analytics_ultimo_invio_tempo", 0.0)
+                # Normalizzazione Timestamp
+                orario_corrente = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
                 
-                # Se sono passati meno di 5 secondi dall'ultimo salvataggio, salta l'invio
-                if (orario_adesso - ultimo_invio_tempo) > 5.0:
-                    
-                    # Connessione ai Secrets di Streamlit
-                    conn = st.connection("gsheets", type=GSheetsConnection)
-                    
-                    # Normalizzazione timestamp leggibile
-                    orario_corrente = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    pills_uniti = ", ".join(tags_scelti_raw) if tags_scelti_raw else "- NESSUNO -"
-                    
-                    nuovo_dato = {
-                        "Timestamp": orario_corrente,
-                        "Macro_Categoria": str(macro_it).strip().upper(),
-                        "Particolare": str(scelta_part_it).strip().upper(),
-                        "Pills_Selezionati": pills_uniti.strip().upper(),
-                        "Stringa_Generata": str(stringa_finale).strip().upper(), # Tutto normalizzato in maiuscolo
-                        "Note_Libere": str(note_en).strip().upper()
-                    }
-                    
-                    # Carica, unisci e aggiorna il foglio Google
-                    df_attuale = conn.read(ttl=0)
-                    df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
-                    conn.update(data=df_aggiornato)
-                    
-                    # Salva il timestamp corrente nello stato per bloccare i prossimi 5 secondi
-                    st.session_state["analytics_ultimo_invio_tempo"] = orario_adesso
-                    st.toast("📊 Analytics aggiornato!", icon="📈")
-                    
-            except Exception as e:
-                pass # Fail-safe blindato
+                # Uniamo i Pills in modo pulito
+                pills_uniti = ", ".join(tags_scelti_raw) if tags_scelti_raw else "- NESSUNO -"
+                
+                # Prendiamo SOLO la nota finale tradotta (note_en)
+                nota_finale = str(note_en).strip().upper() if 'note_en' in locals() and note_en else "- NESSUNA NOTE -"
+
+                nuovo_dato = {
+                    "Timestamp": orario_corrente,
+                    "Macro_Categoria": str(macro_it).strip().upper(),
+                    "Particolare": str(scelta_part_it).strip().upper(),
+                    "Pills_Selezionati": pills_uniti.strip().upper(),
+                    "Stringa_Generata": stringa_finale.strip().upper(),
+                    "Note_Libere": nota_finale
+                }
+                
+                # Carica, unisci e aggiorna il foglio Google
+                df_attuale = conn.read(ttl=0)
+                df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
+                conn.update(data=df_aggiornato)
+                
+                # Salva lo stato per evitare qualsiasi duplicato futuro
+                st.session_state["analytics_ultimo_codice"] = stringa_finale.strip().upper()
+                st.toast("📊 Analytics aggiornato con la traduzione!", icon="📈")
+                
+        except Exception as e:
+            pass # Fail-safe blindato
         
 # =========================================================
 # 4. OUTPUT E MONITORAGGIO (VERSIONE DEFINITIVA COMPATTA)
