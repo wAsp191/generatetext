@@ -1047,47 +1047,47 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         # =========================================================
         # 📊 LIVE INJECTION: INVIO AUTOMATICO A GOOGLE SHEETS
         # =========================================================
-        # Il sistema invia i log solo se sono stati attivati dei Pills 
-        # o se i colleghi hanno inserito delle note libere a mano.
         if tags_scelti_raw or note_en:
             try:
                 import datetime
+                import time
                 import pandas as pd
                 from streamlit_gsheets import GSheetsConnection
                 
-                # Recuperiamo l'ultima stringa inviata in questa sessione per evitare doppioni da Rerun
-                ultima_inviata = st.session_state.get("ultima_stringa_inviata", "")
-
-                if stringa_finale != ultima_inviata:
-                    # Connessione al volo ai Secrets di Streamlit
+                # --- SISTEMA DEBOUNCE A TEMPO ANTIDOPPIONE ---
+                orario_adesso = time.time()
+                ultimo_invio_tempo = st.session_state.get("analytics_ultimo_invio_tempo", 0.0)
+                
+                # Se sono passati meno di 5 secondi dall'ultimo salvataggio, salta l'invio
+                if (orario_adesso - ultimo_invio_tempo) > 5.0:
+                    
+                    # Connessione ai Secrets di Streamlit
                     conn = st.connection("gsheets", type=GSheetsConnection)
                     
-                    # Normalizzazione orario locale italiano
+                    # Normalizzazione timestamp leggibile
                     orario_corrente = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                    
-                    # Prepariamo la riga singola (unendo i pills separati da virgola)
                     pills_uniti = ", ".join(tags_scelti_raw) if tags_scelti_raw else "- NESSUNO -"
                     
                     nuovo_dato = {
                         "Timestamp": orario_corrente,
-                        "Macro_Categoria": str(macro_it).upper(),
-                        "Particolare": str(scelta_part_it).upper(),
-                        "Pills_Selezionati": pills_uniti.upper(),
-                        "Stringa_Generata": stringa_finale,  # Ora salviamo anche il codice tecnico finale!
-                        "Note_Libere": str(note_en).upper()
+                        "Macro_Categoria": str(macro_it).strip().upper(),
+                        "Particolare": str(scelta_part_it).strip().upper(),
+                        "Pills_Selezionati": pills_uniti.strip().upper(),
+                        "Stringa_Generata": str(stringa_finale).strip().upper(), # Tutto normalizzato in maiuscolo
+                        "Note_Libere": str(note_en).strip().upper()
                     }
                     
-                    # Carichiamo il foglio, uniamo e salviamo (Logica Standard Streamlit GSheets)
+                    # Carica, unisci e aggiorna il foglio Google
                     df_attuale = conn.read(ttl=0)
                     df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
                     conn.update(data=df_aggiornato)
                     
-                    # Blocchiamo futuri invii identici automatici
-                    st.session_state["ultima_stringa_inviata"] = stringa_finale
+                    # Salva il timestamp corrente nello stato per bloccare i prossimi 5 secondi
+                    st.session_state["analytics_ultimo_invio_tempo"] = orario_adesso
                     st.toast("📊 Analytics aggiornato!", icon="📈")
                     
             except Exception as e:
-                pass # Fail-safe blindato: l'app non va mai in crash se Google fallisce
+                pass # Fail-safe blindato
         
 # =========================================================
 # 4. OUTPUT E MONITORAGGIO (VERSIONE DEFINITIVA COMPATTA)
