@@ -3,6 +3,18 @@ from deep_translator import GoogleTranslator
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
+import streamlit as st
+
+# =========================================================
+# 🧭 CONFIGURAZIONE DELLA NAVIGAZIONE (CAMBIO NOMI SIDEBAR)
+# =========================================================
+# Definiamo le pagine puntando ai file reali, ma assegnando il nome che vogliamo!
+pagina_generatore = st.Page("app.py", title="Technical Generator", icon="🚀", default=True)
+pagina_analytics = st.Page("pages/1_Analytics.py", title="Analytics", icon="📊")
+
+# Attiviamo la navigazione con i nuovi nomi personalizzati
+pg = st.navigation([pagina_generatore, pagina_analytics])
+pg.run()
 
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
