@@ -6,17 +6,6 @@ import pandas as pd
 import streamlit as st
 import streamlit as st
 
-# 1. Configurazione iniziale della pagina principale
-st.set_page_config(page_title="Technical Generator", page_icon="🚀", layout="wide")
-
-# 2. Definizione dei nomi personalizzati per la barra laterale
-pagina_generatore = st.Page("app.py", title="Technical Generator", icon="🚀", default=True)
-pagina_analytics = st.Page("pages/1_Analytics.py", title="Analytics", icon="📊")
-
-# 3. Avvio della navigazione con i titoli personalizzati
-pg = st.navigation([pagina_generatore, pagina_analytics])
-pg.run()
-
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
