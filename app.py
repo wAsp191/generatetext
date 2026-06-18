@@ -662,9 +662,7 @@ with col_workarea:
         dati_part = part_info.get(scelta_part_it, ["", "PILLS_VUOTO", ""])
         
         # --- LOGICA CORRETTA PER PILLS CENTRALIZZATI ---
-        # Recuperiamo la stringa-chiave del gruppo (es: "PILLS_PIEDI")
         chiave_gruppo_pills = dati_part[1]
-        # Estraiamo i relativi Pills dal dizionario globale PILLS_CONDIVISI
         pills_disponibili = PILLS_CONDIVISI.get(chiave_gruppo_pills, {})
         extra_options = list(pills_disponibili.keys())
         
