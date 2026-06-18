@@ -159,7 +159,7 @@ SUB_OPTIONS_CONFIG = {
         "Serie M": "M SERIES", "Serie L": "L SERIES"
     },
     "Con distanziale (+)": {
-        "L100": "L100", "L150": "L150", "L200": "L200", "L250": "L250"
+        "L100": "S100", "L150": "S150", "L200": "S200", "L250": "S250"
     },
     "Numero diagonali (+)": {
         "Doppie": "DD", "Triple": "TD", "Quadruple": "QD"
@@ -184,6 +184,7 @@ SUB_OPTIONS_CONFIG = {
         "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"
     },
     "Orientamento (+)": {"Destra": "RIGHT", "Sinistra": "LEFT"},
+    
     "Posizioni multiple (+)": {
         "1 posizione": "1 POSITION", "2 posizioni": "2 POSITIONS", "3 posizioni": "3 POSITIONS"
     },
@@ -697,7 +698,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             corpo = f"{corpo} - {comp_tag}"
             
         if st.session_state.get("check_1090"):
-            corpo += " (UNI EN 1090-2)"
+            corpo += " (UNI EN 1090-1)"
 
         # --- F. SALVATAGGIO ---
         # Join/Split finale per eliminare ogni doppio spazio residuo
