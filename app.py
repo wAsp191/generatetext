@@ -1045,51 +1045,42 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         st.session_state['stringa_stabile'] = " ".join(corpo.split()).upper()
 
         # =========================================================
-        # 📊 LIVE INJECTION: INVIO AUTOMATICO A GOOGLE SHEETS (FINALE)
+        # 📊 LIVE INJECTION: COPIATO SOLO SUL RISULTATO FINALE REALE
         # =========================================================
-        # Inviamo i dati SOLO alla fine di tutti i calcoli e le traduzioni
         try:
             import datetime
-            import time
             import pandas as pd
             from streamlit_gsheets import GSheetsConnection
             
-            # Verifichiamo se abbiamo già inviato QUESTA esatta stringa finale tradotta
-            ultimo_codice_inviato = st.session_state.get("analytics_ultimo_codice", "")
+            # Recuperiamo il testo definitivo che l'utente vede a schermo sotto "Risultato Finale"
+            # NOTA: Sostituisci 'risultato_completo' con il nome esatto della tua variabile finale se diverso
+            testo_definitivo = risultato_completo.strip().upper()
             
-            if stringa_finale.strip().upper() != ultimo_codice_inviato:
-                # Connessione ai Secrets di Streamlit
+            ultimo_inviato = st.session_state.get("analytics_definitivo_inviato", "")
+            
+            if testo_definitivo != ultimo_inviato:
                 conn = st.connection("gsheets", type=GSheetsConnection)
                 
-                # Normalizzazione Timestamp
-                orario_corrente = datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")
-                
-                # Uniamo i Pills in modo pulito
                 pills_uniti = ", ".join(tags_scelti_raw) if tags_scelti_raw else "- NESSUNO -"
+                nota_inglese = str(note_en).strip().upper() if 'note_en' in locals() and note_en else "- NESSUNA NOTE -"
                 
-                # Prendiamo SOLO la nota finale tradotta (note_en)
-                nota_finale = str(note_en).strip().upper() if 'note_en' in locals() and note_en else "- NESSUNA NOTE -"
-
                 nuovo_dato = {
-                    "Timestamp": orario_corrente,
+                    "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
                     "Macro_Categoria": str(macro_it).strip().upper(),
                     "Particolare": str(scelta_part_it).strip().upper(),
                     "Pills_Selezionati": pills_uniti.strip().upper(),
-                    "Stringa_Generata": stringa_finale.strip().upper(),
-                    "Note_Libere": nota_finale
+                    "Stringa_Generata": testo_definitivo,
+                    "Note_Libere": nota_inglese
                 }
                 
-                # Carica, unisci e aggiorna il foglio Google
                 df_attuale = conn.read(ttl=0)
                 df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
                 conn.update(data=df_aggiornato)
                 
-                # Salva lo stato per evitare qualsiasi duplicato futuro
-                st.session_state["analytics_ultimo_codice"] = stringa_finale.strip().upper()
-                st.toast("📊 Analytics aggiornato con la traduzione!", icon="📈")
-                
-        except Exception as e:
-            pass # Fail-safe blindato
+                st.session_state["analytics_definitivo_inviato"] = testo_definitivo
+                st.toast("📊 Analytics registrato sul Risultato Finale!", icon="📈")
+        except:
+            pass
         
 # =========================================================
 # 4. OUTPUT E MONITORAGGIO (VERSIONE DEFINITIVA COMPATTA)
