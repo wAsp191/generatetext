@@ -52,21 +52,17 @@ try:
         st.subheader("🏷️ Utilizzo delle Opzioni Extra (Pills)")
         
         if "Pills_Selezionati" in df.columns:
-            # Prendiamo tutti i pills, rimuoviamo i valori vuoti e separiamo le stringhe con la virgola
             pills_series = df["Pills_Selezionati"].dropna().astype(str)
             
             all_pills = []
             for item in pills_series:
-                # Separiamo se ci sono più elementi (es: "Scorrevoli, Con Foro") e puliamo gli spazi bianchi
                 parts = [p.strip() for p in item.split(",") if p.strip()]
                 all_pills.extend(parts)
             
             if all_pills:
-                # Creiamo un DataFrame con il conteggio di ogni singolo Pills
                 pills_counts = pd.Series(all_pills).value_counts().reset_index()
                 pills_counts.columns = ["Opzione Extra (Pill)", "Numero di Utilizzi"]
                 
-                # Mostriamo i dati affiancando un grafico e una tabella
                 col_pills_grafico, col_pills_tabella = st.columns([2, 1])
                 
                 with col_pills_grafico:
@@ -100,9 +96,12 @@ try:
         
         # --- TABELLA ULTIMI DATI (AUMENTATA A 20) ---
         st.subheader("📋 Ultimi 20 Log Registrati")
-        # Estraiamo gli ultimi 20 elementi salvati e li ordiniamo dal più recente al più vecchio
         ultimi_log = df.tail(20).sort_index(ascending=False)
         st.dataframe(ultimi_log, use_container_width=True)
+        
+        st.divider()
 
-except Exception as e:
-    st.error(f"Errore nel caricamento dei dati: {e}")
+        # --- NUOVA SEZIONE: ELENCO NOTE LIBERE ---
+        st.subheader("📝 Registro Note Libere Inserite")
+        
+        if "Note_Libere" in
