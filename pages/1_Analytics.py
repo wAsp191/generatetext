@@ -101,35 +101,26 @@ try:
         
         st.divider()
 
-       st.divider()
-
         # --- ELENCO NOTE LIBERE CON MOLTIPLIPICATORE ---
         st.subheader("📝 Classifica Note Libere più Utilizzate")
         
         if "Note_Libere" in df.columns:
-            # Filtriamo via i valori nulli, vuoti o spazi bianchi
             df_note = df[df["Note_Libere"].notna() & (df["Note_Libere"].astype(str).str.strip() != "")].copy()
             
             if not df_note.empty:
-                # Standardizziamo in maiuscolo per evitare che "Trial" e "trial" vengano contati come diversi
                 df_note["Nota_Pulita"] = df_note["Note_Libere"].astype(str).str.strip().str.upper()
                 
-                # Raggruppiamo per nota e contiamo le ripetizioni
                 classifica_note = df_note["Nota_Pulita"].value_counts().reset_index()
                 classifica_note.columns = ["Nota Libera Digitata", "Numero di Ripetizioni"]
                 
-                # Aggiungiamo un tocco visivo: se è ripetuta più di una volta mettiamo un badge
                 def aggiungi_moltiplicatore(row):
                     if row["Numero di Ripetizioni"] > 1:
                         return f"🔥 {row['Numero di Ripetizioni']} Volte"
                     return "1 Volta"
                 
                 classifica_note["Frequenza"] = classifica_note.apply(aggiungi_moltiplicatore, axis=1)
-                
-                # Selezioniamo le colonne da mostrare in modo pulito
                 df_visualizzazione = classifica_note[["Nota Libera Digitata", "Frequenza"]]
                 
-                # Mostriamo la tabella con il moltiplicatore
                 st.dataframe(df_visualizzazione, use_container_width=True, hide_index=True)
             else:
                 st.info("Nessuna nota libera è stata ancora inserita nei log.")
