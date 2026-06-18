@@ -1,5 +1,8 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
+from datetime import datetime
+from streamlit_gsheets import GSheetsConnection
+import pandas as pd
 
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
@@ -881,6 +884,29 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
     macro_it = st.session_state.get("radio_macro", "")
     scelta_part_it = st.session_state.get("selectbox_part", "")
     mat_en = st.session_state.get("mat_en", "").upper()
+
+    # --- AGGANCIO COMPLETO PER GOOGLE SHEETS ANALYTICS ---
+    try:
+        nuovo_dato = {
+            "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+            "Macro_Categoria": st.session_state.get('macro_selezionata', 'N/D'), # Controlla le tue variabili di stato
+            "Particolare": st.session_state.get('particolare_selezionato', 'N/D'),
+            "Pills_Selezionati": ", ".join(st.session_state.get('pills_scelti', [])),
+            "Stringa_Generata": stringa_finale,
+            "Note_Libere": st.session_state.get('note_input', '')
+        }
+
+        # Legge il database attuale (usa il nome del foglio effettivo, es: "REG_Analytics_DB")
+        df_attuale = conn.read(ttl=0) 
+
+        # Unisce il vecchio database con la nuova riga generata
+        df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
+
+        # Invia l'aggiornamento definitivo a Google Sheets
+        conn.update(data=df_aggiornato)
+        st.success("📊 Dati registrati nel database Analytics!")
+    except Exception as e:
+        st.warning(f"Connessione Analytics in attesa dei Secrets: {e}")
     
     if scelta_part_it:
         part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", "PILLS_VUOTO", ""])
