@@ -885,29 +885,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
     scelta_part_it = st.session_state.get("selectbox_part", "")
     mat_en = st.session_state.get("mat_en", "").upper()
 
-    # --- AGGANCIO COMPLETO PER GOOGLE SHEETS ANALYTICS ---
-    try:
-        nuovo_dato = {
-            "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-            "Macro_Categoria": st.session_state.get('macro_selezionata', 'N/D'), # Controlla le tue variabili di stato
-            "Particolare": st.session_state.get('particolare_selezionato', 'N/D'),
-            "Pills_Selezionati": ", ".join(st.session_state.get('pills_scelti', [])),
-            "Stringa_Generata": stringa_finale,
-            "Note_Libere": st.session_state.get('note_input', '')
-        }
-
-        # Legge il database attuale (usa il nome del foglio effettivo, es: "REG_Analytics_DB")
-        df_attuale = conn.read(ttl=0) 
-
-        # Unisce il vecchio database con la nuova riga generata
-        df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
-
-        # Invia l'aggiornamento definitivo a Google Sheets
-        conn.update(data=df_aggiornato)
-        st.success("📊 Dati registrati nel database Analytics!")
-    except Exception as e:
-        st.warning(f"Connessione Analytics in attesa dei Secrets: {e}")
-    
     if scelta_part_it:
         part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", "PILLS_VUOTO", ""])
         part_en = part_db[0].upper()
@@ -915,7 +892,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         # --- LOGICA ADATTATA AL NUOVO DB CENTRALIZZATO ---
         chiave_gruppo_pills = part_db[1]
         dict_extra_db = PILLS_CONDIVISI.get(chiave_gruppo_pills, {})
-        
         tag_reale_db = part_db[2] if len(part_db) > 2 else ""
 
         # --- B. GESTIONE EXTRA E AGGETTIVI ---
@@ -935,6 +911,32 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
                 lista_prima.append(traduzione)
             else:
                 lista_dopo.append(traduzione)
+
+        # -------------------------------------------------------------------------
+        # [ QUI NEL TUO CODICE DOVREBBE ESSERCI LA CREAZIONE DELLA STRINGA FINALE ]
+        # Esempio: stringa_finale = f"{mat_en} {part_en} ..." 
+        # Cerca la riga esatta sotto questo blocco nel tuo file originale!
+        # -------------------------------------------------------------------------
+
+        # --- SPOSTA IL BLOCCO DI INVIO QUI (DOPO CHE stringa_finale È STATA DEFINITA) ---
+        try:
+            nuovo_dato = {
+                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Macro_Categoria": macro_it,         # Usa la variabile corretta
+                "Particolare": scelta_part_it,       # Usa la variabile corretta
+                "Pills_Selezionati": ", ".join(tags_scelti_raw), # Prende la lista dei tag scelti
+                "Stringa_Generata": stringa_finale,  # Ora stringa_finale esiste ed è valorizzata!
+                "Note_Libere": st.session_state.get('note_input', '') # Sostituisci se la variabile delle note ha un altro nome
+            }
+
+            # Scrittura su Google Sheets
+            df_attuale = conn.read(ttl=0) 
+            df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
+            conn.update(data=df_aggiornato)
+            st.success("📊 Dati registrati nel database Analytics!")
+            
+        except Exception as e:
+            st.warning(f"Connessione Analytics in attesa dei Secrets: {e}")
 
         # --- C. DIMENSIONI ---
         dim_list = []
