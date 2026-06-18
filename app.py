@@ -899,7 +899,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         lista_prima = []
         lista_dopo = []
         
-        # Recuperiamo i tag selezionati nell'interfaccia (assicurati che tags_scelti_raw sia definita sopra)
+        # Recuperiamo i tag selezionati nell'interfaccia
         tags_scelti_effettivi = tags_scelti_raw if 'tags_scelti_raw' in locals() else st.session_state.get('comp_tags', [])
         if not isinstance(tags_scelti_effettivi, list):
             tags_scelti_effettivi = [tags_scelti_effettivi] if tags_scelti_effettivi else []
@@ -917,68 +917,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
                 lista_prima.append(traduzione)
             else:
                 lista_dopo.append(traduzione)
-
-        # --- COSTRUZIONE DELLA STRINGA FINALE ---
-        # Uniamo i pezzi recuperati per formare il codice tecnico finale
-        stringa_prima = " ".join(lista_prima)
-        stringa_dopo = " ".join(lista_dopo)
-        
-        componenti_stringa = [mat_en, stringa_prima, part_en, stringa_dopo]
-        stringa_finale = " ".join([p for p in componenti_stringa if p.strip()]).strip()
-
-        # --- 🚀 INVIO DATI A GOOGLE SHEETS (ANALYTICS) ---
-        try:
-            # Inizializzazione connessione sicura con Google Sheets
-            conn = st.connection("gsheets", type=GSheetsConnection)
-            
-            nuovo_dato = {
-                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "Macro_Categoria": macro_it,
-                "Particolare": scelta_part_it,
-                "Pills_Selezionati": ", ".join(tags_scelti_effettivi),
-                "Stringa_Generata": stringa_finale,
-                "Note_Libere": st.session_state.get('extra_text', '') # Agganciato alla tua chiave text_keys
-            }
-
-            # Legge il database attuale, unisce il nuovo record e aggiorna Google Sheets
-            df_attuale = conn.read(ttl=0) 
-            df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
-            conn.update(data=df_aggiornato)
-            
-            st.success("📊 Dati registrati nel database Analytics!")
-            
-        except Exception as e:
-            st.warning(f"Connessione Analytics in attesa dei Secrets o Errore API: {e}")
-
-        # Mostra il risultato a schermo all'utente
-        st.subheader("Stringa Tecnica Generata")
-        st.code(stringa_finale, language="text")
-
-        # -------------------------------------------------------------------------
-        # [ QUI NEL TUO CODICE DOVREBBE ESSERCI LA CREAZIONE DELLA STRINGA FINALE ]
-        # Esempio: stringa_finale = f"{mat_en} {part_en} ..." 
-        # Cerca la riga esatta sotto questo blocco nel tuo file originale!
-        # -------------------------------------------------------------------------
-
-        # --- SPOSTA IL BLOCCO DI INVIO QUI (DOPO CHE stringa_finale È STATA DEFINITA) ---
-        try:
-            nuovo_dato = {
-                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                "Macro_Categoria": macro_it,         # Usa la variabile corretta
-                "Particolare": scelta_part_it,       # Usa la variabile corretta
-                "Pills_Selezionati": ", ".join(tags_scelti_raw), # Prende la lista dei tag scelti
-                "Stringa_Generata": stringa_finale,  # Ora stringa_finale esiste ed è valorizzata!
-                "Note_Libere": st.session_state.get('note_input', '') # Sostituisci se la variabile delle note ha un altro nome
-            }
-
-            # Scrittura su Google Sheets
-            df_attuale = conn.read(ttl=0) 
-            df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
-            conn.update(data=df_aggiornato)
-            st.success("📊 Dati registrati nel database Analytics!")
-            
-        except Exception as e:
-            st.warning(f"Connessione Analytics in attesa dei Secrets: {e}")
 
         # --- C. DIMENSIONI ---
         dim_list = []
@@ -1004,7 +942,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         note_it = st.session_state.get("extra_text", "").strip()
         note_en = traduci_note(note_it)
 
-        # --- E. ASSEMBLAGGIO FINALE (Logica Anti-Rifuso Infallibile) ---
+        # --- E. ASSEMBLAGGIO FINALE ---
         if macro_it == "ASSEMBLY":
             prefix_base = "ASSEMBLED" if st.session_state.get("check_assembled") else ""
         else:
@@ -1042,7 +980,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             corpo += " (UNI EN 1090-1)"
 
         # --- F. SALVATAGGIO IN SESSION STATE ---
-        st.session_state['stringa_stabile'] = " ".join(corpo.split()).upper()
+        stringa_definitiva = " ".join(corpo.split()).upper()
+        st.session_state['stringa_stabile'] = stringa_definitiva
 
         # =========================================================
         # 📊 LIVE INJECTION: COPIATO SOLO SUL RISULTATO FINALE REALE
@@ -1052,13 +991,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             import pandas as pd
             from streamlit_gsheets import GSheetsConnection
             
-            # Recuperiamo il testo definitivo che l'utente vede a schermo sotto "Risultato Finale"
-            # NOTA: Sostituisci 'risultato_completo' con il nome esatto della tua variabile finale se diverso
-            testo_definitivo = risultato_completo.strip().upper()
-            
             ultimo_inviato = st.session_state.get("analytics_definitivo_inviato", "")
             
-            if testo_definitivo != ultimo_inviato:
+            # Invia SOLO se questa stringa esatta non è stata già inviata in questa sessione
+            if stringa_definitiva != ultimo_inviato:
                 conn = st.connection("gsheets", type=GSheetsConnection)
                 
                 pills_uniti = ", ".join(tags_scelti_raw) if tags_scelti_raw else "- NESSUNO -"
@@ -1069,7 +1005,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
                     "Macro_Categoria": str(macro_it).strip().upper(),
                     "Particolare": str(scelta_part_it).strip().upper(),
                     "Pills_Selezionati": pills_uniti.strip().upper(),
-                    "Stringa_Generata": testo_definitivo,
+                    "Stringa_Generata": stringa_definitiva,
                     "Note_Libere": nota_inglese
                 }
                 
@@ -1077,10 +1013,11 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
                 df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
                 conn.update(data=df_aggiornato)
                 
-                st.session_state["analytics_definitivo_inviato"] = testo_definitivo
-                st.toast("📊 Analytics registrato sul Risultato Finale!", icon="📈")
-        except:
-            pass
+                # Blocca futuri rerun registrando l'invio
+                st.session_state["analytics_definitivo_inviato"] = stringa_definitiva
+                
+        except Exception as e:
+            pass # Fail-safe blindato
         
 # =========================================================
 # 4. OUTPUT E MONITORAGGIO (VERSIONE DEFINITIVA COMPATTA)
