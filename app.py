@@ -884,7 +884,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
     macro_it = st.session_state.get("radio_macro", "")
     scelta_part_it = st.session_state.get("selectbox_part", "")
     mat_en = st.session_state.get("mat_en", "").upper()
-
+    
     if scelta_part_it:
         part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", "PILLS_VUOTO", ""])
         part_en = part_db[0].upper()
@@ -892,13 +892,19 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         # --- LOGICA ADATTATA AL NUOVO DB CENTRALIZZATO ---
         chiave_gruppo_pills = part_db[1]
         dict_extra_db = PILLS_CONDIVISI.get(chiave_gruppo_pills, {})
+        
         tag_reale_db = part_db[2] if len(part_db) > 2 else ""
 
         # --- B. GESTIONE EXTRA E AGGETTIVI ---
         lista_prima = []
         lista_dopo = []
         
-        for tag in tags_scelti_raw:
+        # Recuperiamo i tag selezionati nell'interfaccia (assicurati che tags_scelti_raw sia definita sopra)
+        tags_scelti_effettivi = tags_scelti_raw if 'tags_scelti_raw' in locals() else st.session_state.get('comp_tags', [])
+        if not isinstance(tags_scelti_effettivi, list):
+            tags_scelti_effettivi = [tags_scelti_effettivi] if tags_scelti_effettivi else []
+        
+        for tag in tags_scelti_effettivi:
             if tag in SUB_OPTIONS_CONFIG:
                 chiave_sub = st.session_state.get(f"sub_{tag}", "")
                 traduzione = SUB_OPTIONS_CONFIG[tag].get(chiave_sub, chiave_sub).upper()
@@ -911,6 +917,42 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
                 lista_prima.append(traduzione)
             else:
                 lista_dopo.append(traduzione)
+
+        # --- COSTRUZIONE DELLA STRINGA FINALE ---
+        # Uniamo i pezzi recuperati per formare il codice tecnico finale
+        stringa_prima = " ".join(lista_prima)
+        stringa_dopo = " ".join(lista_dopo)
+        
+        componenti_stringa = [mat_en, stringa_prima, part_en, stringa_dopo]
+        stringa_finale = " ".join([p for p in componenti_stringa if p.strip()]).strip()
+
+        # --- 🚀 INVIO DATI A GOOGLE SHEETS (ANALYTICS) ---
+        try:
+            # Inizializzazione connessione sicura con Google Sheets
+            conn = st.connection("gsheets", type=GSheetsConnection)
+            
+            nuovo_dato = {
+                "Timestamp": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                "Macro_Categoria": macro_it,
+                "Particolare": scelta_part_it,
+                "Pills_Selezionati": ", ".join(tags_scelti_effettivi),
+                "Stringa_Generata": stringa_finale,
+                "Note_Libere": st.session_state.get('extra_text', '') # Agganciato alla tua chiave text_keys
+            }
+
+            # Legge il database attuale, unisce il nuovo record e aggiorna Google Sheets
+            df_attuale = conn.read(ttl=0) 
+            df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
+            conn.update(data=df_aggiornato)
+            
+            st.success("📊 Dati registrati nel database Analytics!")
+            
+        except Exception as e:
+            st.warning(f"Connessione Analytics in attesa dei Secrets o Errore API: {e}")
+
+        # Mostra il risultato a schermo all'utente
+        st.subheader("Stringa Tecnica Generata")
+        st.code(stringa_finale, language="text")
 
         # -------------------------------------------------------------------------
         # [ QUI NEL TUO CODICE DOVREBBE ESSERCI LA CREAZIONE DELLA STRINGA FINALE ]
