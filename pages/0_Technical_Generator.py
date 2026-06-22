@@ -899,17 +899,18 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
 
         # --- B. GESTIONE EXTRA E AGGETTIVI (ORDINATI) ---
         
-        # 1. Recupero sicuro dei tag (definizione garantita)
+        # 1. Recupero sicuro dei tag
         tags_scelti_effettivi = st.session_state.get('comp_tags', [])
         if not isinstance(tags_scelti_effettivi, list):
             tags_scelti_effettivi = [tags_scelti_effettivi] if tags_scelti_effettivi else []
 
         # 2. Creiamo una lista di tuple: (indice_nel_codice, traduzione)
-        ordine_codice = list(dict_extra_db.keys())
+        # Convertiamo tutto in minuscolo per confronto sicuro
+        ordine_codice = [k.lower() for k in dict_extra_db.keys()]
         tag_processati = []
 
         for tag in tags_scelti_effettivi:
-            # Recupero traduzione
+            # Recupero traduzione (logica originale)
             if tag in SUB_OPTIONS_CONFIG:
                 chiave_sub = st.session_state.get(f"sub_{tag}", "")
                 traduzione = SUB_OPTIONS_CONFIG[tag].get(chiave_sub, chiave_sub).upper()
@@ -918,16 +919,17 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             else:
                 traduzione = dict_extra_db.get(tag, tag).upper()
             
-            # Recuperiamo l'indice del tag nel dizionario originale
-            # Usiamo .get() per evitare errori se il tag non è nel dizionario
+            # --- CORREZIONE QUI: Cerchiamo l'indice in modo robusto ---
             try:
-                indice = ordine_codice.index(tag)
-            except ValueError:
-                indice = 999 # Se non trovato, va in fondo
+                # Cerchiamo il tag normalizzato (minuscolo) nell'ordine_codice
+                indice = ordine_codice.index(tag.lower())
+            except (ValueError, AttributeError):
+                # Se non trovato, mettiamo 999
+                indice = 999 
             
             tag_processati.append((indice, traduzione))
 
-        # 3. Ordiniamo i tag in base all'indice originale del codice
+        # 3. Ordiniamo
         tag_processati.sort(key=lambda x: x[0])
 
         # 4. Dividiamo in lista_prima e lista_dopo
