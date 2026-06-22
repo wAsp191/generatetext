@@ -898,7 +898,13 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         tag_reale_db = part_db[2] if len(part_db) > 2 else ""
 
         # --- B. GESTIONE EXTRA E AGGETTIVI (ORDINATI) ---
-        # 1. Creiamo una lista di tuple: (indice_nel_codice, traduzione)
+        
+        # 1. Recupero sicuro dei tag (definizione garantita)
+        tags_scelti_effettivi = st.session_state.get('comp_tags', [])
+        if not isinstance(tags_scelti_effettivi, list):
+            tags_scelti_effettivi = [tags_scelti_effettivi] if tags_scelti_effettivi else []
+
+        # 2. Creiamo una lista di tuple: (indice_nel_codice, traduzione)
         ordine_codice = list(dict_extra_db.keys())
         tag_processati = []
 
@@ -912,16 +918,19 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             else:
                 traduzione = dict_extra_db.get(tag, tag).upper()
             
-            # Recuperiamo l'indice del tag nel dizionario originale per forzare l'ordine
-            # Se il tag non esiste nel dict (es. input manuale), mettiamo un indice alto
-            indice = ordine_codice.index(tag) if tag in ordine_codice else 999
+            # Recuperiamo l'indice del tag nel dizionario originale
+            # Usiamo .get() per evitare errori se il tag non è nel dizionario
+            try:
+                indice = ordine_codice.index(tag)
+            except ValueError:
+                indice = 999 # Se non trovato, va in fondo
+            
             tag_processati.append((indice, traduzione))
 
-        # 2. Ordiniamo i tag in base all'indice originale del codice
+        # 3. Ordiniamo i tag in base all'indice originale del codice
         tag_processati.sort(key=lambda x: x[0])
 
-        # 3. Ora dividiamo in lista_prima e lista_dopo come facevi prima, 
-        # ma mantenendo l'ordine che abbiamo appena calcolato
+        # 4. Dividiamo in lista_prima e lista_dopo
         lista_prima = []
         lista_dopo = []
         for _, traduzione in tag_processati:
