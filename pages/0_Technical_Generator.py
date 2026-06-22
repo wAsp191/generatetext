@@ -132,6 +132,8 @@ def activate_reset():
     # 4. Flag per attivare il toast al termine del refresh automatico
     st.session_state['reset_eseguito'] = True
     
+import streamlit as st
+
 # =========================================================
 # 1. DIZIONARI, PILLS E DATABASE CENTRALIZZATO (SANIFICATO)
 # =========================================================
@@ -202,7 +204,7 @@ SUB_OPTIONS_CONFIG = {
 
 EXTRA_CON_INPUT_MANUALE = ["Sezione circolare", "Sezione quadrata"]
 
-# --- CONFIGURAZIONE MATERIALI INTERFACCIA (CHIAVE PER FIX RIGA 633) ---
+# --- CONFIGURAZIONE MATERIALI INTERFACCIA ---
 MATERIALI_CONFIG = {
     "METAL COMP": {"METAL": "METAL", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
     "WOOD COMP": {"LAMINATO": "LAMINATED", "NOBILITATO": "MELAMINE", "TRUCIOLARE": "OSB"},
@@ -212,7 +214,7 @@ MATERIALI_CONFIG = {
     "ASSEMBLY": {}
 }
 
-# --- 1A. GRUPPI DI PILLS (EXTRA) CENTRALIZZATI E CONDIVISI ---
+# --- 1A. GRUPPI DI PILLS CENTRALIZZATI E CONDIVISI ---
 PILLS_CONDIVISI = {
     "PILLS_PIEDI": {
         "Altezza piede (+)": "", 
@@ -492,7 +494,7 @@ PILLS_CONDIVISI = {
     "PILLS_VUOTO": {}
 }
 
-# --- 1B. DATABASE COMPONENTI SNELLITO (Puntatori ai Pills) ---
+# --- 1B. DATABASE COMPONENTI (Puntatori ai Pills) ---
 DATABASE = {
     "METAL COMP": {
         "macro_en": "METAL COMPONENT",
@@ -636,6 +638,55 @@ TERMINI_ANTICIPATI = [
     "WIRE", "GRIPPED", "CHROMED", "PAINTED", "MESH", "SLIDING", "CURVED", "STRAIGHT", "MILLING", "WIRE-BASKET",
     "SEMICIRCULAR", "SINGLE", "DOUBLE", "END", "L-SHAPED", "U-SHAPED", "SERRATED LOCK", "ROTATING", "CTR", "UPRIGHT-GRAFT"
 ]
+
+# =========================================================
+# 1A. FUNZIONE MOTORE: Generazione Stringa Ordinata
+# =========================================================
+def genera_stringa_finale(pills_selezionati, pills_disponibili_dict):
+    """
+    Riordina i pills selezionati basandosi sull'ordine originale definito in PILLS_CONDIVISI.
+    """
+    ordine_originale = list(pills_disponibili_dict.keys())
+    
+    # Ordina i pills scelti basandosi sull'indice nel dizionario originale
+    pills_ordinati = sorted(
+        pills_selezionati, 
+        key=lambda x: ordine_originale.index(x) if x in ordine_originale else 999
+    )
+    
+    # Costruzione stringa usando le traduzioni
+    return " + ".join([pills_disponibili_dict[p] for p in pills_ordinati])
+
+# =========================================================
+# 3. LOGICA INTERFACCIA (UI STREAMLIT)
+# =========================================================
+
+# 1. Selezione Categoria
+macro_selezionata = st.selectbox("Seleziona Categoria", list(DATABASE.keys()))
+
+# 2. Selezione Particolare
+particolari = DATABASE[macro_selezionata]["Particolari"]
+particolare_selezionato = st.selectbox("Seleziona Particolare", list(particolari.keys()))
+
+# 3. Recupero Nome del Gruppo Pills dal database
+nome_gruppo_pills = particolari[particolare_selezionato][1]
+
+# 4. Recupero effettivo dizionario pills da PILLS_CONDIVISI
+if nome_gruppo_pills in PILLS_CONDIVISI:
+    pills_disponibili = PILLS_CONDIVISI[nome_gruppo_pills]
+else:
+    pills_disponibili = {}
+
+# 5. Multiselect (Ordine dei pills uguale a quello in PILLS_CONDIVISI)
+pills_scelti = st.multiselect("Seleziona Opzioni (Pills)", list(pills_disponibili.keys()))
+
+# 6. Generazione Stringa
+if st.button("Genera Stringa"):
+    if pills_scelti:
+        stringa_finale = genera_stringa_finale(pills_scelti, pills_disponibili)
+        st.write(f"Stringa Risultante: **{stringa_finale}**")
+    else:
+        st.warning("Seleziona almeno un'opzione.")
 # =========================================================
 # 2. INTERFACCIA UTENTE (Layout & Logica)
 # =========================================================
