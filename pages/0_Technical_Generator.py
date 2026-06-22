@@ -613,16 +613,25 @@ st.title("Generatore Semplificato")
 cat = st.selectbox("Categoria", list(DATABASE.keys()))
 part = st.selectbox("Particolare", list(DATABASE[cat]["Particolari"].keys()))
 
-# Recupero i pills di quel particolare
-pills_dict = DATABASE[cat]["Particolari"][part]
+# --- CORREZIONE QUI ---
+# Recuperiamo la lista: es. ["BASE FOOT", "PILLS_PIEDI", "FOOT"]
+info_particolare = DATABASE[cat]["Particolari"][part]
+nome_dizionario_pills = info_particolare[1]
 
-# Multiselect
+# Recuperiamo il dizionario reale da PILLS_CONDIVISI
+# Se il dizionario non esiste, usiamo un dizionario vuoto
+pills_dict = PILLS_CONDIVISI.get(nome_dizionario_pills, {})
+
+# Multiselect (ora funziona perché pills_dict è un dizionario)
 scelti = st.multiselect("Seleziona", list(pills_dict.keys()))
 
 if st.button("Genera"):
     if scelti:
+        # Passiamo il dizionario reale per la traduzione
         risultato = genera_stringa_finale(scelti, pills_dict)
         st.success(f"Stringa: {risultato}")
+    else:
+        st.warning("Seleziona almeno un'opzione.")
 
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F25 READY", "F50", "F50 BESPOKE", "F50 READY", "UNIVERSAL", "BC", "FORTISSIMO", "MINIRACK", "UNIMOB"]
 
