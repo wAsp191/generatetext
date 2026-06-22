@@ -897,20 +897,16 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         
         tag_reale_db = part_db[2] if len(part_db) > 2 else ""
 
-        # --- B. GESTIONE EXTRA E AGGETTIVI (ORDINATI) ---
+        # --- B. GESTIONE EXTRA E AGGETTIVI ---
+        lista_prima = []
+        lista_dopo = []
         
-        # 1. Recupero sicuro dei tag
-        tags_scelti_effettivi = st.session_state.get('comp_tags', [])
+        # Recuperiamo i tag selezionati nell'interfaccia
+        tags_scelti_effettivi = tags_scelti_raw if 'tags_scelti_raw' in locals() else st.session_state.get('comp_tags', [])
         if not isinstance(tags_scelti_effettivi, list):
             tags_scelti_effettivi = [tags_scelti_effettivi] if tags_scelti_effettivi else []
-
-        # 2. Creiamo una lista di tuple: (indice_nel_codice, traduzione)
-        # Convertiamo tutto in minuscolo per confronto sicuro
-        ordine_codice = [k.lower() for k in dict_extra_db.keys()]
-        tag_processati = []
-
+        
         for tag in tags_scelti_effettivi:
-            # Recupero traduzione (logica originale)
             if tag in SUB_OPTIONS_CONFIG:
                 chiave_sub = st.session_state.get(f"sub_{tag}", "")
                 traduzione = SUB_OPTIONS_CONFIG[tag].get(chiave_sub, chiave_sub).upper()
@@ -919,23 +915,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             else:
                 traduzione = dict_extra_db.get(tag, tag).upper()
             
-            # --- CORREZIONE QUI: Cerchiamo l'indice in modo robusto ---
-            try:
-                # Cerchiamo il tag normalizzato (minuscolo) nell'ordine_codice
-                indice = ordine_codice.index(tag.lower())
-            except (ValueError, AttributeError):
-                # Se non trovato, mettiamo 999
-                indice = 999 
-            
-            tag_processati.append((indice, traduzione))
-
-        # 3. Ordiniamo
-        tag_processati.sort(key=lambda x: x[0])
-
-        # 4. Dividiamo in lista_prima e lista_dopo
-        lista_prima = []
-        lista_dopo = []
-        for _, traduzione in tag_processati:
             if traduzione in TERMINI_ANTICIPATI:
                 lista_prima.append(traduzione)
             else:
