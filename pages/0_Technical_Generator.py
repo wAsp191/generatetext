@@ -597,6 +597,32 @@ DATABASE = {
         }
     }
 }
+# 2. FUNZIONE MOTORE: Ordina secondo il codice
+def genera_stringa_finale(pills_selezionati, dizionario_originale):
+    # Trasforma il dizionario in una lista di chiavi (mantiene l'ordine del codice)
+    ordine_codice = list(dizionario_originale.keys())
+    
+    # Riordina i selezionati seguendo l'indice di apparizione nel dizionario
+    pills_ordinati = sorted(pills_selezionati, key=lambda x: ordine_codice.index(x))
+    
+    return " + ".join([dizionario_originale[p] for p in pills_ordinati])
+
+# 3. INTERFACCIA
+st.title("Generatore Semplificato")
+
+cat = st.selectbox("Categoria", list(DATABASE.keys()))
+part = st.selectbox("Particolare", list(DATABASE[cat]["Particolari"].keys()))
+
+# Recupero i pills di quel particolare
+pills_dict = DATABASE[cat]["Particolari"][part]
+
+# Multiselect
+scelti = st.multiselect("Seleziona", list(pills_dict.keys()))
+
+if st.button("Genera"):
+    if scelti:
+        risultato = genera_stringa_finale(scelti, pills_dict)
+        st.success(f"Stringa: {risultato}")
 
 OPZIONI_COMPATIBILITA = ["", "F25", "F25 BESPOKE", "F25 READY", "F50", "F50 BESPOKE", "F50 READY", "UNIVERSAL", "BC", "FORTISSIMO", "MINIRACK", "UNIMOB"]
 
