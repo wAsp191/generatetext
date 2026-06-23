@@ -897,36 +897,43 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         
         tag_reale_db = part_db[2] if len(part_db) > 2 else ""
 
-        # --- B. GESTIONE EXTRA E AGGETTIVI (ORDINE FORZATO DAL CODICE) ---
+        # --- B. GESTIONE EXTRA E AGGETTIVI (DEBUGGATA) ---
         lista_prima = []
         lista_dopo = []
         
-        # 1. Recupero tag selezionati
-        tags_scelti_effettivi = st.session_state.get('comp_tags', [])
-        if not isinstance(tags_scelti_effettivi, list):
-            tags_scelti_effettivi = [tags_scelti_effettivi] if tags_scelti_effettivi else []
+        # Recupero i tag dal session_state
+        tags_selezionati = st.session_state.get('comp_tags', [])
+        
+        # Debug: vediamo cosa stiamo cercando di processare
+        # st.write(f"DEBUG: Tag nel session state: {tags_selezionati}")
+        # st.write(f"DEBUG: Chiavi nel dict_extra_db: {list(dict_extra_db.keys())}")
 
-        # 2. OTTIENI L'ORDINE ORIGINALE DAL DIZIONARIO (dict_extra_db è la tua sorgente di verità)
-        ordine_master = list(dict_extra_db.keys())
+        # Se sono vuoti, esci subito
+        if not tags_selezionati:
+            st.warning("Nessun pill selezionato.")
+        else:
+            # Ordine Master
+            ordine_master = list(dict_extra_db.keys())
 
-        # 3. FILTRA E ORDINA: prendiamo solo i tag selezionati, ma nell'ordine del dizionario
-        tag_ordinati = [t for t in ordine_master if t in tags_scelti_effettivi]
-
-        # 4. CICLA SULLA LISTA GIÀ ORDINATA
-        for tag in tag_ordinati:
-            if tag in SUB_OPTIONS_CONFIG:
-                chiave_sub = st.session_state.get(f"sub_{tag}", "")
-                traduzione = SUB_OPTIONS_CONFIG[tag].get(chiave_sub, chiave_sub).upper()
-            elif tag in EXTRA_CON_INPUT_MANUALE:
-                traduzione = st.session_state.get(f"manual_{tag}", "").upper()
-            else:
-                traduzione = dict_extra_db.get(tag, tag).upper()
-            
-            if traduzione in TERMINI_ANTICIPATI:
-                lista_prima.append(traduzione)
-            else:
-                lista_dopo.append(traduzione)
-
+            # Cicliamo sull'ordine del dizionario (il "Master")
+            for tag_master in ordine_master:
+                # Confronto case-insensitive per sicurezza
+                if any(tag_master.lower() == t.lower() for t in tags_selezionati):
+                    
+                    # Recuperiamo la traduzione
+                    if tag_master in SUB_OPTIONS_CONFIG:
+                        chiave_sub = st.session_state.get(f"sub_{tag_master}", "")
+                        traduzione = SUB_OPTIONS_CONFIG[tag_master].get(chiave_sub, chiave_sub).upper()
+                    elif tag_master in EXTRA_CON_INPUT_MANUALE:
+                        traduzione = st.session_state.get(f"manual_{tag_master}", "").upper()
+                    else:
+                        traduzione = dict_extra_db.get(tag_master, tag_master).upper()
+                    
+                    # Smistiamo
+                    if traduzione in TERMINI_ANTICIPATI:
+                        lista_prima.append(traduzione)
+                    else:
+                        lista_dopo.append(traduzione)
         # --- C. DIMENSIONI ---
         dim_list = []
         
