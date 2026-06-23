@@ -835,7 +835,6 @@ from deep_translator import GoogleTranslator
 def traduci_note(testo):
     if not testo: return ""
     
-    # GLOSSARIO FORZATO (Termini tecnici specifici)
     GLOSSARIO_TECNICO = {
         "mensola": "BRACKET", 
         "mensole": "BRACKETS", 
@@ -849,14 +848,11 @@ def traduci_note(testo):
     }
     
     testo_elaborato = testo.lower().strip()
-    
-    # Sostituzione forzata termini del glossario
     for it, en in GLOSSARIO_TECNICO.items():
         if it in testo_elaborato:
             testo_elaborato = testo_elaborato.replace(it, en)
             
     try:
-        # Il traduttore riceve il testo con i termini tecnici già in inglese
         traduzione = GoogleTranslator(source='it', target='en').translate(testo_elaborato)
         return traduzione.upper()
     except:
@@ -891,41 +887,26 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         part_db = DATABASE.get(macro_it, {}).get("Particolari", {}).get(scelta_part_it, ["", "PILLS_VUOTO", ""])
         part_en = part_db[0].upper()
         
-        # --- LOGICA ADATTATA AL NUOVO DB CENTRALIZZATO ---
         chiave_gruppo_pills = part_db[1]
         dict_extra_db = PILLS_CONDIVISI.get(chiave_gruppo_pills, {})
         
-        tag_reale_db = part_db[2] if len(part_db) > 2 else ""
-
-        # --- B. GESTIONE EXTRA E AGGETTIVI (DEBUGGATA) ---
+        # --- B. GESTIONE EXTRA E AGGETTIVI (ORDINE GARANTITO) ---
         lista_prima = []
         lista_dopo = []
         
-        # DEBUG: Stampiamo tutte le chiavi presenti nel session_state per capire come si chiama la tua lista
-        # st.write("Chiavi nel session_state:", list(st.session_state.keys()))
+        # RECUPERO CORRETTO: usiamo 'extra_tags' definito nel modulo 2
+        tags_selezionati = st.session_state.get('extra_tags', [])
         
-        # Cerchiamo di trovare la lista giusta. 
-        # Di solito le multiselect usano la chiave assegnata al widget.
-        # Controlla nel tuo codice dove definisci la multiselect: key="???"
-        tags_selezionati = st.session_state.get('comp_tags', [])
-        
-        # Se comp_tags è vuoto, proviamo a vedere se il nome è diverso
         if not tags_selezionati:
-            # Prova a cercare chiavi che contengono "tag" o "pill"
-            for k in st.session_state.keys():
-                if "tag" in k.lower() or "pill" in k.lower():
-                    tags_selezionati = st.session_state.get(k, [])
-                    break
-
-        if not tags_selezionati:
-            st.warning("⚠️ Nessun pill rilevato. Verifica la key della tua multiselect.")
+            # Se l'utente non ha selezionato nulla, procediamo normalmente
+            pass
         else:
-            # Ordine Master (dal codice)
+            # ORDINE MASTER: basato sull'ordine nel dizionario PILLS_CONDIVISI
             ordine_master = list(dict_extra_db.keys())
-
-            # Ciclo sul Master per garantire l'ordine del codice
+            
+            # Cicliamo sull'ordine del dizionario (Master) per forzare la sequenza
             for tag_master in ordine_master:
-                # Confronto flessibile
+                # Confronto case-insensitive
                 if any(tag_master.lower() == str(t).lower() for t in tags_selezionati):
                     
                     if tag_master in SUB_OPTIONS_CONFIG:
@@ -940,9 +921,9 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
                         lista_prima.append(traduzione)
                     else:
                         lista_dopo.append(traduzione)
+
         # --- C. DIMENSIONI ---
         dim_list = []
-        
         L = st.session_state.get("dim_l", "").strip() or st.session_state.get("dim_l_gen", "").strip()
         P = st.session_state.get("dim_p", "").strip()
         H = st.session_state.get("dim_h", "").strip()
@@ -956,7 +937,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             dim_list.append(f"{prefix_d}{D.upper()}")
         
         dim_str = " ".join(dim_list)
-        
         norma_sel = st.session_state.get("norm_select", "")
         norma_str = MAPPA_NORMATIVE_FASTENER.get(scelta_part_it, {}).get(norma_sel, "")
 
@@ -973,7 +953,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         elementi_prefisso = [prefix_base] + lista_prima
         prefisso_lista = [p.strip().upper() for p in elementi_prefisso if p.strip()]
         prefix_completo = " ".join(prefisso_lista)
-        
         part_en_upper = part_en.strip().upper()
         
         parole_prefisso = set(prefix_completo.split())
