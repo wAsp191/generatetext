@@ -901,26 +901,33 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         lista_prima = []
         lista_dopo = []
         
-        # Recupero i tag dal session_state
+        # DEBUG: Stampiamo tutte le chiavi presenti nel session_state per capire come si chiama la tua lista
+        # st.write("Chiavi nel session_state:", list(st.session_state.keys()))
+        
+        # Cerchiamo di trovare la lista giusta. 
+        # Di solito le multiselect usano la chiave assegnata al widget.
+        # Controlla nel tuo codice dove definisci la multiselect: key="???"
         tags_selezionati = st.session_state.get('comp_tags', [])
         
-        # Debug: vediamo cosa stiamo cercando di processare
-        # st.write(f"DEBUG: Tag nel session state: {tags_selezionati}")
-        # st.write(f"DEBUG: Chiavi nel dict_extra_db: {list(dict_extra_db.keys())}")
-
-        # Se sono vuoti, esci subito
+        # Se comp_tags è vuoto, proviamo a vedere se il nome è diverso
         if not tags_selezionati:
-            st.warning("Nessun pill selezionato.")
+            # Prova a cercare chiavi che contengono "tag" o "pill"
+            for k in st.session_state.keys():
+                if "tag" in k.lower() or "pill" in k.lower():
+                    tags_selezionati = st.session_state.get(k, [])
+                    break
+
+        if not tags_selezionati:
+            st.warning("⚠️ Nessun pill rilevato. Verifica la key della tua multiselect.")
         else:
-            # Ordine Master
+            # Ordine Master (dal codice)
             ordine_master = list(dict_extra_db.keys())
 
-            # Cicliamo sull'ordine del dizionario (il "Master")
+            # Ciclo sul Master per garantire l'ordine del codice
             for tag_master in ordine_master:
-                # Confronto case-insensitive per sicurezza
-                if any(tag_master.lower() == t.lower() for t in tags_selezionati):
+                # Confronto flessibile
+                if any(tag_master.lower() == str(t).lower() for t in tags_selezionati):
                     
-                    # Recuperiamo la traduzione
                     if tag_master in SUB_OPTIONS_CONFIG:
                         chiave_sub = st.session_state.get(f"sub_{tag_master}", "")
                         traduzione = SUB_OPTIONS_CONFIG[tag_master].get(chiave_sub, chiave_sub).upper()
@@ -929,7 +936,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
                     else:
                         traduzione = dict_extra_db.get(tag_master, tag_master).upper()
                     
-                    # Smistiamo
                     if traduzione in TERMINI_ANTICIPATI:
                         lista_prima.append(traduzione)
                     else:
