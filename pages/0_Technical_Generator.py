@@ -227,22 +227,23 @@ PILLS_CONDIVISI = {
         "Predisposto per montante (+)": "", 
         "Antisismico": "SEISMIC", 
         "Statico": "STATIC", 
-        "Regolabile": "ADJUSTABLE",
-        "Compatibilità piede di base (+)": ""
+        "Regolabile": "ADJUSTABLE"
     },
-    "PILLS_ZOCCOLI": {
+    "PILLS_ZOCCOLATURA_IRON": {
         "Compatibilità piede di base (+)": "", 
         "Liscia": "PLAIN", 
         "Angolo aperto": "EXTERNAL CORNER", 
         "Angolo chiuso": "INNER CORNER", 
         "Inclinata": "INCLINED", 
         "Forata": "PERFORATED", 
-        "Stondata": "ROUNDED", 
+        "Stondata": "ROUNDED"
+    },
+    "PILLS_ZOCCOLATURA_WOOD": {
         "Completa di paracolpo ABS": "WITH ABS BUFFER",
         "Con lati bordati": "WITH EDGED SIDES", 
         "Con viteria": "WITH SCREWS"
     },
-    "PILLS_PANNELLI": {
+    "PILLS_PANNELLI_IRON": {
         "Centrale": "CTR", 
         "Scantonato": "NOTCHED", 
         "Forato": "PERFORATED", 
@@ -253,34 +254,40 @@ PILLS_CONDIVISI = {
         "Attacco montante": "HOOK ONTO UPRIGHT", 
         "Angolo aperto": "EXTERNAL CORNER", 
         "Angolo chiuso": "INNER CORNER",
+    },
+    "PILLS_PANNELLI_WOOD": {
         "Con mensole": "WITH BRACKET", 
         "Con viteria": "WITH SCREWS", 
         "Con lati bordati": "WITH EDGED SIDES",
+        "Bordi smussati": "CHAMFERED EDGES"
+     },
+    "PILLS_PANNELLI_GLASS_PLASTIC": {
         "Serigrafata": "SILKSCREENED", 
         "Antiurto": "SHOCKPROOF", 
         "Trasparente": "TRANSPARENT", 
-        "Bordi smussati": "CHAMFERED EDGES",
         "Aggangio montante": "HOOK ONTO UPRIGHT"
-    },
+     },   
     "PILLS_CHIUSURE": {
         "Superiore": "TOP", 
         "Tra ripiani di base": "INTER-BASE SHELF", 
         "Con scasso": "WITH RECESS",
         "Per Top legno": "FOR TOP SHELF"
     },
-    "PILLS_FIANCATE": {
+    "PILLS_FIANCATE_IRON": {
         "Orientamento (+)": "", 
         "Forata": "PERFORATED", 
         "Portante": "LOAD-BEARING", 
         "Non portante": "NON LOAD-BEARING", 
         "Stondata": "ROUNDED", 
-        "Trapezoidale": "SLOPING", 
+        "Trapezoidale": "SLOPING"  
+    },
+    "PILLS_FIANCATE_WOOD": {
         "Sagomata": "SHAPED",
         "Con mensole": "WITH BRACKET", 
         "Con lati bordati": "WITH EDGED SIDES", 
         "Con viteria": "WITH SCREWS", 
         "Fresata": "MILLING"
-    },
+   },     
     "PILLS_MENSOLE": {
         "Orientamento (+)": "", 
         "Posizioni multiple (+)": "", 
