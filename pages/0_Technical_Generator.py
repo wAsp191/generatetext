@@ -513,11 +513,11 @@ DATABASE = {
         "macro_en": "METAL COMPONENT",
         "Particolari": {
             "Piede di base": ["BASE FOOT", "PILLS_PIEDI", "FOOT"],
-            "Zoccolatura": ["PLINTH", "PILLS_ZOCCOLI", "PLINTH"],
-            "Pannello rivestimento": ["BACK PANEL", "PILLS_PANNELLI", "PANEL"],
+            "Zoccolatura": ["PLINTH", "PILLS_ZOCCOLATURA_IRON", "PLINTH"],
+            "Pannello rivestimento": ["BACK PANEL", "PILLS_PANNELLI_IRON", "PANEL"],
             "Copripiede": ["FOOT COVER", "PILLS_PIEDI", "COVER"],
             "Chiusura": ["COVER", "PILLS_CHIUSURE", "COVER"],
-            "Fiancata laterale": ["SIDE PANEL", "PILLS_FIANCATE", "SIDE-PANEL"],
+            "Fiancata laterale": ["SIDE PANEL", "PILLS_FIANCATE_IRON", "SIDE-PANEL"],
             "Mensola": ["BRACKET", "PILLS_MENSOLE", "BRACKET"],
             "Ripiano": ["SHELF", "PILLS_RIPIANI", "SHELF"],
             "Cesto in filo": ["WIRE-BASKET", "PILLS_CESTI_FILO", "BASKET"],
@@ -553,10 +553,10 @@ DATABASE = {
         "macro_en": "WOOD COMPONENT",
         "Particolari": {
             "Ripiano Legno": ["WOODEN SHELF", "PILLS_RIPIANI", "SHELF"],
-            "Schienale Legno": ["WOODEN BACK", "PILLS_PANNELLI", "PANEL"],
+            "Schienale Legno": ["WOODEN BACK", "PILLS_PANNELLI_WOOD", "PANEL"],
             "Cielino": ["WOODEN CANOPY", "PILLS_CIELINI", "CANOPY"],
-            "Zoccolatura": ["WOODEN PLINTH", "PILLS_ZOCCOLI", "PLINTH"],
-            "Fiancata": ["WOODEN SIDE PANEL", "PILLS_FIANCATE", "SIDE PANEL"],
+            "Zoccolatura": ["WOODEN PLINTH", "PILLS_ZOCCOLATURA_WOOD", "PLINTH"],
+            "Fiancata": ["WOODEN SIDE PANEL", "PILLS_FIANCATE_WOOD", "SIDE PANEL"],
             "Copripiede": ["WOODEN FOOT-COVER", "PILLS_ZOCCOLI", "COVER"],
             "Coprimontante": ["WOODEN UPRIGHT-COVER", "PILLS_COPRIMONTANTI", "COVER"],
             "Compensazione": ["WOODEN FILLER PIECE", "PILLS_CHIUSURE", "SPACER"],
@@ -571,7 +571,7 @@ DATABASE = {
             "Cerniera": ["HINGE", "PILLS_VUOTO", "ACCESSORY"],
             "Divisorio": ["DIVIDER", "PILLS_DIVISORI_FRONTALINI", "DIVIDER"],
             "Frontalino": ["RISER", "PILLS_DIVISORI_FRONTALINI", "RISER"],
-            "Pannello": ["PANEL", "PILLS_PANNELLI", "PANEL"],
+            "Pannello": ["PANEL", "PILLS_PANNELLI_GLASS_PLASTIC", "PANEL"],
             "Anta": ["DOOR", "PILLS_ANTE_SPORTELLI", "DOOR"],
             "Portaprezzo": ["TICKET-HOLDER", "PILLS_PORTAPREZZI", "TICKET-HOLDER"]
         }
