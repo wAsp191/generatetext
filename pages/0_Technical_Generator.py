@@ -897,16 +897,23 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         
         tag_reale_db = part_db[2] if len(part_db) > 2 else ""
 
-        # --- B. GESTIONE EXTRA E AGGETTIVI ---
+        # --- B. GESTIONE EXTRA E AGGETTIVI (ORDINE FORZATO DAL CODICE) ---
         lista_prima = []
         lista_dopo = []
         
-        # Recuperiamo i tag selezionati nell'interfaccia
-        tags_scelti_effettivi = tags_scelti_raw if 'tags_scelti_raw' in locals() else st.session_state.get('comp_tags', [])
+        # 1. Recupero tag selezionati
+        tags_scelti_effettivi = st.session_state.get('comp_tags', [])
         if not isinstance(tags_scelti_effettivi, list):
             tags_scelti_effettivi = [tags_scelti_effettivi] if tags_scelti_effettivi else []
-        
-        for tag in tags_scelti_effettivi:
+
+        # 2. OTTIENI L'ORDINE ORIGINALE DAL DIZIONARIO (dict_extra_db è la tua sorgente di verità)
+        ordine_master = list(dict_extra_db.keys())
+
+        # 3. FILTRA E ORDINA: prendiamo solo i tag selezionati, ma nell'ordine del dizionario
+        tag_ordinati = [t for t in ordine_master if t in tags_scelti_effettivi]
+
+        # 4. CICLA SULLA LISTA GIÀ ORDINATA
+        for tag in tag_ordinati:
             if tag in SUB_OPTIONS_CONFIG:
                 chiave_sub = st.session_state.get(f"sub_{tag}", "")
                 traduzione = SUB_OPTIONS_CONFIG[tag].get(chiave_sub, chiave_sub).upper()
