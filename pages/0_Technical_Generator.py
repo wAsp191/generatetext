@@ -187,22 +187,30 @@ SUB_OPTIONS_CONFIG = {
         "Attacco multilame": "HOOK FOR MULTISTRIP", 
         "Attacco pannello forato": "HOOK FOR SLOTTED PANEL"
     },
-    "Orientamento (+)": {"Destra": "RIGHT", "Sinistra": "LEFT"},
+    "Orientamento (+)": {
+        "Destra": "RIGHT", "Sinistra": "LEFT"
+    },
     "Posizioni multiple (+)": {
         "1 posizione": "1 POSITION", "2 posizioni": "2 POSITIONS", "3 posizioni": "3 POSITIONS"
     },
-    "Altezza piede (+)": {"H90": "H90", "H100": "H100", "H150": "H150"},
+    "Altezza piede (+)": {
+        "H90": "H90", "H100": "H100", "H150": "H150"
+    },
     "Predisposto per montante (+)": {
         "L80": "FOR L80 UPRIGHT", "L100/L120": "FOR L100/L120 UPRIGHT"
     },
-    "Numero tasche (+)": {"1 Tasca": "1 POCKET", "2 Tasche": "2 POCKETS"},
-    "Numero gradoni (+)": {"1 gradone": "1 STEP", "2 gradoni": "2 STEPS", "3 gradoni": "3 STEPS"},
+    "Numero tasche (+)": {
+        "1 Tasca": "1 POCKET", "2 Tasche": "2 POCKETS"
+    },
+    "Numero gradoni (+)": {
+        "1 gradone": "1 STEP", "2 gradoni": "2 STEPS", "3 gradoni": "3 STEPS"
+    },
     "Asimmetrica (+)": {"AS240": "AS240", "AS340": "AS340", "AS440": "AS440"}
 }
 
 EXTRA_CON_INPUT_MANUALE = ["Sezione circolare", "Sezione quadrata"]
 
-# --- CONFIGURAZIONE MATERIALI INTERFACCIA (CHIAVE PER FIX RIGA 633) ---
+# --- CONFIGURAZIONE MATERIALI INTERFACCIA ---
 MATERIALI_CONFIG = {
     "METAL COMP": {"METAL": "METAL", "ZINCATO": "GALVANIZED", "INOX": "STAINLESS STEEL", "ALLUMINIO": "ALUMINIUM"},
     "WOOD COMP": {"LAMINATO": "LAMINATED", "NOBILITATO": "MELAMINE", "TRUCIOLARE": "OSB"},
