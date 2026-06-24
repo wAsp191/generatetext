@@ -1002,26 +1002,40 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         if st.session_state.get("check_1090"):
             corpo += " (UNI EN 1090-1)"
 
-        # --- F. SALVATAGGIO (QUI LA MODIFICA) ---
-    try:
-        import datetime
-        import pandas as pd
+        # --- F. SALVATAGGIO E INVIO (CORRETTO) ---
+        stringa_definitiva = " ".join(corpo.split()).upper()
+        st.session_state['stringa_stabile'] = stringa_definitiva
         
-        ultimo_inviato = st.session_state.get("analytics_definitivo_inviato", "")
-        
-        if stringa_definitiva != ultimo_inviato:
-            # USA LA CLASSE IMPORTATA E NON LA STRINGA
-            conn = st.connection("gsheets", type=GSheetsConnection) 
+        try:
+            import datetime
+            import pandas as pd
             
-            # ... (il resto del codice rimane uguale) ...
-            df_attuale = conn.read(ttl=0)
-            df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
-            conn.update(data=df_aggiornato)
+            ultimo_inviato = st.session_state.get("analytics_definitivo_inviato", "")
             
-            st.session_state["analytics_definitivo_inviato"] = stringa_definitiva
-            
-    except Exception as e:
-        st.error(f"Errore di invio a Sheets: {e}")
+            if stringa_definitiva != ultimo_inviato:
+                # Connessione usando la classe importata esplicitamente in cima al file
+                conn = st.connection("gsheets", type=GSheetsConnection)
+                
+                pills_uniti = ", ".join(tags_scelti_raw).strip().upper() if tags_scelti_raw else "- NESSUNO -"
+                nota_inglese = str(note_en).strip().upper() if 'note_en' in locals() and note_en else "- NESSUNA NOTE -"
+                
+                nuovo_dato = {
+                    "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "Macro_Categoria": str(macro_it).strip().upper(),
+                    "Particolare": str(scelta_part_it).strip().upper(),
+                    "Pills_Selezionati": pills_uniti,
+                    "Stringa_Generata": stringa_definitiva,
+                    "Note_Libere": nota_inglese
+                }
+                
+                df_attuale = conn.read(ttl=0)
+                df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
+                conn.update(data=df_aggiornato)
+                
+                st.session_state["analytics_definitivo_inviato"] = stringa_definitiva
+                
+        except Exception as e:
+            st.error(f"Errore di invio a Sheets: {e}")
 
         # =========================================================
         # 📊 LIVE INJECTION: COPIATO SOLO SUL RISULTATO FINALE REALE
