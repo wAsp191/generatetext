@@ -1,7 +1,8 @@
 import streamlit as st
 from deep_translator import GoogleTranslator
 from datetime import datetime
-from streamlit_gsheets import GSheetsConnection
+# Streamlit ha integrato la connessione, non serve importarla come modulo esterno
+# Ti basterà richiamarla direttamente nel codice così: from streamlit_gsheets import GSheetsConnection
 import pandas as pd
 
 # =========================================================
@@ -1011,13 +1012,12 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         try:
             import datetime
             import pandas as pd
-            from streamlit_gsheets import GSheetsConnection
             
             ultimo_inviato = st.session_state.get("analytics_definitivo_inviato", "")
             
-            # Invia SOLO se questa stringa esatta non è stata già inviata in questa sessione
             if stringa_definitiva != ultimo_inviato:
-                conn = st.connection("gsheets", type=GSheetsConnection)
+                # Usa la sintassi nativa (senza importare GSheetsConnection)
+                conn = st.connection("gsheets", type="gsheets")
                 
                 pills_uniti = ", ".join(tags_scelti_raw) if tags_scelti_raw else "- NESSUNO -"
                 nota_inglese = str(note_en).strip().upper() if 'note_en' in locals() and note_en else "- NESSUNA NOTE -"
