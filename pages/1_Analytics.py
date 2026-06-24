@@ -1,7 +1,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from streamlit_gsheets import GSheetsConnection
+# from streamlit_gsheets import GSheetsConnection
 
 # 1. Configurazione della pagina
 st.set_page_config(page_title="Analytics Dashboard", page_icon="📊", layout="wide")
@@ -11,7 +11,8 @@ st.markdown("Monitoraggio interattivo delle stringhe tecniche generate.")
 st.divider()
 
 # 2. Connessione e Lettura dati
-conn = st.connection("gsheets", type=GSheetsConnection)
+conn = st.connection("gsheets", type="gsheets")
+df = conn.read(ttl=60)
 
 try:
     df = conn.read(ttl=60) # Aumentato ttl per performance
