@@ -2,5 +2,4 @@ streamlit
 pandas
 deep-translator
 plotly
-gspread
-google-auth
+streamlit-gsheets
