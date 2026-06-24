@@ -1,3 +1,5 @@
 streamlit
+pandas
+streamlit-gsheets
 deep-translator
-st-gsheets-connection
+plotly
