@@ -1,9 +1,9 @@
+# --- SEZIONE IMPORT (IN CIMA AL FILE) ---
 import streamlit as st
-from deep_translator import GoogleTranslator
-from datetime import datetime
-# Streamlit ha integrato la connessione, non serve importarla come modulo esterno
-# Ti basterà richiamarla direttamente nel codice così: from streamlit_gsheets import GSheetsConnection
 import pandas as pd
+import datetime
+from deep_translator import GoogleTranslator
+from streamlit_gsheets import GSheetsConnection
 
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
