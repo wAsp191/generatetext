@@ -310,11 +310,6 @@ PILLS_CONDIVISI = {
         "Con inserti filettati": "WITH RIVET", 
         "Con portaprezzo": "WITH TICKET-HOLDER", 
         "Scantonato": "NOTCHED",
-        "Con mensole": "WITH BRACKET", 
-        "Con lati bordati": "WITH EDGED SIDES", 
-        "Con viteria": "WITH SCREWS", 
-        "Fresata": "MILLING",
-        "Per ripiano": "FOR SHELF"
     },
     "PILLS_RIPIANI_WOOD": {
         "Scantonato": "NOTCHED",
@@ -322,7 +317,6 @@ PILLS_CONDIVISI = {
         "Con lati bordati": "WITH EDGED SIDES", 
         "Con viteria": "WITH SCREWS", 
         "Fresata": "MILLING",
-        "Per ripiano": "FOR SHELF"
      },   
     "PILLS_CESTI_FILO": {
         "Per attacco montante": "HOOK ONTO UPRIGHT", 
