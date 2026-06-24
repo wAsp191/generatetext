@@ -4,4 +4,3 @@ pandas
 deep-translator
 plotly
 gspread
-streamlit-gsheets
