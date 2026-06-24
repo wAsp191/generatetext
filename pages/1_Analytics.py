@@ -77,26 +77,37 @@ try:
             
         st.divider()
         
-        # --- GRAFICI DI CATEGORIA ---
+        # --- GRAFICI DI CATEGORIA (TORTA) ---
+        import plotly.express as px
+        
         col_grafico1, col_grafico2 = st.columns(2)
         
         with col_grafico1:
             st.subheader("Generazioni per Macro Categoria")
             if "Macro_Categoria" in df.columns:
-                macro_counts = df["Macro_Categoria"].value_counts()
-                st.bar_chart(macro_counts)
+                # Creiamo il grafico a torta
+                fig1 = px.pie(df, names="Macro_Categoria", hole=0.3, template="plotly_white")
+                st.plotly_chart(fig1, use_container_width=True)
             
         with col_grafico2:
             st.subheader("Top 5 Particolari")
             if "Particolare" in df.columns:
-                part_counts = df["Particolare"].value_counts().head(5)
-                st.bar_chart(part_counts)
-            
+                # Creiamo il grafico a torta per i primi 5 (gli altri vengono raggruppati o rimossi)
+                top_5_df = df["Particolare"].value_counts().head(5).reset_index()
+                top_5_df.columns = ["Particolare", "Conteggio"]
+                fig2 = px.pie(top_5_df, names="Particolare", values="Conteggio", hole=0.3, template="plotly_white")
+                st.plotly_chart(fig2, use_container_width=True)
+        
         st.divider()
         
-        # --- TABELLA ULTIMI DATI (AUMENTATA A 20) ---
+        # --- TABELLA ULTIMI DATI ---
         st.subheader("📋 Ultimi 20 Log Registrati")
-        ultimi_log = df.tail(20).sort_index(ascending=False)
+        # Ordiniamo per Timestamp se esiste, altrimenti usiamo l'indice
+        if "Timestamp" in df.columns:
+            ultimi_log = df.sort_values(by="Timestamp", ascending=False).head(20)
+        else:
+            ultimi_log = df.tail(20).sort_index(ascending=False)
+            
         st.dataframe(ultimi_log, use_container_width=True)
         
         st.divider()
