@@ -3,8 +3,6 @@ from deep_translator import GoogleTranslator
 from datetime import datetime
 from streamlit_gsheets import GSheetsConnection
 import pandas as pd
-import streamlit as st
-import streamlit as st
 
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
