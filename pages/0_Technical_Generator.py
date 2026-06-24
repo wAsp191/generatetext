@@ -1039,7 +1039,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
                 st.session_state["analytics_definitivo_inviato"] = stringa_definitiva
                 
         except Exception as e:
-    st.error(f"Errore di invio a Sheets: {e}")
+            st.error(f"Errore di invio a Sheets: {e}")
         
 # =========================================================
 # 4. OUTPUT E MONITORAGGIO (VERSIONE DEFINITIVA COMPATTA)
