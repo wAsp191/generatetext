@@ -1,93 +1,131 @@
 import streamlit as st
 import pandas as pd
-import plotly.express as px
-# from streamlit_gsheets import GSheetsConnection
+from streamlit_gsheets import GSheetsConnection
 
 # 1. Configurazione della pagina
 st.set_page_config(page_title="Analytics Dashboard", page_icon="📊", layout="wide")
 
 st.title("📊 Dashboard Analytics")
-st.markdown("Monitoraggio interattivo delle stringhe tecniche generate.")
+st.markdown("Monitoraggio in tempo reale delle stringhe tecniche generate.")
 st.divider()
 
-# 2. Connessione e Lettura dati
-conn = st.connection("gsheets", type="gsheets")
-df = conn.read(ttl=60)
+# 2. Connessione sicura a Google Sheets
+conn = st.connection("gsheets", type=GSheetsConnection)
 
 try:
-    df = conn.read(ttl=60) # Aumentato ttl per performance
+    # Lettura dati con cache a 10 secondi
+    df = conn.read(ttl=10)
+    
+    # Pulizia righe completamente vuote
     df = df.dropna(how="all")
     
     if df.empty:
-        st.info("Nessun dato ancora registrato.")
+        st.info("Nessun dato ancora registrato nel database Analytics.")
     else:
-        # Conversione Timestamp
+        # Controllo e conversione Timestamp
         if "Timestamp" in df.columns:
             df["Timestamp"] = pd.to_datetime(df["Timestamp"], errors='coerce')
-        
-        # --- SIDEBAR: FILTRI TEMPORALI ---
-        st.sidebar.header("⚙️ Filtri")
-        if "Timestamp" in df.columns:
-            data_min = df["Timestamp"].min().date()
-            data_max = df["Timestamp"].max().date()
-            
-            intervallo = st.sidebar.date_input(
-                "Seleziona periodo:",
-                value=(data_min, data_max),
-                min_value=data_min,
-                max_value=data_max
-            )
-            
-            # Filtro effettivo
-            if len(intervallo) == 2:
-                start_date, end_date = intervallo
-                mask = (df["Timestamp"].dt.date >= start_date) & (df["Timestamp"].dt.date <= end_date)
-                df = df.loc[mask]
         
         # --- METRICHE PRINCIPALI ---
         st.subheader("💡 Metriche Chiave")
         col1, col2, col3 = st.columns(3)
         
-        col1.metric("Totale Stringhe", len(df))
-        top_macro = df["Macro_Categoria"].mode()[0] if not df["Macro_Categoria"].dropna().empty else "N/A"
-        col2.metric("Macro Categoria Top", str(top_macro))
-        top_part = df["Particolare"].mode()[0] if not df["Particolare"].dropna().empty else "N/A"
-        col3.metric("Particolare Top", str(top_part))
+        totale_generazioni = len(df)
+        
+        if "Macro_Categoria" in df.columns and not df["Macro_Categoria"].dropna().empty:
+            top_macro = df["Macro_Categoria"].value_counts().idxmax()
+        else:
+            top_macro = "N/A"
+            
+        if "Particolare" in df.columns and not df["Particolare"].dropna().empty:
+            top_particolare = df["Particolare"].value_counts().idxmax()
+        else:
+            top_particolare = "N/A"
+        
+        col1.metric("Totale Stringhe Generate", totale_generazioni)
+        col2.metric("Macro Categoria più usata", str(top_macro))
+        col3.metric("Particolare più richiesto", str(top_particolare))
         
         st.divider()
         
-        # --- GRAFICI PLOTLY ---
-        col_g1, col_g2 = st.columns(2)
+        # --- ANALISI PILLS (TAG EXTRA) ---
+        st.subheader("🏷️ Utilizzo delle Opzioni Extra (Pills)")
         
-        with col_g1:
-            st.subheader("Distribuzione per Categoria")
-            fig1 = px.pie(df, names="Macro_Categoria", hole=0.4, template="plotly_white")
-            st.plotly_chart(fig1, use_container_width=True)
-            
-        with col_g2:
-            st.subheader("Volume nel Tempo")
-            df_temp = df.groupby(df["Timestamp"].dt.date).size().reset_index(name="Conteggio")
-            fig2 = px.line(df_temp, x="index", y="Conteggio", template="plotly_white", markers=True)
-            st.plotly_chart(fig2, use_container_width=True)
-            
-        st.divider()
-        
-        # --- ANALISI PILLS (BAR CHART PLOTLY) ---
         if "Pills_Selezionati" in df.columns:
-            all_pills = [p.strip() for item in df["Pills_Selezionati"].dropna().astype(str) for p in item.split(",") if p.strip()]
+            pills_series = df["Pills_Selezionati"].dropna().astype(str)
+            
+            all_pills = []
+            for item in pills_series:
+                parts = [p.strip() for p in item.split(",") if p.strip()]
+                all_pills.extend(parts)
+            
             if all_pills:
                 pills_counts = pd.Series(all_pills).value_counts().reset_index()
-                pills_counts.columns = ["Opzione", "Conteggio"]
+                pills_counts.columns = ["Opzione Extra (Pill)", "Numero di Utilizzi"]
                 
-                st.subheader("🏷️ Utilizzo Opzioni Extra")
-                fig3 = px.bar(pills_counts, x="Conteggio", y="Opzione", orientation='h', color="Conteggio", template="plotly_white")
-                st.plotly_chart(fig3, use_container_width=True)
-
+                col_pills_grafico, col_pills_tabella = st.columns([2, 1])
+                
+                with col_pills_grafico:
+                    st.bar_chart(data=pills_counts, x="Opzione Extra (Pill)", y="Numero di Utilizzi")
+                
+                with col_pills_tabella:
+                    st.dataframe(pills_counts, use_container_width=True, hide_index=True)
+            else:
+                st.info("Nessuna opzione extra (Pills) ancora registrata nei log.")
+        else:
+            st.warning("Colonna 'Pills_Selezionati' non trovata nel database.")
+            
         st.divider()
         
-        # --- TABELLA LOG ---
-        st.subheader("📋 Ultimi Log")
-        st.dataframe(df.tail(20).sort_index(ascending=False), use_container_width=True)
+        # --- GRAFICI DI CATEGORIA ---
+        col_grafico1, col_grafico2 = st.columns(2)
+        
+        with col_grafico1:
+            st.subheader("Generazioni per Macro Categoria")
+            if "Macro_Categoria" in df.columns:
+                macro_counts = df["Macro_Categoria"].value_counts()
+                st.bar_chart(macro_counts)
+            
+        with col_grafico2:
+            st.subheader("Top 5 Particolari")
+            if "Particolare" in df.columns:
+                part_counts = df["Particolare"].value_counts().head(5)
+                st.bar_chart(part_counts)
+            
+        st.divider()
+        
+        # --- TABELLA ULTIMI DATI (AUMENTATA A 20) ---
+        st.subheader("📋 Ultimi 20 Log Registrati")
+        ultimi_log = df.tail(20).sort_index(ascending=False)
+        st.dataframe(ultimi_log, use_container_width=True)
+        
+        st.divider()
+
+        # --- ELENCO NOTE LIBERE CON MOLTIPLIPICATORE ---
+        st.subheader("📝 Classifica Note Libere più Utilizzate")
+        
+        if "Note_Libere" in df.columns:
+            df_note = df[df["Note_Libere"].notna() & (df["Note_Libere"].astype(str).str.strip() != "")].copy()
+            
+            if not df_note.empty:
+                df_note["Nota_Pulita"] = df_note["Note_Libere"].astype(str).str.strip().str.upper()
+                
+                classifica_note = df_note["Nota_Pulita"].value_counts().reset_index()
+                classifica_note.columns = ["Nota Libera Digitata", "Numero di Ripetizioni"]
+                
+                def aggiungi_moltiplicatore(row):
+                    if row["Numero di Ripetizioni"] > 1:
+                        return f"🔥 {row['Numero di Ripetizioni']} Volte"
+                    return "1 Volta"
+                
+                classifica_note["Frequenza"] = classifica_note.apply(aggiungi_moltiplicatore, axis=1)
+                df_visualizzazione = classifica_note[["Nota Libera Digitata", "Frequenza"]]
+                
+                st.dataframe(df_visualizzazione, use_container_width=True, hide_index=True)
+            else:
+                st.info("Nessuna nota libera è stata ancora inserita nei log.")
+        else:
+            st.warning("Colonna 'Note_Libere' non trovata nel database.")
 
 except Exception as e:
-    st.error(f"Errore: {e}")
+    st.error(f"Errore nel caricamento dei dati: {e}")
