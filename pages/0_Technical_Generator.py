@@ -329,7 +329,8 @@ PILLS_CONDIVISI = {
         "Inclinato": "SLOPING", 
         "Con finestra": "WITH WINDOW", 
         "Stondato": "CURVED", 
-        "Centrale": "CENTRAL", 
+        "Centrale": "CENTRAL",
+        "Terminale": "END",
         "Con illuminazione": "WITH LIGHTING"
     },
     "PILLS_CIELINI_WOOD": {
