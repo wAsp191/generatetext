@@ -2,7 +2,4 @@ streamlit
 pandas
 deep-translator
 plotly
-gspread
-google-auth
-google-auth-oauthlib
-google-auth-httplib2
+streamlit-gsheets@git+https://github.com/streamlit/gsheets-connection
