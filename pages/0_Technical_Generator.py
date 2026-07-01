@@ -518,6 +518,7 @@ DATABASE = {
         "macro_en": "METAL COMPONENT",
         "Particolari": {
             "Piede di base": ["BASE FOOT", "PILLS_PIEDI", "FOOT"],
+            "Porta cartello": ["SING HOLDER", "PILLS_RIPIANI", "SING HOLDER"],
             "Zoccolatura": ["PLINTH", "PILLS_ZOCCOLATURA_IRON", "PLINTH"],
             "Pannello rivestimento": ["BACK PANEL", "PILLS_PANNELLI_IRON", "PANEL"],
             "Copripiede": ["FOOT COVER", "PILLS_PIEDI", "COVER"],
