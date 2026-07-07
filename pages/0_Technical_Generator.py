@@ -390,8 +390,8 @@ PILLS_CONDIVISI = {
         "Con ruote": "WITH WHEELS"
     },
     "PILLS_COPRIMONTANTI": {
-        "Per montante H70": "FOR H70 UPRIGHT", 
-        "Per montante H90": "FOR H90 UPRIGHT",
+        "Per montante M70": "FOR M70 UPRIGHT", 
+        "Per montante M90": "FOR M90 UPRIGHT",
         "Minirack": "MINIRACK"
     },
     "PILLS_COPRIMONTANTI_WOOD": {
