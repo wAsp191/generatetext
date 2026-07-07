@@ -552,6 +552,7 @@ DATABASE = {
             "Pannello frontale": ["FRONT PANEL", "PILLS_PANNELLI", "PANEL"],
             "Adattatore": ["ADAPTER", "PILLS_ADATTATORI_CANALINE", "ADAPTER"],
             "Canalina passa cavi": ["CABLE TRAY", "PILLS_ADATTATORI_CANALINE", "ESA"],
+            "Vasca": ["TANK", "PILLS_RIPIANI", "TANK"],
             "Protezione": ["PROTECTION FOR PERFORATED SHELF", "PILLS_ADATTATORI_CANALINE", "PROTECTION"]
         }
     },
