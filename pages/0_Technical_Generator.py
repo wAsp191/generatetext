@@ -553,6 +553,7 @@ DATABASE = {
             "Adattatore": ["ADAPTER", "PILLS_ADATTATORI_CANALINE", "ADAPTER"],
             "Canalina passa cavi": ["CABLE TRAY", "PILLS_ADATTATORI_CANALINE", "ESA"],
             "Vasca": ["TANK", "PILLS_RIPIANI", "TANK"],
+            "Tamponamento": ["BUFFER PANEL", "PILLS_RIPIANI", "BUFFER"],
             "Protezione": ["PROTECTION FOR PERFORATED SHELF", "PILLS_ADATTATORI_CANALINE", "PROTECTION"]
         }
     },
@@ -568,6 +569,7 @@ DATABASE = {
             "Copripiede": ["WOODEN FOOT-COVER", "PILLS_ZOCCOLI", "COVER"],
             "Coprimontante": ["WOODEN UPRIGHT-COVER", "PILLS_COPRIMONTANTI_WOOD", "COVER"],
             "Compensazione": ["WOODEN FILLER PIECE", "PILLS_CHIUSURE", "SPACER"],
+            "Tamponamento": ["BUFFER PANEL", "PILLS_RIPIANI_WOOD", "BUFFER"],
             "Mobiletto in legno": ["WOODEN CABINET", "PILLS_FIANCATE", "CABINET"]
         }
     },
