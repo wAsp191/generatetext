@@ -870,7 +870,8 @@ def traduci_note(testo):
         "montante": "UPRIGHT",
         "per": "FOR", 
         "losanga": "LOSANGA",
-        "rivestimento": "BACK PANEL"
+        "rivestimento": "BACK PANEL",
+        "cancelletto": "GATE"
     }
     
     testo_elaborato = testo.lower().strip()
