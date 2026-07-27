@@ -152,7 +152,7 @@ COPPIE_INCOMPATIBILI = [
 GLOSSARIO_TECNICO = {
     "mensola": "BRACKET", "mensole": "BRACKETS", "gondola": "GONDOLA",
     "spalla": "FRAME", "innesto": "COUPLING", "montante": "UPRIGHT",
-    "per": "FOR", "losanga": "LOSANGA"
+    "per": "FOR", "losanga": "LOSANGA", "cancelletto": "GATE"
 }
 
 # --- CONFIGURAZIONE SOTTO-OPZIONI (+) ---
