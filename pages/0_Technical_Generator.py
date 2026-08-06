@@ -152,7 +152,7 @@ COPPIE_INCOMPATIBILI = [
 GLOSSARIO_TECNICO = {
     "mensola": "BRACKET", "mensole": "BRACKETS", "gondola": "GONDOLA",
     "spalla": "FRAME", "innesto": "COUPLING", "montante": "UPRIGHT",
-    "per": "FOR", "losanga": "LOSANGA", "cancelletto": "GATE"
+    "per": "FOR", "losanga": "LOSANGA", "cancelletto": "GATE", "vasca": "TANK"
 }
 
 # --- CONFIGURAZIONE SOTTO-OPZIONI (+) ---
@@ -874,7 +874,8 @@ def traduci_note(testo):
         "per": "FOR", 
         "losanga": "LOSANGA",
         "rivestimento": "BACK PANEL",
-        "cancelletto": "GATE"
+        "cancelletto": "GATE",
+        "vasca": "TANK"
     }
     
     testo_elaborato = testo.lower().strip()
