@@ -451,7 +451,8 @@ PILLS_CONDIVISI = {
         "Colorato": "COLORED", 
         "Con tasca oscillante": "WITH LIFT-UP POCKET", 
         "Adesivo": "ADHESIVE", 
-        "Con asola centrale": "WITH CENTRAL SLOT"
+        "Con asola centrale": "WITH CENTRAL SLOT",
+        "Sezione a C": "C-PROFILE"
     },
     "PILLS_GLASS_ARM": {
         "Orientamento (+)": "", 
@@ -554,7 +555,8 @@ DATABASE = {
             "Canalina passa cavi": ["CABLE TRAY", "PILLS_ADATTATORI_CANALINE", "ESA"],
             "Vasca": ["TANK", "PILLS_RIPIANI", "TANK"],
             "Tamponamento": ["BUFFER PANEL", "PILLS_RIPIANI", "BUFFER"],
-            "Protezione": ["PROTECTION FOR PERFORATED SHELF", "PILLS_ADATTATORI_CANALINE", "PROTECTION"]
+            "Protezione": ["PROTECTION FOR PERFORATED SHELF", "PILLS_ADATTATORI_CANALINE", "PROTECTION"],
+            "Portaprezzo": ["TICKET-HOLDER", "PILLS_PORTAPREZZI", "TICKET-HOLDER"]
         }
     },
     "WOOD COMP": {
