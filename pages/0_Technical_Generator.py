@@ -858,8 +858,9 @@ with col_workarea:
 # =========================================================
 st.divider()
 
-# 1. Funzione di traduzione note con Glossario Tecnico
+# 1. Funzione di traduzione note con Glossario Tecnico e Logica di Retry
 from deep_translator import GoogleTranslator
+import time
 
 def traduci_note(testo):
     if not testo: return ""
@@ -883,11 +884,19 @@ def traduci_note(testo):
         if it in testo_elaborato:
             testo_elaborato = testo_elaborato.replace(it, en)
             
-    try:
-        traduzione = GoogleTranslator(source='it', target='en').translate(testo_elaborato)
-        return traduzione.upper()
-    except:
-        return testo_elaborato.upper()
+    # Tentativi multipli (Retry logic) per aggirare i micro-timeout di Google Translate
+    tentativi = 3
+    for _ in range(tentativi):
+        try:
+            traduzione = GoogleTranslator(source='it', target='en').translate(testo_elaborato)
+            if traduzione:
+                return traduzione.upper()
+        except Exception:
+            time.sleep(0.5)
+            continue
+            
+    # Se anche dopo i tentativi fallisce, restituisce comunque il testo elaborato col glossario
+    return testo_elaborato.upper()
 
 # --- LOGICA DI CONTROLLO INCOMPATIBILITÀ ---
 tags_scelti_raw = st.session_state.get("extra_tags", [])
