@@ -828,7 +828,7 @@ with col_workarea:
                 label="Caratteristiche:",
                 key_prefix="extra_tags",
                 selection_mode="multi",
-                max_per_row=4
+                max_per_row=8
             )
             
             tags_scelti_raw = st.session_state.get("extra_tags", [])
