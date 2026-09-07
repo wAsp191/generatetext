@@ -8,12 +8,11 @@ from streamlit_gsheets import GSheetsConnection
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
-import streamlit as st
 
 # Spostiamo set_page_config come primissima istruzione per evitare errori
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
-# CSS per compattare l'interfaccia e gestire i pills
+# CSS per compattare l'interfaccia
 st.markdown("""
     <style>
         /* 1. Riduciamo il padding superiore della pagina */
@@ -25,7 +24,7 @@ st.markdown("""
         /* 2. Compattiamo lo spazio tra ogni elemento (widget) */
         [data-testid="stVerticalBlock"] > div {
             flex-direction: column;
-            gap: 0.10rem !important; /* Riduce il buco tra un widget e l'altro */
+            gap: 0.15rem !important; /* Riduce il buco tra un widget e l'altro */
         }
 
         /* 3. Riduciamo l'altezza dei titoli */
@@ -52,24 +51,10 @@ st.markdown("""
             min-height: 1.6rem !important;
         }
         
-        /* 7. Nascondiamo lo spazio extra dei Pills e forziamo la griglia flessibile */
+        /* 7. Nascondiamo lo spazio extra dei Pills */
         [data-testid="stPills"] {
-            margin-top: -0.4rem !important;
+            margin-top: -0.5rem !important;
         }
-        
-        /* Gestione visiva pills a blocchi/andata a capo automatica */
-        [data-testid="stPills"] div[role="radiogroup"] {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 6px !important;
-        }
-
-        [data-testid="stPills"] div[role="radiogroup"] label {
-            flex: 1 1 auto;
-            min-width: 90px;
-            text-align: center;
-        }
-
         /* 8. Ingrandimento scritte Categorie (st.radio) */
         [data-testid="stWidgetLabel"] p {
             font-size: 1.6rem !important; /* Ingrandisce la label del widget */
@@ -77,7 +62,7 @@ st.markdown("""
         }
 
         [data-testid="stMarkdownContainer"] p {
-            font-size: 1.1rem !important; /* Ingrandisce le opzioni del radio (Metal Comp, etc) */
+            font-size: 1.2rem !important; /* Ingrandisce le opzioni del radio (Metal Comp, etc) */
         }
         
         /* Ottimizzazione spazio tra le opzioni del radio per non farle accavallare */
@@ -860,34 +845,7 @@ with col_workarea:
     
     with c_pills:
         if macro_it != "FASTENER":
-            st.markdown("**Modello di destinazione:**")
-            
-            # 1. Definiamo le opzioni e le suddividiamo in righe da 4 elementi
-            opzioni_compatibilita = ["F25", "F25 BESPOKE", "F25 READY", "F50", "F50 BESPOKE", "F50 READY", "UNIVERSAL", "BC", "FORTISSIMO", "MINIRACK", "UNIMOB"]
-            righe = [opzioni_compatibilita[i:i + 4] for i in range(0, len(opzioni_compatibilita), 4)]
-            
-            # 2. Renderizziamo le righe mantenendo sincronizzato 'comp_tags'
-            valore_attuale = st.session_state.get("comp_tags", None)
-            
-            for idx, riga in enumerate(righe):
-                # Selezioniamo il default solo se l'elemento fa parte di questa riga
-                default_val = valore_attuale if valore_attuale in riga else None
-                
-                scelta_riga = st.pills(
-                    f"Modello riga {idx}",
-                    options=riga,
-                    selection_mode="single",
-                    key=f"comp_riga_{idx}",
-                    label_visibility="collapsed",
-                    default=default_val
-                )
-                
-                if scelta_riga:
-                    st.session_state["comp_tags"] = scelta_riga
-                    # Resettiamo le altre righe per evitare doppie selezioni visive
-                    for altro_idx in range(len(righe)):
-                        if altro_idx != idx:
-                            st.session_state[f"comp_riga_{altro_idx}"] = None
+            st.pills("Modello di destinazione:", options=OPZIONI_COMPATIBILITA, selection_mode="single", key="comp_tags", label_visibility="collapsed")
         else:
             st.info("Nessuna compatibilità necessaria per i Fastener.")
             
