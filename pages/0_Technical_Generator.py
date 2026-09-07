@@ -130,6 +130,22 @@ def activate_reset():
 
     # 4. Flag per attivare il toast al termine del refresh automatico
     st.session_state['reset_eseguito'] = True
+
+/* Forziamo i pills a comportarsi come una griglia flessibile a larghezza controllata, 
+   permettendo loro di andare a capo in modo naturale o a blocchi */
+[data-testid="stPills"] div[role="radiogroup"] {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px !important;
+}
+
+/* Se vuoi che i singoli bottoni dei pills abbiano una dimensione che si adatta 
+   ma non sfora, o vuoi forzare un comportamento specifico */
+[data-testid="stPills"] div[role="radiogroup"] label {
+    flex: 1 1 auto;
+    min-width: 90px; /* Adatta questa misura in base alle tue etichette più lunghe */
+    text-align: center;
+}
     
 # =========================================================
 # 1. DIZIONARI, PILLS E DATABASE CENTRALIZZATO (SANIFICATO)
