@@ -13,7 +13,7 @@ import streamlit as st
 # Spostiamo set_page_config come primissima istruzione per evitare errori
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
-# CSS per compattare l'interfaccia e correggere il troncamento dei Pills
+# CSS per compattare l'interfaccia e correggere definitivamente il troncamento dei Pills
 st.markdown("""
     <style>
         /* 1. Riduciamo il padding superiore della pagina */
@@ -25,7 +25,7 @@ st.markdown("""
         /* 2. Compattiamo lo spazio tra ogni elemento (widget) */
         [data-testid="stVerticalBlock"] > div {
             flex-direction: column;
-            gap: 0.15rem !important; /* Riduce il buco tra un widget e l'altro */
+            gap: 0.15rem !important;
         }
 
         /* 3. Riduciamo l'altezza dei titoli */
@@ -33,7 +33,7 @@ st.markdown("""
         h2 { margin-bottom: -0.8rem !important; font-size: 1.2rem !important; }
         h3 { margin-bottom: -0.5rem !important; font-size: 1.0rem !important; }
 
-        /* 4. Compattiamo i divisori (st.divider / st.markdown("---")) */
+        /* 4. Compattiamo i divisori */
         hr {
             margin-top: 0.4rem !important;
             margin-bottom: 0.4rem !important;
@@ -44,7 +44,7 @@ st.markdown("""
             margin-bottom: -0.8rem !important;
         }
 
-        /* 6. Riduciamo lo spazio interno ai widget (Selectbox, Text Input) */
+        /* 6. Riduciamo lo spazio interno ai widget */
         div[data-baseweb="select"] > div, 
         div[data-testid="stTextInput"] > div > div > input {
             padding-top: 0px !important;
@@ -52,41 +52,42 @@ st.markdown("""
             min-height: 1.6rem !important;
         }
         
-        /* 7. Ottimizzazione e FIX WRAPPING PILLS (Risolve il troncamento laterale) */
+        /* 7. FIX DEFINITIVO WRAPPING PILLS (Forza la rottura di riga e impedisce lo scroll orizzontale) */
         [data-testid="stPills"] {
             margin-top: -0.5rem !important;
         }
-        div[data-testid="stPills"] div[data-baseweb="tag"], 
-        div[data-testid="stPills"] > div {
-            flex-wrap: wrap !important; /* Forza i pills ad andare a capo automaticamente */
+        
+        /* Agganciamo direttamente il contenitore dei tag di BaseWeb usato dai pills di Streamlit */
+        [data-testid="stPills"] div[data-baseweb], 
+        [data-testid="stPills"] [class*="st-"] {
+            flex-wrap: wrap !important;
         }
-        div[data-testid="stPills"] {
+        
+        /* Forza il contenitore principale dei pills a distribuirsi in altezza e larghezza 100% */
+        div[data-testid="stPills"] > div {
+            display: flex !important;
+            flex-wrap: wrap !important;
             max-width: 100% !important;
+            overflow: visible !important;
         }
 
         /* 8. Ingrandimento scritte Categorie (st.radio) */
         [data-testid="stWidgetLabel"] p {
-            font-size: 1.6rem !important; /* Ingrandisce la label del widget */
+            font-size: 1.6rem !important;
             font-weight: 700 !important;
         }
 
         [data-testid="stMarkdownContainer"] p {
-            font-size: 1.2rem !important; /* Ingrandisce le opzioni del radio (Metal Comp, etc) */
+            font-size: 1.2rem !important;
         }
         
-        /* Ottimizzazione spazio tra le opzioni del radio per non farle accavallare */
-        [data-testid="stAudioRadio"] div {
-            gap: 0.5rem !important;
-        }
-
         /* 9. Distanziamento verticale tra le opzioni del Radio (Categorie) */
         div[data-testid="stRadio"] div[role="radiogroup"] label {
-            margin-bottom: 12px !important; /* Aggiunge spazio sotto ogni categoria */
-            padding: 5px 0px !important;    /* Dà un po' di respiro interno */
-            transition: all 0.2s ease;      /* Effetto fluido al passaggio del mouse */
+            margin-bottom: 12px !important;
+            padding: 5px 0px !important;
+            transition: all 0.2s ease;
         }
 
-        /* Opzionale: un leggero effetto hover per capire cosa stiamo selezionando */
         div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
             background-color: rgba(255, 255, 255, 0.05);
             border-radius: 5px;
@@ -101,13 +102,7 @@ if st.session_state.get('reset_eseguito'):
 
 # --- LOGICA DI RESET OTTIMIZZATA ---
 def activate_reset():
-    """
-    Reset centralizzato dello stato. 
-    Nota: Non chiamiamo st.rerun() qui perché usata come callback 'on_click',
-    evitando l'avviso 'no-op'.
-    """
-    
-    # 1. Valori di default
+    """Reset centralizzato dello stato."""
     defaults = {
         'comp_tags': None,
         'selectbox_part': None,
@@ -124,7 +119,6 @@ def activate_reset():
         'stringa_editabile', 'input_manuale'
     ]
 
-    # 2. Esecuzione Reset Session State
     for key, val in defaults.items():
         st.session_state[key] = val
         
@@ -132,12 +126,10 @@ def activate_reset():
         if key in st.session_state:
             st.session_state[key] = ""
 
-    # 3. Pulizia chiavi dinamiche
     for key in list(st.session_state.keys()):
         if key.startswith(("manual_", "sub_")):
             del st.session_state[key]
 
-    # 4. Flag per attivare il toast al termine del refresh automatico
     st.session_state['reset_eseguito'] = True
     
 # =========================================================
