@@ -779,15 +779,30 @@ with col_workarea:
     if scelta_part_it:
         dati_part = part_info.get(scelta_part_it, ["", "PILLS_VUOTO", ""])
         
-        # --- LOGICA CORRETTA PER PILLS CENTRALIZZATI ---
         chiave_gruppo_pills = dati_part[1]
         pills_disponibili = PILLS_CONDIVISI.get(chiave_gruppo_pills, {})
         extra_options = list(pills_disponibili.keys())
         
         if extra_options:
-            st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
+            st.markdown("**Caratteristiche:**")
             
-            tags_scelti_raw = st.session_state.get("extra_tags", [])
+            # Suddividiamo le opzioni in righe da 4 elementi per creare una griglia ordinata
+            num_colonne = 4
+            righe = [extra_options[i:i + num_colonne] for i in range(0, len(extra_options), num_colonne)]
+            
+            tag_selezionati = []
+            
+            for r_idx, riga in enumerate(righe):
+                cols = st.columns(num_colonne)
+                for c_idx, opt in enumerate(riga):
+                    with cols[c_idx]:
+                        # Ogni checkbox agisce come un tag cliccabile che va a capo nativamente
+                        if st.checkbox(opt, key=f"tag_chk_{opt}"):
+                            tag_selezionati.append(opt)
+            
+            # Sincronizziamo la lista con la chiave ufficiale attesa dal resto del codice
+            st.session_state["extra_tags"] = tag_selezionati
+            tags_scelti_raw = tag_selezionati
             tags_scelti_upper = [str(t).upper().strip() for t in tags_scelti_raw]
             
             conflitto_rilevato = False
@@ -814,15 +829,6 @@ with col_workarea:
                         st.selectbox(f"Dettaglio per {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
                     elif ex in EXTRA_CON_INPUT_MANUALE:
                         st.text_input(f"Specifica valore per {ex}:", key=f"manual_{ex}")
-
-    st.text_input(
-        "Note libere (Traduzione automatica):", 
-        key="extra_text", 
-        placeholder="es: con tappi in gomma...",
-        help="Il testo inserito verrà tradotto in inglese nel risultato finale."
-    )
-    
-    st.markdown("---")
     
     # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento")
