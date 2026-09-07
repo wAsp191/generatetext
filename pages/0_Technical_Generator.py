@@ -860,7 +860,34 @@ with col_workarea:
     
     with c_pills:
         if macro_it != "FASTENER":
-            st.pills("Modello di destinazione:", options=OPZIONI_COMPATIBILITA, selection_mode="single", key="comp_tags", label_visibility="collapsed")
+            st.markdown("**Modello di destinazione:**")
+            
+            # 1. Definiamo le opzioni e le suddividiamo in righe da 4 elementi
+            opzioni_compatibilita = ["F25", "F25 BESPOKE", "F25 READY", "F50", "F50 BESPOKE", "F50 READY", "UNIVERSAL", "BC", "FORTISSIMO", "MINIRACK", "UNIMOB"]
+            righe = [opzioni_compatibilita[i:i + 4] for i in range(0, len(opzioni_compatibilita), 4)]
+            
+            # 2. Renderizziamo le righe mantenendo sincronizzato 'comp_tags'
+            valore_attuale = st.session_state.get("comp_tags", None)
+            
+            for idx, riga in enumerate(righe):
+                # Selezioniamo il default solo se l'elemento fa parte di questa riga
+                default_val = valore_attuale if valore_attuale in riga else None
+                
+                scelta_riga = st.pills(
+                    f"Modello riga {idx}",
+                    options=riga,
+                    selection_mode="single",
+                    key=f"comp_riga_{idx}",
+                    label_visibility="collapsed",
+                    default=default_val
+                )
+                
+                if scelta_riga:
+                    st.session_state["comp_tags"] = scelta_riga
+                    # Resettiamo le altre righe per evitare doppie selezioni visive
+                    for altro_idx in range(len(righe)):
+                        if altro_idx != idx:
+                            st.session_state[f"comp_riga_{altro_idx}"] = None
         else:
             st.info("Nessuna compatibilità necessaria per i Fastener.")
             
