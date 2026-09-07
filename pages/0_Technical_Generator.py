@@ -8,7 +8,6 @@ from streamlit_gsheets import GSheetsConnection
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
-import streamlit as st
 
 # Spostiamo set_page_config come primissima istruzione per evitare errori
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
@@ -51,7 +50,7 @@ st.markdown("""
             padding-bottom: 0px !important;
             min-height: 1.6rem !important;
         }
-
+        
         /* 7. Nascondiamo lo spazio extra dei Pills */
         [data-testid="stPills"] {
             margin-top: -0.5rem !important;
@@ -65,7 +64,7 @@ st.markdown("""
         [data-testid="stMarkdownContainer"] p {
             font-size: 1.2rem !important; /* Ingrandisce le opzioni del radio (Metal Comp, etc) */
         }
-
+        
         /* Ottimizzazione spazio tra le opzioni del radio per non farle accavallare */
         [data-testid="stAudioRadio"] div {
             gap: 0.5rem !important;
@@ -98,7 +97,7 @@ def activate_reset():
     Nota: Non chiamiamo st.rerun() qui perché usata come callback 'on_click',
     evitando l'avviso 'no-op'.
     """
-
+    
     # 1. Valori di default
     defaults = {
         'comp_tags': None,
@@ -119,14 +118,14 @@ def activate_reset():
     # 2. Esecuzione Reset Session State
     for key, val in defaults.items():
         st.session_state[key] = val
-
+        
     for key in text_keys:
         if key in st.session_state:
             st.session_state[key] = ""
 
-    # 3. Pulizia chiavi dinamiche (inclusi i prefissi dei pills a righe multiple)
+    # 3. Pulizia chiavi dinamiche
     for key in list(st.session_state.keys()):
-        if key.startswith(("manual_", "sub_", "pills_riga_", "compatibilita_riga_", "extra_pills_riga_")):
+        if key.startswith(("manual_", "sub_")):
             del st.session_state[key]
 
     # 4. Flag per attivare il toast al termine del refresh automatico
@@ -690,60 +689,6 @@ TESTO_MANUALE = """
 </div>
 """
 
-# --- FUNZIONE HELPER PER PILLS MULTI-RIGA ---
-def render_multiline_pills(options_list, label, key_prefix, selection_mode="multi", max_per_row=4):
-    """
-    Suddivide una lista lunga di opzioni in più righe di pills per evitare lo scroll orizzontale
-    e gestire lo stato in modo pulito e centralizzato.
-    """
-    if not options_list:
-        return [] if selection_mode == "multi" else None
-
-    if label:
-        st.markdown(f"**{label}**")
-    
-    # Spezziamo la lista in blocchi in base al numero massimo per riga
-    chunks = [options_list[i:i + max_per_row] for i in range(0, len(options_list), max_per_row)]
-    
-    if selection_mode == "multi":
-        all_selected = []
-        for idx, chunk in enumerate(chunks):
-            row_selection = st.pills(
-                f"{label}_riga_{idx}",
-                options=chunk,
-                selection_mode="multi",
-                key=f"{key_prefix}_riga_{idx}",
-                label_visibility="collapsed"
-            )
-            if row_selection:
-                all_selected.extend(row_selection)
-        
-        # Sincronizziamo il risultato globale con la chiave principale attesa dal resto del codice
-        st.session_state[key_prefix] = all_selected
-        return all_selected
-
-    else:
-        # Modalità singola (es. Compatibilità)
-        current_val = st.session_state.get(key_prefix, None)
-        
-        for idx, chunk in enumerate(chunks):
-            row_selection = st.pills(
-                f"{label}_riga_{idx}",
-                options=chunk,
-                selection_mode="single",
-                key=f"{key_prefix}_riga_{idx}",
-                label_visibility="collapsed"
-            )
-            if row_selection:
-                st.session_state[key_prefix] = row_selection
-                # Resettiamo le altre righe dello stesso gruppo per evitare conflitti visivi
-                for altro_idx in range(len(chunks)):
-                    if altro_idx != idx:
-                        st.session_state[f"{key_prefix}_riga_{altro_idx}"] = None
-                return row_selection
-                
-        return current_val
-
 # --- HEADER ---
 col_t, col_m, col_r = st.columns([2.5, 1.5, 1], vertical_alignment="bottom")
 with col_t: 
@@ -783,6 +728,8 @@ with col_workarea:
     
     with c_mat:
         if "ASSEMBLY" in macro_it.upper(): 
+            # Gestiamo solo il toggle. 
+            # mat_en viene resettato per evitare che "ASSEMBLY" entri come stringa fissa
             st.toggle("ASSEMBLATO", key="check_assembled")
             st.session_state.mat_en = "" 
         else:
@@ -817,19 +764,13 @@ with col_workarea:
     if scelta_part_it:
         dati_part = part_info.get(scelta_part_it, ["", "PILLS_VUOTO", ""])
         
+        # --- LOGICA CORRETTA PER PILLS CENTRALIZZATI ---
         chiave_gruppo_pills = dati_part[1]
         pills_disponibili = PILLS_CONDIVISI.get(chiave_gruppo_pills, {})
         extra_options = list(pills_disponibili.keys())
         
         if extra_options:
-            # Sostituito il vecchio st.pills con la nostra funzione multi-riga sicura (max 4 per riga)
-            render_multiline_pills(
-                options_list=extra_options,
-                label="Caratteristiche:",
-                key_prefix="extra_tags",
-                selection_mode="multi",
-                max_per_row=8
-            )
+            st.pills("Caratteristiche:", options=extra_options, selection_mode="multi", key="extra_tags")
             
             tags_scelti_raw = st.session_state.get("extra_tags", [])
             tags_scelti_upper = [str(t).upper().strip() for t in tags_scelti_raw]
@@ -871,6 +812,7 @@ with col_workarea:
     # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento")
 
+    # Inizializzazione sicura chiavi
     for k in ["dim_l", "dim_dia", "dim_l_gen", "dim_p", "dim_h", "dim_dia_gen"]:
         if k not in st.session_state:
             st.session_state[k] = ""
@@ -903,14 +845,7 @@ with col_workarea:
     
     with c_pills:
         if macro_it != "FASTENER":
-            # Utilizziamo la funzione helper in modalità singola anche per la compatibilità
-            render_multiline_pills(
-                options_list=OPZIONI_COMPATIBILITA,
-                label="Modello di destinazione:",
-                key_prefix="comp_tags",
-                selection_mode="single",
-                max_per_row=4
-            )
+            st.pills("Modello di destinazione:", options=OPZIONI_COMPATIBILITA, selection_mode="single", key="comp_tags", label_visibility="collapsed")
         else:
             st.info("Nessuna compatibilità necessaria per i Fastener.")
             
