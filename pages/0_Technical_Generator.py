@@ -24,7 +24,7 @@ st.markdown("""
         /* 2. Compattiamo lo spazio tra ogni elemento (widget) */
         [data-testid="stVerticalBlock"] > div {
             flex-direction: column;
-            gap: 0.15rem !important; /* Riduce il buco tra un widget e l'altro */
+            gap: 0.12rem !important; /* Riduce il buco tra un widget e l'altro */
         }
 
         /* 3. Riduciamo l'altezza dei titoli */
@@ -34,8 +34,8 @@ st.markdown("""
 
         /* 4. Compattiamo i divisori (st.divider / st.markdown("---")) */
         hr {
-            margin-top: 0.4rem !important;
-            margin-bottom: 0.4rem !important;
+            margin-top: 0.35rem !important;
+            margin-bottom: 0.35rem !important;
         }
 
         /* 5. Trick per ridurre lo spazio sotto le label dei widget */
@@ -771,8 +771,8 @@ with col_workarea:
         if extra_options:
             st.markdown("**Caratteristiche:**")
             
-            # Suddividiamo le opzioni in righe da 4 elementi per creare una griglia ordinata
-            num_colonne = 4
+            # Suddividiamo le opzioni in righe da 5 elementi per creare una griglia ordinata
+            num_colonne = 5
             righe = [extra_options[i:i + num_colonne] for i in range(0, len(extra_options), num_colonne)]
             
             tag_selezionati = []
