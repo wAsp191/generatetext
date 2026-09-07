@@ -8,12 +8,11 @@ from streamlit_gsheets import GSheetsConnection
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
-import streamlit as st
 
 # Spostiamo set_page_config come primissima istruzione per evitare errori
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
-# CSS per compattare l'interfaccia (ripulito dai vecchi fix CSS non necessari)
+# CSS per compattare l'interfaccia
 st.markdown("""
     <style>
         /* 1. Riduciamo il padding superiore della pagina */
@@ -25,7 +24,7 @@ st.markdown("""
         /* 2. Compattiamo lo spazio tra ogni elemento (widget) */
         [data-testid="stVerticalBlock"] > div {
             flex-direction: column;
-            gap: 0.15rem !important;
+            gap: 0.15rem !important; /* Riduce il buco tra un widget e l'altro */
         }
 
         /* 3. Riduciamo l'altezza dei titoli */
@@ -33,7 +32,7 @@ st.markdown("""
         h2 { margin-bottom: -0.8rem !important; font-size: 1.2rem !important; }
         h3 { margin-bottom: -0.5rem !important; font-size: 1.0rem !important; }
 
-        /* 4. Compattiamo i divisori */
+        /* 4. Compattiamo i divisori (st.divider / st.markdown("---")) */
         hr {
             margin-top: 0.4rem !important;
             margin-bottom: 0.4rem !important;
@@ -44,31 +43,41 @@ st.markdown("""
             margin-bottom: -0.8rem !important;
         }
 
-        /* 6. Riduciamo lo spazio interno ai widget */
+        /* 6. Riduciamo lo spazio interno ai widget (Selectbox, Text Input) */
         div[data-baseweb="select"] > div, 
         div[data-testid="stTextInput"] > div > div > input {
             padding-top: 0px !important;
             padding-bottom: 0px !important;
             min-height: 1.6rem !important;
         }
-
-        /* 7. Ingrandimento scritte Categorie (st.radio) */
+        
+        /* 7. Nascondiamo lo spazio extra dei Pills */
+        [data-testid="stPills"] {
+            margin-top: -0.5rem !important;
+        }
+        /* 8. Ingrandimento scritte Categorie (st.radio) */
         [data-testid="stWidgetLabel"] p {
-            font-size: 1.6rem !important;
+            font-size: 1.6rem !important; /* Ingrandisce la label del widget */
             font-weight: 700 !important;
         }
 
         [data-testid="stMarkdownContainer"] p {
-            font-size: 1.2rem !important;
+            font-size: 1.2rem !important; /* Ingrandisce le opzioni del radio (Metal Comp, etc) */
         }
         
-        /* 8. Distanziamento verticale tra le opzioni del Radio (Categorie) */
-        div[data-testid="stRadio"] div[role="radiogroup"] label {
-            margin-bottom: 12px !important;
-            padding: 5px 0px !important;
-            transition: all 0.2s ease;
+        /* Ottimizzazione spazio tra le opzioni del radio per non farle accavallare */
+        [data-testid="stAudioRadio"] div {
+            gap: 0.5rem !important;
         }
 
+        /* 9. Distanziamento verticale tra le opzioni del Radio (Categorie) */
+        div[data-testid="stRadio"] div[role="radiogroup"] label {
+            margin-bottom: 12px !important; /* Aggiunge spazio sotto ogni categoria */
+            padding: 5px 0px !important;    /* Dà un po' di respiro interno */
+            transition: all 0.2s ease;      /* Effetto fluido al passaggio del mouse */
+        }
+
+        /* Opzionale: un leggero effetto hover per capire cosa stiamo selezionando */
         div[data-testid="stRadio"] div[role="radiogroup"] label:hover {
             background-color: rgba(255, 255, 255, 0.05);
             border-radius: 5px;
@@ -84,8 +93,9 @@ if st.session_state.get('reset_eseguito'):
 # --- LOGICA DI RESET OTTIMIZZATA ---
 def activate_reset():
     """
-    Reset centralizzato dello stato globale. 
-    Gestisce anche la pulizia della nuova griglia di compatibilità.
+    Reset centralizzato dello stato. 
+    Nota: Non chiamiamo st.rerun() qui perché usata come callback 'on_click',
+    evitando l'avviso 'no-op'.
     """
     
     # 1. Valori di default
@@ -95,7 +105,6 @@ def activate_reset():
         'extra_tags': [],
         'check_1090': False,
         'check_assembled': False,
-        'selected_compatibilita': None, # Stato per la nuova griglia a bottoni
         'stringa_stabile': "",
         'tags_stabili': []
     }
@@ -114,9 +123,9 @@ def activate_reset():
         if key in st.session_state:
             st.session_state[key] = ""
 
-    # 3. Pulizia chiavi dinamiche (inclusi i bottoni dinamici della griglia compatibilità)
+    # 3. Pulizia chiavi dinamiche
     for key in list(st.session_state.keys()):
-        if key.startswith(("manual_", "sub_", "btn_comp_")):
+        if key.startswith(("manual_", "sub_")):
             del st.session_state[key]
 
     # 4. Flag per attivare il toast al termine del refresh automatico
