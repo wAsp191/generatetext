@@ -8,28 +8,12 @@ from streamlit_gsheets import GSheetsConnection
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
-
-/* --- FORZA I PILLS A VISUALIZZARSI SU PIÙ RIGHE (ZERO SCROLL) --- */
-div[data-testid="stPills"] div[role="radiogroup"] {
-    display: flex !important;
-    flex-wrap: wrap !important;     /* Abilita l'andata a capo automatica */
-    overflow: visible !important;   /* Evita tagli o scroll invisibili */
-    gap: 6px !important;            /* Spaziatura pulita tra i bottoni */
-}
-
-div[data-testid="stPills"] {
-    overflow: visible !important;
-}
-
-/* Opzionale: permette ai bottoni di adattarsi elegantemente allo spazio */
-div[data-testid="stPills"] div[role="radiogroup"] label {
-    flex: 0 1 auto !important;
-}
+import streamlit as st
 
 # Spostiamo set_page_config come primissima istruzione per evitare errori
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
-# CSS per compattare l'interfaccia
+# CSS per compattare l'interfaccia e gestire i pills correttamente
 st.markdown("""
     <style>
         /* 1. Riduciamo il padding superiore della pagina */
@@ -68,10 +52,24 @@ st.markdown("""
             min-height: 1.6rem !important;
         }
         
-        /* 7. Nascondiamo lo spazio extra dei Pills */
+        /* 7. Nascondiamo lo spazio extra dei Pills e FORZIAMO L'ANDATA A CAPO */
         [data-testid="stPills"] {
             margin-top: -0.5rem !important;
+            overflow: visible !important;
         }
+        
+        /* Forza i pills a distribuirsi su più righe senza scroll orizzontale */
+        div[data-testid="stPills"] div[role="radiogroup"] {
+            display: flex !important;
+            flex-wrap: wrap !important;
+            overflow: visible !important;
+            gap: 6px !important;
+        }
+
+        div[data-testid="stPills"] div[role="radiogroup"] label {
+            flex: 0 1 auto !important;
+        }
+
         /* 8. Ingrandimento scritte Categorie (st.radio) */
         [data-testid="stWidgetLabel"] p {
             font-size: 1.6rem !important; /* Ingrandisce la label del widget */
