@@ -24,7 +24,7 @@ st.markdown("""
         /* 2. Compattiamo lo spazio tra ogni elemento (widget) */
         [data-testid="stVerticalBlock"] > div {
             flex-direction: column;
-            gap: 0.15rem !important; /* Riduce il buco tra un widget e l'altro */
+            gap: 0.10rem !important; /* Riduce il buco tra un widget e l'altro */
         }
 
         /* 3. Riduciamo l'altezza dei titoli */
@@ -53,7 +53,7 @@ st.markdown("""
         
         /* 7. Nascondiamo lo spazio extra dei Pills */
         [data-testid="stPills"] {
-            margin-top: -0.5rem !important;
+            margin-top: -0.4rem !important;
         }
         /* 8. Ingrandimento scritte Categorie (st.radio) */
         [data-testid="stWidgetLabel"] p {
@@ -62,7 +62,7 @@ st.markdown("""
         }
 
         [data-testid="stMarkdownContainer"] p {
-            font-size: 1.2rem !important; /* Ingrandisce le opzioni del radio (Metal Comp, etc) */
+            font-size: 1.1rem !important; /* Ingrandisce le opzioni del radio (Metal Comp, etc) */
         }
         
         /* Ottimizzazione spazio tra le opzioni del radio per non farle accavallare */
