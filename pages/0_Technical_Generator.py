@@ -8,11 +8,12 @@ from streamlit_gsheets import GSheetsConnection
 # =========================================================
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
+import streamlit as st
 
 # Spostiamo set_page_config come primissima istruzione per evitare errori
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
-# CSS per compattare l'interfaccia
+# CSS per compattare l'interfaccia e correggere il troncamento dei Pills
 st.markdown("""
     <style>
         /* 1. Riduciamo il padding superiore della pagina */
@@ -51,10 +52,18 @@ st.markdown("""
             min-height: 1.6rem !important;
         }
         
-        /* 7. Nascondiamo lo spazio extra dei Pills */
+        /* 7. Ottimizzazione e FIX WRAPPING PILLS (Risolve il troncamento laterale) */
         [data-testid="stPills"] {
             margin-top: -0.5rem !important;
         }
+        div[data-testid="stPills"] div[data-baseweb="tag"], 
+        div[data-testid="stPills"] > div {
+            flex-wrap: wrap !important; /* Forza i pills ad andare a capo automaticamente */
+        }
+        div[data-testid="stPills"] {
+            max-width: 100% !important;
+        }
+
         /* 8. Ingrandimento scritte Categorie (st.radio) */
         [data-testid="stWidgetLabel"] p {
             font-size: 1.6rem !important; /* Ingrandisce la label del widget */
