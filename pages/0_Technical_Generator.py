@@ -13,7 +13,7 @@ import streamlit as st
 # Spostiamo set_page_config come primissima istruzione per evitare errori
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
-# CSS per compattare l'interfaccia e correggere definitivamente il troncamento dei Pills
+# CSS per compattare l'interfaccia (ripulito dai vecchi fix CSS non necessari)
 st.markdown("""
     <style>
         /* 1. Riduciamo il padding superiore della pagina */
@@ -51,27 +51,8 @@ st.markdown("""
             padding-bottom: 0px !important;
             min-height: 1.6rem !important;
         }
-        
-        /* 7. FIX DEFINITIVO WRAPPING PILLS (Forza la rottura di riga e impedisce lo scroll orizzontale) */
-        [data-testid="stPills"] {
-            margin-top: -0.5rem !important;
-        }
-        
-        /* Agganciamo direttamente il contenitore dei tag di BaseWeb usato dai pills di Streamlit */
-        [data-testid="stPills"] div[data-baseweb], 
-        [data-testid="stPills"] [class*="st-"] {
-            flex-wrap: wrap !important;
-        }
-        
-        /* Forza il contenitore principale dei pills a distribuirsi in altezza e larghezza 100% */
-        div[data-testid="stPills"] > div {
-            display: flex !important;
-            flex-wrap: wrap !important;
-            max-width: 100% !important;
-            overflow: visible !important;
-        }
 
-        /* 8. Ingrandimento scritte Categorie (st.radio) */
+        /* 7. Ingrandimento scritte Categorie (st.radio) */
         [data-testid="stWidgetLabel"] p {
             font-size: 1.6rem !important;
             font-weight: 700 !important;
@@ -81,7 +62,7 @@ st.markdown("""
             font-size: 1.2rem !important;
         }
         
-        /* 9. Distanziamento verticale tra le opzioni del Radio (Categorie) */
+        /* 8. Distanziamento verticale tra le opzioni del Radio (Categorie) */
         div[data-testid="stRadio"] div[role="radiogroup"] label {
             margin-bottom: 12px !important;
             padding: 5px 0px !important;
@@ -102,13 +83,19 @@ if st.session_state.get('reset_eseguito'):
 
 # --- LOGICA DI RESET OTTIMIZZATA ---
 def activate_reset():
-    """Reset centralizzato dello stato."""
+    """
+    Reset centralizzato dello stato globale. 
+    Gestisce anche la pulizia della nuova griglia di compatibilità.
+    """
+    
+    # 1. Valori di default
     defaults = {
         'comp_tags': None,
         'selectbox_part': None,
         'extra_tags': [],
         'check_1090': False,
         'check_assembled': False,
+        'selected_compatibilita': None, # Stato per la nuova griglia a bottoni
         'stringa_stabile': "",
         'tags_stabili': []
     }
@@ -119,6 +106,7 @@ def activate_reset():
         'stringa_editabile', 'input_manuale'
     ]
 
+    # 2. Esecuzione Reset Session State
     for key, val in defaults.items():
         st.session_state[key] = val
         
@@ -126,10 +114,12 @@ def activate_reset():
         if key in st.session_state:
             st.session_state[key] = ""
 
+    # 3. Pulizia chiavi dinamiche (inclusi i bottoni dinamici della griglia compatibilità)
     for key in list(st.session_state.keys()):
-        if key.startswith(("manual_", "sub_")):
+        if key.startswith(("manual_", "sub_", "btn_comp_")):
             del st.session_state[key]
 
+    # 4. Flag per attivare il toast al termine del refresh automatico
     st.session_state['reset_eseguito'] = True
     
 # =========================================================
