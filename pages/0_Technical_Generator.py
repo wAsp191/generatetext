@@ -9,6 +9,23 @@ from streamlit_gsheets import GSheetsConnection
 # 0. CONFIGURAZIONE PAGINA E LOGICA RESET
 # =========================================================
 
+/* --- FORZA I PILLS A VISUALIZZARSI SU PIÙ RIGHE (ZERO SCROLL) --- */
+div[data-testid="stPills"] div[role="radiogroup"] {
+    display: flex !important;
+    flex-wrap: wrap !important;     /* Abilita l'andata a capo automatica */
+    overflow: visible !important;   /* Evita tagli o scroll invisibili */
+    gap: 6px !important;            /* Spaziatura pulita tra i bottoni */
+}
+
+div[data-testid="stPills"] {
+    overflow: visible !important;
+}
+
+/* Opzionale: permette ai bottoni di adattarsi elegantemente allo spazio */
+div[data-testid="stPills"] div[role="radiogroup"] label {
+    flex: 0 1 auto !important;
+}
+
 # Spostiamo set_page_config come primissima istruzione per evitare errori
 st.set_page_config(page_title="Technical Generator v8.7", layout="wide")
 
