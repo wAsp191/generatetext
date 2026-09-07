@@ -845,9 +845,17 @@ with col_workarea:
     
     with c_pills:
         if macro_it != "FASTENER":
-            st.pills("Modello di destinazione:", options=OPZIONI_COMPATIBILITA, selection_mode="single", key="comp_tags", label_visibility="collapsed")
+            # Usiamo una selectbox pulita ed elegante al posto dei pills
+            st.selectbox(
+                "Modello di destinazione:",
+                options=OPZIONI_COMPATIBILITA,
+                index=None,
+                placeholder="Seleziona modello...",
+                key="comp_tags",
+                label_visibility="collapsed"
+            )
         else:
-            st.info("Nessuna compatibilità necessaria per i Fastener.")
+            st.info("Nessuna compatibilità necessaria per il Fastener.")
             
     with c_check:
         if st.session_state.get("comp_tags") in ["FORTISSIMO", "MINIRACK"]:
