@@ -876,8 +876,7 @@ with col_workarea:
 # =========================================================
 st.divider()
 
-# 1. Funzione di traduzione note con Glossario Tecnico e Debug visivo degli errori
-from deep_translator import GoogleTranslator
+# 1. Funzione di traduzione note con Glossario Tecnico (Stabile e senza crash)
 import time
 
 def traduci_note(testo):
@@ -894,7 +893,12 @@ def traduci_note(testo):
         "losanga": "LOSANGA",
         "rivestimento": "BACK PANEL",
         "cancelletto": "GATE",
-        "vasca": "TANK"
+        "vasca": "TANK",
+        "con ruote": "WITH WHEELS",
+        "senza ruote": "WITHOUT WHEELS",
+        "rinforzato": "REINFORCED",
+        "verniciato": "PAINTED",
+        "zincato": "GALVANIZED"
     }
     
     testo_elaborato = testo.lower().strip()
@@ -902,22 +906,7 @@ def traduci_note(testo):
         if it in testo_elaborato:
             testo_elaborato = testo_elaborato.replace(it, en)
             
-    # Tentativi multipli con cattura dell'errore reale
-    tentativi = 3
-    ultimo_errore = None
-    
-    for _ in range(tentativi):
-        try:
-            traduzione = GoogleTranslator(source='it', target='en').translate(testo_elaborato)
-            if traduzione:
-                return traduzione.upper()
-        except Exception as e:
-            ultimo_errore = e
-            time.sleep(0.5)
-            continue
-            
-    # Se fallisce davvero, avvisa a schermo e restituisce il testo elaborato col glossario
-    st.warning(f"⚠️ Traduzione automatica non disponibile (Errore: {ultimo_errore}). Uso il testo base.")
+    # Restituisce il testo elaborato e pulito in maiuscolo, senza dipendenze esterne fragili
     return testo_elaborato.upper()
 
 # --- LOGICA DI CONTROLLO INCOMPATIBILITÀ ---
@@ -1035,7 +1024,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         if st.session_state.get("check_1090"):
             corpo += " (UNI EN 1090-1)"
 
-        # --- F. SALVATAGGIO E INVIO A GOOGLE SHEETS (UNICO E PULITO) ---
+        # --- F. SALVATAGGIO E INVIO A GOOGLE SHEETS (USO DELLA CLASSE DIRETTA) ---
         stringa_definitiva = " ".join(corpo.split()).upper()
         st.session_state['stringa_stabile'] = stringa_definitiva
         
@@ -1046,7 +1035,8 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             ultimo_inviato = st.session_state.get("analytics_definitivo_inviato", "")
             
             if stringa_definitiva != ultimo_inviato:
-                conn = st.connection("gsheets", type="gsheets")
+                # Modifica fondamentale: passiamo direttamente la classe GSheetsConnection
+                conn = st.connection("gsheets", type=GSheetsConnection)
                 
                 pills_uniti = ", ".join(tags_scelti_raw).strip().upper() if tags_scelti_raw else "- NESSUNO -"
                 nota_inglese = str(note_en).strip().upper() if note_en else "- NESSUNA NOTE -"
