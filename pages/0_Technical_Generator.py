@@ -908,7 +908,6 @@ def traduci_note(testo):
     
     for _ in range(tentativi):
         try:
-            # Forziamo la traduzione da italiano a inglese
             traduzione = GoogleTranslator(source='it', target='en').translate(testo_elaborato)
             if traduzione:
                 return traduzione.upper()
@@ -917,7 +916,7 @@ def traduci_note(testo):
             time.sleep(0.5)
             continue
             
-    # Se fallisce davvero, stampiamo a schermo il motivo esatto dell'errore API
+    # Se fallisce davvero, avvisa a schermo e restituisce il testo elaborato col glossario
     st.warning(f"⚠️ Traduzione automatica non disponibile (Errore: {ultimo_errore}). Uso il testo base.")
     return testo_elaborato.upper()
 
@@ -957,19 +956,12 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         lista_prima = []
         lista_dopo = []
         
-        # RECUPERO CORRETTO: usiamo 'extra_tags' definito nel modulo 2
         tags_selezionati = st.session_state.get('extra_tags', [])
         
-        if not tags_selezionati:
-            # Se l'utente non ha selezionato nulla, procediamo normalmente
-            pass
-        else:
-            # ORDINE MASTER: basato sull'ordine nel dizionario PILLS_CONDIVISI
+        if tags_selezionati:
             ordine_master = list(dict_extra_db.keys())
             
-            # Cicliamo sull'ordine del dizionario (Master) per forzare la sequenza
             for tag_master in ordine_master:
-                # Confronto case-insensitive
                 if any(tag_master.lower() == str(t).lower() for t in tags_selezionati):
                     
                     if tag_master in SUB_OPTIONS_CONFIG:
@@ -1043,7 +1035,7 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         if st.session_state.get("check_1090"):
             corpo += " (UNI EN 1090-1)"
 
-        # --- F. SALVATAGGIO E INVIO (CORRETTO) ---
+        # --- F. SALVATAGGIO E INVIO A GOOGLE SHEETS (UNICO E PULITO) ---
         stringa_definitiva = " ".join(corpo.split()).upper()
         st.session_state['stringa_stabile'] = stringa_definitiva
         
@@ -1054,11 +1046,10 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
             ultimo_inviato = st.session_state.get("analytics_definitivo_inviato", "")
             
             if stringa_definitiva != ultimo_inviato:
-                # Connessione usando la classe importata esplicitamente in cima al file
-                conn = st.connection("gsheets", type=GSheetsConnection)
+                conn = st.connection("gsheets", type="gsheets")
                 
                 pills_uniti = ", ".join(tags_scelti_raw).strip().upper() if tags_scelti_raw else "- NESSUNO -"
-                nota_inglese = str(note_en).strip().upper() if 'note_en' in locals() and note_en else "- NESSUNA NOTE -"
+                nota_inglese = str(note_en).strip().upper() if note_en else "- NESSUNA NOTE -"
                 
                 nuovo_dato = {
                     "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
