@@ -728,8 +728,6 @@ with col_workarea:
     
     with c_mat:
         if "ASSEMBLY" in macro_it.upper(): 
-            # Gestiamo solo il toggle. 
-            # mat_en viene resettato per evitare che "ASSEMBLY" entri come stringa fissa
             st.toggle("ASSEMBLATO", key="check_assembled")
             st.session_state.mat_en = "" 
         else:
@@ -781,7 +779,6 @@ with col_workarea:
                 cols = st.columns(num_colonne)
                 for c_idx, opt in enumerate(riga):
                     with cols[c_idx]:
-                        # Ogni checkbox agisce come un tag cliccabile che va a capo nativamente
                         if st.checkbox(opt, key=f"tag_chk_{opt}"):
                             tag_selezionati.append(opt)
             
@@ -814,6 +811,14 @@ with col_workarea:
                         st.selectbox(f"Dettaglio per {ex}:", options=list(SUB_OPTIONS_CONFIG[ex].keys()), key=f"sub_{ex}")
                     elif ex in EXTRA_CON_INPUT_MANUALE:
                         st.text_input(f"Specifica valore per {ex}:", key=f"manual_{ex}")
+
+        # --- CAMPO NOTE LIBERE AGGIUNTIVE (RIPRISTINATO) ---
+        st.markdown("")
+        st.text_input(
+            "💬 **Note libere aggiuntive (es. tradotte in inglese):**", 
+            key="extra_text", 
+            placeholder="Scrivi qui eventuali note libere..."
+        )
     
     # --- SEZIONE 4: DIMENSIONAMENTO ---
     st.subheader("📏 4. Dimensionamento")
@@ -851,7 +856,6 @@ with col_workarea:
     
     with c_pills:
         if macro_it != "FASTENER":
-            # Usiamo una selectbox pulita ed elegante al posto dei pills
             st.selectbox(
                 "Modello di destinazione:",
                 options=OPZIONI_COMPATIBILITA,
