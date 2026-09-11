@@ -907,13 +907,13 @@ def traduci_note(testo):
         if it in testo_elaborato:
             testo_elaborato = testo_elaborato.replace(it, en)
             
-    # Tentativi multipli con MyMemoryTranslator (API libera e stabile)
+    # Tentativi multipli con MyMemoryTranslator usando i codici locali corretti ('it-IT' e 'en-US')
     tentativi = 3
     ultimo_errore = None
     
     for _ in range(tentativi):
         try:
-            traduzione = MyMemoryTranslator(source='it', target='en').translate(testo_elaborato)
+            traduzione = MyMemoryTranslator(source='it-IT', target='en-US').translate(testo_elaborato)
             if traduzione:
                 return traduzione.upper()
         except Exception as e:
@@ -921,7 +921,7 @@ def traduci_note(testo):
             time.sleep(0.5)
             continue
             
-    # Fallback sicuro: se l'API fallisce, restituisce comunque il testo elaborato col glossario
+    # Fallback sicuro: se fallisce, restituisce il testo elaborato col glossario
     st.warning(f"⚠️ Traduzione automatica non disponibile (Errore: {ultimo_errore}). Uso il testo base.")
     return testo_elaborato.upper()
 
