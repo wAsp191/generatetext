@@ -876,7 +876,7 @@ with col_workarea:
 # =========================================================
 st.divider()
 
-# 1. Funzione di traduzione note con Glossario Tecnico e Logica di Retry
+# 1. Funzione di traduzione note con Glossario Tecnico e Debug visivo degli errori
 from deep_translator import GoogleTranslator
 import time
 
@@ -902,18 +902,23 @@ def traduci_note(testo):
         if it in testo_elaborato:
             testo_elaborato = testo_elaborato.replace(it, en)
             
-    # Tentativi multipli (Retry logic) per aggirare i micro-timeout di Google Translate
+    # Tentativi multipli con cattura dell'errore reale
     tentativi = 3
+    ultimo_errore = None
+    
     for _ in range(tentativi):
         try:
+            # Forziamo la traduzione da italiano a inglese
             traduzione = GoogleTranslator(source='it', target='en').translate(testo_elaborato)
             if traduzione:
                 return traduzione.upper()
-        except Exception:
+        except Exception as e:
+            ultimo_errore = e
             time.sleep(0.5)
             continue
             
-    # Se anche dopo i tentativi fallisce, restituisce comunque il testo elaborato col glossario
+    # Se fallisce davvero, stampiamo a schermo il motivo esatto dell'errore API
+    st.warning(f"⚠️ Traduzione automatica non disponibile (Errore: {ultimo_errore}). Uso il testo base.")
     return testo_elaborato.upper()
 
 # --- LOGICA DI CONTROLLO INCOMPATIBILITÀ ---
@@ -1073,41 +1078,6 @@ if st.button("🚀 GENERA STRINGA FINALE", use_container_width=True, disabled=co
         except Exception as e:
             st.error(f"Errore di invio a Sheets: {e}")
 
-        # =========================================================
-        # 📊 LIVE INJECTION: COPIATO SOLO SUL RISULTATO FINALE REALE
-        # =========================================================
-        try:
-            import datetime
-            import pandas as pd
-            
-            ultimo_inviato = st.session_state.get("analytics_definitivo_inviato", "")
-            
-            if stringa_definitiva != ultimo_inviato:
-                # Usa la sintassi nativa (senza importare GSheetsConnection)
-                conn = st.connection("gsheets", type="gsheets")
-                
-                pills_uniti = ", ".join(tags_scelti_raw) if tags_scelti_raw else "- NESSUNO -"
-                nota_inglese = str(note_en).strip().upper() if 'note_en' in locals() and note_en else "- NESSUNA NOTE -"
-                
-                nuovo_dato = {
-                    "Timestamp": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
-                    "Macro_Categoria": str(macro_it).strip().upper(),
-                    "Particolare": str(scelta_part_it).strip().upper(),
-                    "Pills_Selezionati": pills_uniti.strip().upper(),
-                    "Stringa_Generata": stringa_definitiva,
-                    "Note_Libere": nota_inglese
-                }
-                
-                df_attuale = conn.read(ttl=0)
-                df_aggiornato = pd.concat([df_attuale, pd.DataFrame([nuovo_dato])], ignore_index=True)
-                conn.update(data=df_aggiornato)
-                
-                # Blocca futuri rerun registrando l'invio
-                st.session_state["analytics_definitivo_inviato"] = stringa_definitiva
-                
-        except Exception as e:
-            st.error(f"Errore di invio a Sheets: {e}")
-        
 # =========================================================
 # 4. OUTPUT E MONITORAGGIO (VERSIONE DEFINITIVA COMPATTA)
 # =========================================================
