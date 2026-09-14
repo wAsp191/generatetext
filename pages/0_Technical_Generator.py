@@ -594,7 +594,8 @@ DATABASE = {
         "Particolari": {
             "Ripiano": ["GLASS SHELF", "PILLS_VUOTO", "SHELF"],
             "Anta": ["GLASS DOOR", "PILLS_ANTE_SPORTELLI_WOOD", "DOOR"],
-            "Cancelletto": ["GLASS ARM", "PILLS_GLASS_ARM", "ARM"]
+            "Cancelletto": ["GLASS ARM", "PILLS_GLASS_ARM", "ARM"],
+            "Chiusura": ["COVER", "PILLS_GLASS_ARM", "PILLS_CHIUSURE", "COVER"],
         }
     },
     "FASTENER": {
