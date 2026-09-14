@@ -899,7 +899,9 @@ def traduci_note(testo):
         "senza ruote": "WITHOUT WHEELS",
         "rinforzato": "REINFORCED",
         "verniciato": "PAINTED",
-        "zincato": "GALVANIZED"
+        "zincato": "GALVANIZED",
+        "superiore": "UPPER",
+        "trasparente": "TRANSPARENT"
     }
     
     testo_elaborato = testo.lower().strip()
