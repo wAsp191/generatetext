@@ -904,27 +904,16 @@ def traduci_note(testo):
         "trasparente": "TRANSPARENT"
     }
     
-    testo_elaborato = testo.lower().strip()
-    for it, en in GLOSSARIO_TECNICO.items():
-        if it in testo_elaborato:
-            testo_elaborato = testo_elaborato.replace(it, en)
-            
-    # Tentativi multipli con MyMemoryTranslator usando i codici locali corretti ('it-IT' e 'en-US')
-    tentativi = 2
-    ultimo_errore = None
-    
-    for _ in range(tentativi):
-        try:
-            traduzione = MyMemoryTranslator(source='it-IT', target='en-US').translate(testo_elaborato)
-            if traduzione:
-                return traduzione.upper()
-        except Exception as e:
-            ultimo_errore = e
-            time.sleep(1)
-            continue
-            
-    # Fallback sicuro: se fallisce, restituisce il testo elaborato col glossario
-    st.warning(f"⚠️ Traduzione automatica non disponibile (Errore: {ultimo_errore}). Uso il testo base.")
+   # Unico tentativo secco: se il server risponde, bene; altrimenti si va avanti all'istante
+    try:
+        traduzione = MyMemoryTranslator(source='it-IT', target='en-US').translate(testo_elaborato)
+        if traduzione and "too many requests" not in traduzione.lower():
+            return traduzione.upper()
+    except Exception:
+        pass  # Ignora l'errore in silenzio
+        
+    # Fallback immediato: se l'API fallisce o è bloccata, restituisce subito 
+    # il testo elaborato col glossario in 0 secondi netti.
     return testo_elaborato.upper()
 
 # --- LOGICA DI CONTROLLO INCOMPATIBILITÀ ---
