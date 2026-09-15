@@ -910,7 +910,7 @@ def traduci_note(testo):
             testo_elaborato = testo_elaborato.replace(it, en)
             
     # Tentativi multipli con MyMemoryTranslator usando i codici locali corretti ('it-IT' e 'en-US')
-    tentativi = 3
+    tentativi = 2
     ultimo_errore = None
     
     for _ in range(tentativi):
@@ -920,7 +920,7 @@ def traduci_note(testo):
                 return traduzione.upper()
         except Exception as e:
             ultimo_errore = e
-            time.sleep(0.5)
+            time.sleep(1)
             continue
             
     # Fallback sicuro: se fallisce, restituisce il testo elaborato col glossario
