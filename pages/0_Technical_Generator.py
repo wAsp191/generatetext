@@ -904,16 +904,21 @@ def traduci_note(testo):
         "trasparente": "TRANSPARENT"
     }
     
-   # Unico tentativo secco: se il server risponde, bene; altrimenti si va avanti all'istante
+    # 1. DEFINIAMO SUBITO LA VARIABILE ELABORANDOLA CON IL GLOSSARIO LOCALE
+    testo_elaborato = testo.lower().strip()
+    for it, en in GLOSSARIO_TECNICO.items():
+        if it in testo_elaborato:
+            testo_elaborato = testo_elaborato.replace(it, en)
+            
+    # 2. Unico tentativo secco con l'API esterna
     try:
         traduzione = MyMemoryTranslator(source='it-IT', target='en-US').translate(testo_elaborato)
         if traduzione and "too many requests" not in traduzione.lower():
             return traduzione.upper()
     except Exception:
-        pass  # Ignora l'errore in silenzio
+        pass  # Ignora l'errore in silenzio se l'API blocca o fallisce
         
-    # Fallback immediato: se l'API fallisce o è bloccata, restituisce subito 
-    # il testo elaborato col glossario in 0 secondi netti.
+    # 3. Fallback immediato: restituisce il testo elaborato col glossario in 0 secondi
     return testo_elaborato.upper()
 
 # --- LOGICA DI CONTROLLO INCOMPATIBILITÀ ---
